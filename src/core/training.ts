@@ -13,7 +13,7 @@ const inGoal = (s: Sim) => s.livingSquad().filter(u => s.inZone(u, 'goal')).leng
 const noLoss: Medal = { name: '全機生還', desc: '1機も失わずに勝つ', test: s => s.lost === 0 };
 const st = (s: Sim, k: string) => s.stat[k] || 0;
 const sumStat = (s: Sim, prefix: string) => Object.entries(s.stat).filter(([k]) => k.startsWith(prefix)).reduce((a, [, v]) => a + v, 0);
-const COMMON = { budget: 9999, arty: 0, limit: 0, lose: '全機喪失' };
+const COMMON = { budget: 9999, arty: 0, limit: 0, lose: '全機喪失', dmgMul: 0.7 };
 const setMissiles = (s: Sim, n: number) => { for (const u of s.world.alive('enemyAI')) if (u.enemyAI.etype === 'launcher' && u.toolbelt) u.toolbelt.ammo = n };
 
 export const TRAINING: MissionDef[] = [
@@ -31,18 +31,22 @@ export const TRAINING: MissionDef[] = [
     ],
     setup(s) {
       s.huntGoal = { x: 6.5, y: 20.5 };
-      s.group(['scout', 'scout', 'scout'], 18, 11, { role: 'hunt' });
-      say(s, 0.5, '機体カードかマップ上の味方をクリックで選択、地面をクリックで移動、敵をクリックで攻撃。Space で一時停止して命令を出せる。');
-      say(s, 8, '偵察型が3機来る。装甲1の軽い機体だ。機関銃（射程3.2）は近いほど強い。機関銃機を前に出せ。');
+      s.schedule(6, s2 => s2.group(['scout', 'scout', 'scout'], 19, 10, { role: 'hunt' }));
+      say(s, 0.5, '開始時は一時停止中。機体カードかマップ上の味方をクリックで選択、地面をクリックで移動、敵をクリックで攻撃。Space で再開・一時停止。');
+      say(s, 5, '北東から偵察型が3機来る。装甲1の軽い機体だ。機関銃（射程3.2）は近いほど強い。機関銃の2機を前に、ライフルの2機は1マス後ろに。');
     },
-    objective: s => s.flags.w2 ? `重装型を撃破せよ（残り ${s.countE()}）` : `偵察型を撃破せよ（残り ${s.countE()}）`,
+    objective: s => s.flags.w2 ? (s.countE() ? `重装型を撃破せよ` : '重装型の接近を待て') : `偵察型を撃破せよ（残り ${s.countE()}）`,
     check: s => {
-      if (!s.flags.w2 && allDead(s)) {
-        s.flags.w2 = true; s.group(['heavy', 'trooper'], 19, 10, { role: 'hunt' });
-        for (const u of s.world.alive('enemyAI')) if (u.toolbelt) u.toolbelt.ammo = 0;
-        s.log('教官：重装型（装甲6）が来る。機関銃の弾（1発6）は装甲にほぼ弾かれる。ライフル機を R で徹甲弾に切り替えて撃て。', 'tip');
+      if (s.time > 7 && !s.flags.w2 && allDead(s)) {
+        s.flags.w2 = true;
+        s.log('教官：よくやった。次は重装型（装甲6）が1機来る。機関銃の弾（1発6）は装甲にほぼ弾かれる。今のうちにライフルの2機を選んで R で徹甲弾に切り替えろ（2.5秒かかる）。', 'tip');
+        s.schedule(s.time + 14, s2 => {
+          s2.group(['heavy'], 20, 8, { role: 'hunt' });
+          for (const u of s2.world.alive('enemyAI')) if (u.toolbelt) u.toolbelt.ammo = 0;
+          s2.log('教官：重装型が来た。ライフルで撃て。弱った機体は後ろへ下げろ。敵は弱った機体を狙ってくる。', 'tip');
+        });
       }
-      return s.flags.w2 && allDead(s) ? { win: true, reason: '敵を全滅させた' } : undefined;
+      return s.flags.w2 && allDead(s) && s.events.every(e => e.done) ? { win: true, reason: '敵を全滅させた' } : undefined;
     },
   },
   {
@@ -64,8 +68,11 @@ export const TRAINING: MissionDef[] = [
     },
     objective: s => `敵残存 ${s.countE()}（第${s.flags.w2 ? 2 : 1}波）`,
     check: s => {
-      if (s.time > 7 && !s.flags.w2 && allDead(s)) { s.flags.w2 = true; s.group(['trooper', 'trooper', 'gunner'], 20, 9, { role: 'hunt' }); s.log('教官：第2波。損傷した機体を修理してから迎え撃て。', 'tip') }
-      return s.flags.w2 && allDead(s) ? { win: true, reason: '2波とも撃退した' } : undefined;
+      if (s.time > 7 && !s.flags.w2 && allDead(s)) {
+        s.flags.w2 = true; s.log('教官：第1波を撃退。第2波まで約20秒。損傷した機体をサポートの近く（2.5以内）に集めて修理しろ。', 'tip');
+        s.schedule(s.time + 20, s2 => { s2.group(['trooper', 'trooper', 'gunner'], 20, 9, { role: 'hunt' }); s2.log('教官：第2波が来た。ヘヴィを前に。', 'tip') });
+      }
+      return s.flags.w2 && allDead(s) && s.events.every(e => e.done) ? { win: true, reason: '2波とも撃退した' } : undefined;
     },
   },
   {

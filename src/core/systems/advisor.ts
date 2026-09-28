@@ -7,7 +7,7 @@ import { dist } from '../rng';
 const MG_FOES = new Set(['gunner', 'scout']);
 
 export function advisorSystem(s: Sim) {
-  if (s.tickN % 30 !== 0) return;
+  if (s.tickN % 30 !== 0 || s.time - s.instrT < 10) return; // don't talk over the instructor
   const tip = (key: string, text: string) => { if (s.tips.has(key)) return; s.tips.add(key); s.log('助言：' + text, 'tip') };
   for (const p of s.projs) {
     if (p.team !== 'P' || p.k === 'MSL') continue;

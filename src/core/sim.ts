@@ -288,10 +288,13 @@ export class Sim {
   /** Currently moving (radar towers can guide missiles onto moving targets only). */
   moving(e: Entity) { return !!e.mover && e.mover.path.length > 0 && !e.truck?.hold }
   targetOf(e: Entity): Entity | undefined { return this.world.get(e.squad ? e.squad.target : e.enemyAI ? e.enemyAI.target : null) }
-  diffMul() { return DIFFS[this.diff] }
+  /** Enemy damage/hp scaling: difficulty × the mission's own damage factor (training chapters are gentler). */
+  diffMul() { const d = DIFFS[this.diff]; return { ...d, dmg: d.dmg * (this.m.dmgMul ?? 1) } }
 
   // ------------------------------------------------------------------ output channels
-  log(text: string, kind: LogKind = 'note') { this.logs.push({ t: +this.time.toFixed(1), text, kind }); if (this.logs.length > 800) this.logs.splice(0, 200) }
+  /** Last time the instructor spoke (advisor tips wait so they don't talk over it). */
+  instrT = -99;
+  log(text: string, kind: LogKind = 'note') { if (kind === 'tip' && text.startsWith('教官')) this.instrT = this.time; this.logs.push({ t: +this.time.toFixed(1), text, kind }); if (this.logs.length > 800) this.logs.splice(0, 200) }
   emit(f: Fx) { this.fx.push(f); if (this.fx.length > 600) this.fx.splice(0, 200) }
   schedule(t: number, fn: (s: Sim) => void) { this.events.push({ t, fn }) }
   addZone(z: Zone) { this.zones.push(z) }

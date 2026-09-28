@@ -19,6 +19,8 @@ export interface MissionDef extends MapSpec {
   /** Fixed squad (training): replaces the hangar loadout. */
   squad?: Loadout[];
   medals?: Medal[];
+  /** Multiplies enemy damage on top of the difficulty (training uses < 1). */
+  dmgMul?: number;
   emines?: [number, number][];
   brief: string; win: string; lose: string; hint: string;
   setup(s: Sim): void;
