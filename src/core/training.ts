@@ -197,11 +197,11 @@ export const TRAINING: MissionDef[] = [
     ...COMMON, id: 't8', part: 3, type: '教練', code: '3-1', name: 'おとり', max: 4, seed: 808,
     terr: { forest: 3, hills: 0, water: 0, rocks: 2 }, spawn: [5, 21], keys: [[18, 8], [22, 12], [20, 10]], bounds: [2, 4, 25, 25],
     paint: [['hill', 18, 8, 1.6], ['hill', 22.5, 12.5, 1.6]],
-    squad: [L('light', 'rifle', 'radar', 'decoy'), L('assault', 'rifle', 'none', 'decoy'), L('heavy', 'rifle', 'plate'), L('assault', 'sniper')],
+    squad: [L('light', 'rifle', 'radar', 'decoy'), L('assault', 'rifle', 'none', 'decoy'), L('heavy', 'rifle', 'plate', 'chaff'), L('assault', 'sniper')],
     brief: '誘導弾型と守備隊をどう崩す？　2つの丘に誘導弾型が陣取り、その間を守備隊が固めている。',
-    win: '誘導弾型2機を撃破', hint: 'デコイ（T）は電波を出す囮。誘導弾はデコイを優先して狙い、守備隊も吸い寄せられる。デコイで弾と敵を引きつけ、その横から撃つ。',
+    win: '誘導弾型2機を撃破', hint: 'デコイ（T）は電波を出す囮。誘導弾はデコイを優先して狙い、守備隊も吸い寄せられる。デコイの上にチャフを張れば、ミサイルはデコイを狙ったまま外れて、デコイが長持ちする。',
     medals: [
-      { name: '身代わり', desc: 'デコイに誘導弾を3発当てさせる', test: s => st(s, 'decoyMissile') >= 3 },
+      { name: '空撃ち', desc: '誘導弾を3発、デコイかチャフで外させる', test: s => st(s, 'decoyMissile') + st(s, 'chaffMissile') >= 3 },
       { name: '無傷の突破', desc: '誘導弾を一度も受けない', test: s => st(s, 'mslOnUs') === 0 },
       noLoss,
     ],
@@ -209,7 +209,7 @@ export const TRAINING: MissionDef[] = [
       s.group(['launcher'], 18, 8, { role: 'overwatch' }); s.group(['launcher'], 22, 12, { role: 'overwatch' });
       s.group(['trooper', 'trooper', 'gunner'], 20, 10, { role: 'garrison', leash: 5 });
       say(s, 0.5, '誘導弾型は電波を出す機体を射程9から狙う。01のレーダーは Z で切っておけ。デコイ（T、射程4）を前に置けば、ミサイルはそちらへ飛ぶ。');
-      say(s, 30, 'デコイには守備隊も寄ってくる。持ち場から釣り出したところを横から叩け。');
+      say(s, 30, 'デコイには守備隊も寄ってくる。デコイはすぐ壊されるので、ヘヴィ（03）がデコイの上にチャフ（T）を張れ。ミサイルはデコイを狙ったまま外れる。釣り出した守備隊は横から叩け。');
     },
     objective: s => `誘導弾型 残り ${s.world.alive('enemyAI').filter(u => u.enemyAI.etype === 'launcher').length}`,
     check: s => s.world.alive('enemyAI').some(u => u.enemyAI.etype === 'launcher') ? undefined : { win: true, reason: '誘導弾陣地を潰した' },

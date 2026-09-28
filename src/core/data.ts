@@ -47,7 +47,7 @@ export const TOOLS: Record<ToolKey, ToolDef> = {
   chaff:   { name: 'チャフ', tag: 'CHF', ammo: 2, range: 3.5, radius: 2.5, dur: 12, cd: 1, cost: 60, target: 'point', desc: '【守り】半径2.5に12秒。中を通るミサイルは誘導が切れ、中の機体はロックされない。代わりに中では味方のレーダーも効かない。2回' },
   smoke:   { name: '煙幕', tag: 'SMK', ammo: 2, range: 3.5, radius: 2.2, dur: 15, cd: 1, cost: 50, target: 'point', desc: '半径2.2に15秒。煙の中・煙越しの射撃は命中率35%。煙の中や煙の向こうの機体は目では見つかりにくい（×0.4）が、レーダーには映る。発砲炎も隠す。2回' },
   flare:   { name: '照明弾', tag: 'FLR', ammo: 2, range: 8, radius: 4, dur: 10, cd: 1, cost: 50, target: 'point', desc: '射程8、半径4を10秒照らして中の敵を視認できる。2回' },
-  decoy:   { name: 'デコイ', tag: 'DCY', ammo: 1, range: 4, dur: 25, cd: 1, cost: 70, target: 'point', desc: '電波を出す囮を置く（HP60・25秒）。敵は本物と区別できず、優先して狙う。1回' },
+  decoy:   { name: 'デコイ', tag: 'DCY', ammo: 1, range: 4, dur: 25, cd: 1, cost: 70, target: 'point', desc: '電波を出す囮を置く（HP100・装甲4・25秒）。敵は遠くからは本物と区別できず、優先して狙う（3マス以内まで近づかれると見破られる）。チャフを重ねるとミサイルを吸わせたまま外させられる。1回' },
   charge:  { name: '爆薬', tag: 'EXP', ammo: 2, range: 1.2, dmg: 260, cd: 1, cost: 70, target: 'struct', desc: '敵の建造物に隣接して仕掛ける（5秒後に爆発）。建造物に260、周囲の機体に100。2個' },
   jammer:  { name: '電障弾', tag: 'ECM', ammo: 2, range: 6, radius: 3, dur: 12, cd: 1, cost: 70, target: 'point', desc: '【攻め】射程6、半径3に12秒。中の敵は視界が4割に落ち、無線で助けを呼べず、レーダー塔も止まる。2回' },
   probe:   { name: 'プローブ', tag: 'PRB', ammo: 2, range: 5, dur: 60, cd: 1, cost: 50, target: 'point', desc: '小型センサーを置く（視界5・60秒・HP25）。見つかりにくいが、敵の偵察型には普通に見つかって壊される。2個' },

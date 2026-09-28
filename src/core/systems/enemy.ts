@@ -183,6 +183,7 @@ function chooseTarget(s: Sim, u: EU): Entity | null {
   for (const p of s.world.alive()) {
     if (p.team !== 'P' || !s.detP.has(p.id)) continue;
     const d = dist(u.pos, p.pos); if (d > 10) continue;
+    if (p.ephemeral?.kind === 'decoy' && d < 3) continue; // close enough to see it's a dummy
     const a = ag?.find(x => x.id === p.id)?.v ?? 0;
     // closer, weaker, and whoever hurt us most
     const sc = d - (p.ephemeral?.kind === 'decoy' ? 3 : 0) - a * 0.08 - (p.health ? (1 - p.health.hp / p.health.maxHp) * 1.2 : 0) - (p.repairer ? 0.6 : 0) + (p.truck ? -1 : 0);

@@ -15,7 +15,7 @@ import { runSystems } from './systems';
 
 export const TICK = 1 / 30;
 /** Bump whenever a change alters simulation results; replays recorded with another version will not reproduce. */
-export const SIM_VERSION = 7;
+export const SIM_VERSION = 8;
 
 export interface GroupOpts { patrol?: [number, number][]; hunt?: boolean; role?: GroupRole; leash?: number; ambush?: boolean; deaf?: boolean }
 export interface Cloud { k: 'chaff' | 'smoke' | 'flare' | 'jam'; x: number; y: number; r: number; t: number; dur: number; team: Team }
@@ -202,7 +202,7 @@ export class Sim {
 
   spawnPlaced(kind: 'decoy' | 'probe', p: Pt, ttl: number) {
     const e = kind === 'decoy'
-      ? this.unitBase('P', { hp: 60, armor: 2, sensor: 1, weapon: null, shape: 'decoy' }, p, 'デコイ')
+      ? this.unitBase('P', { hp: 100, armor: 4, sensor: 1, weapon: null, shape: 'decoy' }, p, 'デコイ')
       : this.unitBase('P', { hp: 25, armor: 1, sensor: 5, weapon: null, shape: 'probe' }, p, 'プローブ');
     if (kind === 'decoy') e.sensor!.emit = 2.5; else e.stealth = { revealT: 0 };
     e.ephemeral = { kind, ttl };
@@ -245,7 +245,7 @@ export class Sim {
   }
   hasRadar(e: Entity) { return !!e.sensor && e.sensor.radarBonus > 0 && !e.sensor.off && !this.inCloud('chaff', e.pos) }
   /** Radiating (radar on, or a decoy): enemy missiles can home on it from anywhere in range. */
-  emitting(e: Entity) { return !!e.sensor && e.sensor.emit > 0 && !e.sensor.off && !this.inCloud('chaff', e.pos) }
+  emitting(e: Entity) { return !!e.sensor && e.sensor.emit > 0 && !e.sensor.off && (e.ephemeral?.kind === 'decoy' || !this.inCloud('chaff', e.pos)) }
   /** Multiplier on how far away enemies notice this unit. */
   detMul(p: Entity) {
     let f = 1;
@@ -272,7 +272,8 @@ export class Sim {
   }
   canSee(viewer: Entity, t: Entity) { return viewer.team === 'P' ? this.seenE.has(t.id) : this.detP.has(t.id) }
   canLock(u: Entity, t: Entity | undefined): boolean {
-    if (!t || !t.life.alive || this.inCloud('chaff', t.pos)) return false;
+    // units inside chaff can't be locked — except a decoy, whose strong signal still draws missiles (which then lose guidance in the chaff)
+    if (!t || !t.life.alive || (this.inCloud('chaff', t.pos) && t.ephemeral?.kind !== 'decoy')) return false;
     const d = dist(u.pos, t.pos);
     if (d > TOOLS.missile.range! + (this.onHill(u) ? 1 : 0)) return false;
     if (u.team === 'P') {

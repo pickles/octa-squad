@@ -20,13 +20,14 @@ export function fireSystem(s: Sim) {
     const r = s.rangeOf(u), min = w.def.min || 0;
     let t: Entity | undefined;
     const cur = s.targetOf(u);
-    if (cur && cur.life.alive && s.canSee(u, cur)) { const d = dist(u.pos, cur.pos); if (d <= r && !(min && d < min)) t = cur }
+    const fake = (e: Entity, d: number) => u.team === 'E' && e.ephemeral?.kind === 'decoy' && d < 3; // enemies up close recognise a decoy
+    if (cur && cur.life.alive && s.canSee(u, cur)) { const d = dist(u.pos, cur.pos); if (d <= r && !(min && d < min) && !fake(cur, d)) t = cur }
     if (!t && !noFire) {
       let bd = 1e9;
       for (const e of s.world.alive()) {
         if (e.team === u.team || !e.health || !s.canSee(u, e)) continue;
         const d = dist(u.pos, e.pos);
-        if (d <= r && !(min && d < min)) {
+        if (d <= r && !(min && d < min) && !fake(e, d)) {
           const score = d + (e.truck ? -1.5 : 0) + (e.structure ? 3 : 0) + (e.ephemeral?.kind === 'decoy' ? -2.5 : 0);
           if (score < bd) { bd = score; t = e }
         }
