@@ -93,6 +93,12 @@ export class BattleScene extends Phaser.Scene {
     return s.seenE.has(e.id) || !!(e.structure?.scanned) || (!!this.s.replay && this.s.reveal);
   }
   /** Pick the unit under a world-pixel position. */
+  /** Our own unit under the cursor, with a bigger hit area than pickAt (for selecting). */
+  pickSquadAt(wx: number, wy: number): Entity | null {
+    let best: Entity | null = null, bd = 26;
+    for (const e of this.s.sim.livingSquad()) { const [px, py] = this.at(e); const d = Math.hypot(px - wx, py - 12 - wy); if (d < bd) { bd = d; best = e } }
+    return best;
+  }
   pickAt(wx: number, wy: number): Entity | null {
     let best: Entity | null = null, bd = 18;
     for (const e of this.s.sim.world.all()) {
@@ -133,8 +139,10 @@ export class BattleScene extends Phaser.Scene {
     if (!P.moved) {
       if (s.targeting) { if (P.btn === 2) s.cancelTargeting(); else s.targetClick(w, picked); this.hooks.onSelectionChanged(); return }
       if (P.btn === 2) { s.orderAt(w, picked); return }
-      if (picked && picked.squad) { if (P.shift) s.toggle(picked.id); else s.select([picked.id]); this.hooks.onSelectionChanged(); return }
-      if (s.sel.size) s.orderAt(w, picked);
+      // left click only selects (generous radius on our own units); orders are right click. Touch has no right click, so a tap on the ground still orders.
+      const mine = this.pickSquadAt(p.worldX, p.worldY);
+      if (mine) { if (P.shift) s.toggle(mine.id); else s.select([mine.id]); this.hooks.onSelectionChanged(); return }
+      if (P.touch && s.sel.size) s.orderAt(w, picked);
       return;
     }
     if (P.btn === 0 && !P.touch) {

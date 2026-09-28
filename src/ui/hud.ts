@@ -174,7 +174,7 @@ export class Hud {
       const u = us[0], sq = u.squad, w = u.weapon!, sy = u.systems!, h = u.health!;
       const broken = (['fcs', 'legs', 'sensor'] as SubsystemKey[]).filter(k => sy[k]);
       d.innerHTML = `<b>${String(sq.no).padStart(2, '0')} ${sq.pilot}</b>　${CHASSIS[sq.cfg.chassis].name} / ${w.def.name} / ${EQUIP[sq.cfg.equip].name}<br>HP <b class="num">${Math.ceil(h.hp)}/${h.maxHp}</b>　装甲 ${h.armor}　速度 ${u.mover!.speed}<br>視界 ${sim.effSensor(u).toFixed(1)}　射程 ${sim.rangeOf(u)}　姿勢 ${STANCES[sq.stance]}${u.toolbelt ? `<br>ツール ${TOOLS[u.toolbelt.tool].name} ×${u.toolbelt.ammo}${u.toolbelt.pending ? '（使用に向かう）' : ''}` : ''}<br>移動 ${MMODES[sq.mmode].name}　弾 ${AMMO[w.ammoType].tag}（徹甲${w.ap}・榴弾${w.he}）${sq.hidden ? '　<b>隠蔽中</b>' : ''}${broken.length ? '<br><span style="color:#ffb38f">損傷：' + broken.map(k => SYSN[k]).join('・') + '（修理機の近くで回復）</span>' : ''}${u.stealth ? (u.stealth.revealT > 0 ? '　<span style="color:#e4643c">ステルス露見</span>' : '　ステルス') : ''}${sim.inForest(u) ? '　森林内' : ''}`;
-    } else if (us.length) d.innerHTML = `<b>${us.length} 機選択中</b><br>地面クリックで移動、敵クリックで集中攻撃。`;
+    } else if (us.length) d.innerHTML = `<b>${us.length} 機選択中</b><br>地面を右クリックで移動、敵を右クリックで集中攻撃。`;
     else d.innerHTML = '<span style="color:#86949a">機体未選択。カードかマップ上の味方をクリック。</span>';
   }
 
