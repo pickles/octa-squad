@@ -154,6 +154,13 @@ export function damage(s: Sim, t: Entity, d: number, src: Entity | null) {
   }
   const ai = t.enemyAI;
   if (ai && src && src.life.alive && (ai.state === 'guard' || ai.state === 'patrol' || ai.state === 'return')) { ai.state = 'engage'; ai.lastKnown = { ...src.pos }; ai.lostT = 0 }
+  // remember the attacker. It knows roughly where the shot came from only if it saw the muzzle flash.
+  if (ai && src && src.life.alive && src.team !== t.team && !src.ephemeral) {
+    const knows = s.detP.has(src.id) || s.muzzleSeen(src, t);
+    const ag = (ai.aggro ??= []); let a = ag.find(x => x.id === src.id);
+    if (!a) { a = { id: src.id, v: 0, pos: null }; ag.push(a) }
+    a.v += d; if (knows) a.pos = { ...src.pos };
+  }
   if (h.hp <= 0) {
     t.life.alive = false; h.hp = 0;
     s.emit({ k: 'boom', x: t.pos.x, y: t.pos.y, r: t.structure ? 1.6 : 1 });

@@ -1,6 +1,6 @@
 // Per-unit timers, the squad's order execution (incl. tools), enemy behaviour, movement.
 import type { Sim } from '../sim';
-import type { Entity, With } from '../ecs';
+import type { Entity, With, Pt } from '../ecs';
 import { SYSN, TOOLS } from '../data';
 import type { SubsystemKey } from '../data';
 import { TERR } from '../map';
@@ -136,7 +136,24 @@ export function enemySystem(s: Sim, dt: number) {
         mv.repathT = 1;
       }
     }
-    if (ai.state === 'engage') {
+    // a unit being shot goes after its attacker rather than the nearest foe (so a heavy in front can't absorb all attention)
+    let th: { id: number; v: number; pos: Pt | null } | undefined, thE: Entity | undefined;
+    if (ai.aggro) {
+      const k = Math.exp(-dt / 8);
+      for (const a of ai.aggro) { a.v *= k; const e = s.world.get(a.id); if (!e || !e.life.alive) a.v = 0 }
+      ai.aggro = ai.aggro.filter(a => a.v > 4);
+      for (const a of ai.aggro) if (a.pos && (!th || a.v > th.v)) th = a;
+      if (th) thE = s.world.get(th.id);
+    }
+    if (ai.state === 'engage' && th && thE) {
+      if (s.detP.has(thE.id)) { th.pos = { ...thE.pos }; ai.lastKnown = { ...thE.pos }; ai.lostT = 0; ai.target = thE.id; chase(thE, dist(u.pos, thE.pos), 0.8) }
+      else {
+        const near = nearestDetected(u, s.rangeOf(u)); ai.target = near.best ? near.best.id : null;
+        const p = th.pos!;
+        if (dist(u.pos, p) <= 0.8) th.pos = null;
+        else if (mv.repathT <= 0) { mv.path = s.map.findPath(u.pos.x, u.pos.y, p.x, p.y); mv.repathT = 1.2 }
+      }
+    } else if (ai.state === 'engage') {
       const { best, bd } = nearestDetected(u, 10);
       if (best) { ai.lastKnown = { ...best.pos }; ai.lostT = 0; ai.target = best.id; chase(best, bd, 0.8) }
       else {

@@ -32,7 +32,9 @@ export interface Entity {
   /** Player-controllable squad member. */
   squad?: { no: number; pilot: string; cfg: Loadout; stance: Stance; order: Order; target: number | null; mmode: MoveMode; hidden: boolean; hideT: number };
   systems?: { fcs: boolean; legs: boolean; sensor: boolean; fixP: number };
-  enemyAI?: { etype: EType; state: AIState; home: Pt; patrol: Pt[] | null; pi: number; lostT: number; lastKnown: Pt | null; alertLogged: boolean; target: number | null };
+  enemyAI?: { etype: EType; state: AIState; home: Pt; patrol: Pt[] | null; pi: number; lostT: number; lastKnown: Pt | null; alertLogged: boolean; target: number | null;
+    /** Damage taken per attacker (decays over ~8s). The biggest one is who this unit goes after. `pos` = where it was last seen. */
+    aggro?: { id: number; v: number; pos: Pt | null }[] };
   structure?: { kind: EType; objective: boolean; label: string; scan: number; scanned: boolean; alerted: boolean };
   truck?: { hold: boolean };
   /** Decoys and probes: placed objects with a lifetime. */

@@ -15,7 +15,7 @@ import { runSystems } from './systems';
 
 export const TICK = 1 / 30;
 /** Bump whenever a change alters simulation results; replays recorded with another version will not reproduce. */
-export const SIM_VERSION = 2;
+export const SIM_VERSION = 3;
 
 export interface Cloud { k: 'chaff' | 'smoke' | 'flare' | 'jam'; x: number; y: number; r: number; t: number; dur: number; team: Team }
 export interface Mine { x: number; y: number; team: Team; arm: number; revealed: boolean; disarm: number; src: number | null; done?: boolean }

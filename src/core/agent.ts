@@ -251,6 +251,7 @@ Difficulty scales enemy damage and hp: ${Object.entries(DIFFS).map(([k, v]) => `
 - You only see enemies within some unit's sensor radius (0.7× for enemies in forest, 0.4× when smoke is on or across the line of sight, unless the viewer has working radar). You can only shoot what you see.
 - Hills: +1 sensor and +1 range. Enemies detect you at enemySensor × mult + radarEmission (+1.5 when moving fast); mult: stealth 0.5 (unless it fired in the last 2.5s), forest 0.7, hidden 0.35, careful 0.85, smoke 0.4.
 - Muzzle flash: a unit that fires is visible, for 2s, to the unit it shot at, at any distance (both sides), unless smoke lies between them. Out-ranged victims cannot shoot back but will know where you are and close in.
+- Enemy aggro: an enemy that takes damage goes after whoever has hurt it most recently (decays over ~8s), even past closer targets; if it lost sight it heads to where it last saw the attacker.
 - A detecting enemy alerts others within 5.5 (radar tower: 13). Alerted enemies chase ~10 tiles and give up ~9s after losing sight.
 - Stances: hold = fire at anything in range but don't chase; free = chase visible enemies when idle; nofire = only fire at an explicit attack target.
 - missile: needs a LOCK (target visible, not in chaff, inside the launcher's own sensor or a radar ally's sensor). Loses guidance in chaff. Enemy heavies carry missiles guided by their own sensor or the radar tower.
