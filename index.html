@@ -1,0 +1,1699 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}</style>
+<title>オクタ小隊戦記</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=IBM+Plex+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme: dark;
+  --ink:#0c1217; --panel:#131c23; --panel2:#18232b; --line:#26363f; --line2:#34495a;
+  --text:#dcdccd; --dim:#86949a; --faint:#56656c;
+  --blue:#5fb0e0; --blue2:#2f6f96; --red:#e4643c; --gold:#e2b84a; --good:#8cc67e; --warn:#e2b84a;
+  --display:'Saira Condensed','IBM Plex Sans JP',sans-serif;
+  --body:'IBM Plex Sans JP','Hiragino Sans','Yu Gothic',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+html,body{height:100%}
+[hidden]{display:none!important}
+body{background:var(--ink);color:var(--text);font-family:var(--body);font-size:14px;line-height:1.55}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#app{height:100%}
+
+/* ===== HQ ===== */
+#hq{max-width:1240px;margin:0 auto;padding:20px 16px 40px}
+.hq-head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 20px;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:18px}
+.brand{display:flex;align-items:baseline;gap:12px}
+.mark{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.3em;color:var(--ink);background:var(--blue);padding:2px 8px 1px}
+.hq-head h1{margin:0;font-size:26px;font-weight:700;letter-spacing:.04em;text-wrap:balance}
+.hq-head .sub{margin:0;color:var(--dim)}
+.lbl{font-family:var(--display);font-weight:500;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin:0 0 10px}
+.lbl b{color:var(--text);font-family:var(--body);letter-spacing:.05em;margin-left:6px}
+.hq-grid{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:24px}
+@media (max-width:880px){.hq-grid{grid-template-columns:minmax(0,1fr)}}
+#mlist{display:grid;gap:6px;margin-bottom:16px}
+.mcard{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;text-align:left;background:var(--panel);border:1px solid var(--line);padding:9px 12px}
+.mcard:hover{border-color:var(--line2)}
+.mcard.on{border-color:var(--blue);background:var(--panel2)}
+.mtype{font-weight:700;font-size:12px;padding:1px 7px;border:1px solid currentColor;letter-spacing:.1em}
+.t-殲滅{color:#e4643c}.t-強襲{color:#e28a3c}.t-索敵{color:#8cc67e}.t-護衛{color:#5fb0e0}.t-離脱{color:#c9a0e8}
+.mcard .nm{font-weight:500}
+.mcard .cd{font-family:var(--mono);font-size:11px;color:var(--faint)}
+.diff{display:flex;gap:0;margin:0 0 16px;border:1px solid var(--line)}
+.diff button{flex:1;background:var(--panel);border:0;border-right:1px solid var(--line);padding:6px 4px;font-size:13px;color:var(--dim)}
+.diff button:last-child{border-right:0}
+.diff button.on{background:var(--panel2);color:var(--gold);box-shadow:inset 0 -2px 0 var(--gold)}
+.brief{background:var(--panel);border:1px solid var(--line);padding:14px 16px}
+.brief h3{margin:0 0 4px;font-size:18px}
+.brief p{margin:6px 0 10px;color:#c4c6b8}
+.brief dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0 0 10px;font-size:13px}
+.brief dt{color:var(--dim)}
+.brief dd{margin:0}
+.brief .hint{border-top:1px dashed var(--line2);padding-top:8px;color:var(--gold);font-size:13px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+.hangar-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:8px}
+#budget{flex:1 1 260px;max-width:420px}
+.bbar{height:8px;background:var(--panel2);border:1px solid var(--line);position:relative;margin-top:4px}
+.bbar i{position:absolute;inset:0 auto 0 0;background:var(--blue)}
+.bbar.over i{background:var(--red)}
+.btxt{display:flex;justify-content:space-between;font-size:12px;color:var(--dim)}
+.btxt b{color:var(--text)}
+#slots{display:grid;gap:6px;margin-top:10px}
+.slot{display:grid;grid-template-columns:52px 104px 1fr 1fr 1fr 1fr 58px;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);padding:7px 10px}
+.slot.on{border-color:var(--blue2);background:linear-gradient(90deg,rgba(95,176,224,.08),transparent 40%),var(--panel)}
+.slot .dep{display:flex;align-items:center;gap:6px;cursor:pointer}
+.slot .dep input{accent-color:var(--blue);width:16px;height:16px}
+.slot .no{font-family:var(--mono);color:var(--dim)}
+.slot .pilot{display:flex;align-items:center;gap:8px;min-width:0}
+.slot .pilot b{display:block;font-weight:500}
+.slot .pilot small{display:block;font-family:var(--display);letter-spacing:.14em;color:var(--faint);font-size:11px;line-height:1}
+.slot select{width:100%;background:var(--panel2);border:1px solid var(--line2);padding:4px 6px;min-width:0}
+.slot .st{grid-column:3 / 7;font-family:var(--mono);font-size:11.5px;color:var(--dim);display:flex;flex-wrap:wrap;gap:2px 12px}
+.slot .st b{color:var(--text);font-weight:500}
+.slot .desc{grid-column:2 / 7;font-size:12px;color:#aeb3a6;line-height:1.5}
+.slot .desc span{color:var(--gold)}
+.slot .cost{grid-row:1 / 3;grid-column:7;text-align:right;font-family:var(--mono);font-size:15px}
+.slot .cost small{display:block;font-size:10px;color:var(--faint)}
+@media (max-width:640px){
+  .slot .desc{grid-column:1 / 4}
+  .slot{grid-template-columns:44px 1fr 58px}
+  .slot select{grid-column:1 / 4}
+  .slot .st{grid-column:1 / 4}
+  .slot .cost{grid-row:1;grid-column:3}
+}
+.deploy-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-top:14px}
+#deployMsg{color:var(--dim);font-size:13px}
+#deployMsg.bad{color:var(--red)}
+.btn{background:var(--panel2);border:1px solid var(--line2);padding:7px 14px}
+.btn:hover{border-color:var(--blue)}
+.btn.primary{background:var(--blue);color:#07131b;border-color:var(--blue);font-weight:700;letter-spacing:.2em;padding:10px 34px;font-size:16px}
+.btn.primary:disabled{background:var(--panel2);color:var(--faint);border-color:var(--line);cursor:not-allowed}
+.guide{margin-top:12px;background:var(--panel);border:1px solid var(--line);padding:10px 14px;font-size:13px;color:#c4c6b8}
+.guide summary{cursor:pointer;color:var(--gold)}
+.guide h3{font-size:13px;color:var(--text);margin:12px 0 4px;letter-spacing:.08em}
+.guide .tw{overflow-x:auto}
+.guide table{border-collapse:collapse;width:100%;font-size:12.5px}
+.guide th{text-align:left;white-space:nowrap;padding:3px 10px 3px 0;color:var(--blue);font-weight:500;vertical-align:top}
+.guide td{padding:3px 10px 3px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.guide td.num{white-space:nowrap;color:var(--dim);font-size:11.5px}
+.guide ul{margin:4px 0 0;padding-left:18px}
+.help{margin-top:18px;background:var(--panel);border:1px solid var(--line);padding:10px 14px;font-size:13px;color:#c4c6b8}
+.help summary{cursor:pointer;color:var(--text)}
+.help ul{margin:8px 0 0;padding-left:18px}
+kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line2);padding:0 4px;background:var(--panel2)}
+
+/* ===== Battle ===== */
+#battle{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;padding-inline:16px;padding-block:8px;gap:8px;box-sizing:border-box}
+.topbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.tb-m{display:flex;align-items:center;gap:8px}
+.tb-m b{font-size:16px}
+.tb-obj{flex:1 1 220px;color:var(--gold);font-size:13px}
+.tb-time{font-family:var(--mono);font-size:15px;min-width:64px;text-align:right}
+.tb-ctl{display:flex;gap:6px}
+.tb-ctl button,.cmdbar button{background:var(--panel2);border:1px solid var(--line2);padding:4px 10px;font-size:13px}
+.tb-ctl button:hover,.cmdbar button:hover{border-color:var(--blue)}
+#pauseBtn.pulse{border-color:var(--gold);color:var(--gold);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 3px rgba(226,184,74,.25)}}
+@media (prefers-reduced-motion:reduce){#pauseBtn.pulse{animation:none}}
+.gobtns{display:flex;flex-wrap:wrap;gap:8px}
+#aiGoBtn{border-color:var(--gold);color:var(--gold)}
+#aiIntent{position:absolute;left:10px;top:8px;max-width:min(420px,60%);background:rgba(12,18,23,.88);border:1px solid var(--gold);color:#efe2b6;padding:4px 10px;font-size:12.5px;pointer-events:none}
+#aiIntent b{color:var(--gold);font-family:var(--mono);margin-right:6px}
+.aichip{font-family:var(--mono);font-size:11px;color:#07131b;background:var(--gold);padding:1px 7px;letter-spacing:.1em}
+.rpbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.rpchip{font-family:var(--display);font-weight:700;letter-spacing:.2em;font-size:12px;color:#07131b;background:var(--gold);padding:1px 8px;display:inline-block}
+.rpseek{position:relative;flex:1 1 260px;min-width:0;height:24px}
+.rpseek input{position:absolute;inset:0;width:100%;margin:0;accent-color:var(--gold)}
+#rpMarks{position:absolute;left:8px;right:8px;top:2px;bottom:2px;pointer-events:none}
+#rpMarks i{position:absolute;top:0;bottom:0;width:1px;background:rgba(95,176,224,.55)}
+#rpMarks i.ai{background:rgba(226,184,74,.7)}
+#rpTime{font-size:13px}
+.rprev{display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer}
+.rprev input{accent-color:var(--gold)}
+#rpInfo{color:var(--dim);font-size:12px}
+#rplist{display:grid;gap:5px}
+.rpempty{color:var(--faint);font-size:13px;margin:0}
+.rpitem{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);padding:6px 10px}
+.rpmeta b{display:block;font-weight:500;font-size:13px}
+.rpmeta small{color:var(--dim);font-size:11.5px}
+.rpmeta .w{color:var(--good)}.rpmeta .l{color:var(--red)}
+.rpbtns{display:flex;gap:4px}.rpbtns .btn{padding:3px 8px;font-size:12px}
+#rpIn{width:100%;box-sizing:border-box;background:var(--panel2);border:1px solid var(--line2);font-family:var(--mono);font-size:11px;margin-top:8px;resize:vertical}
+.rpimp{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-top:6px}
+#rpErr{color:var(--gold);font-size:12px;margin-top:4px}
+#log div.ai{border-color:var(--gold);color:#efe2b6}
+#abortBtn.arm{border-color:var(--red);color:var(--red)}
+.bmain{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:8px;min-height:0}
+.stage{position:relative;min-height:0;border:1px solid var(--line);background:#0a0f13;overflow:hidden}
+#cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+#log{position:absolute;left:10px;bottom:8px;display:grid;gap:2px;pointer-events:none;font-size:12.5px;max-width:70%}
+#log div{background:rgba(10,15,19,.78);padding:1px 8px;border-left:2px solid var(--blue)}
+#log div.e{border-color:var(--red)}#log div.g{border-color:var(--gold)}
+#insp{position:absolute;top:8px;right:8px;width:236px;max-width:calc(100% - 16px);background:rgba(12,18,23,.9);border:1px solid var(--line2);padding:8px 10px;font-size:12px;line-height:1.5;pointer-events:none;color:#c4c6b8}
+#insp h4{margin:0 0 3px;font-size:13px;color:var(--text);display:flex;justify-content:space-between;gap:8px}
+#insp h4 small{font-family:var(--mono);color:var(--faint);font-weight:400}
+#insp .row{display:flex;justify-content:space-between;gap:8px}
+#insp .row>span:first-child{color:var(--dim)}
+#insp .sec{border-top:1px solid var(--line);margin-top:6px;padding-top:6px}
+#insp .P{color:var(--blue)}#insp .E{color:var(--red)}#insp .ok{color:var(--good)}#insp .ng{color:var(--red)}#insp .gd{color:var(--gold)}
+@media (max-width:760px){#insp{display:none}}
+#pauseBanner{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(10,15,19,.85);border:1px solid var(--gold);color:var(--gold);padding:3px 12px;font-size:12.5px;pointer-events:none;white-space:nowrap}
+#result{position:absolute;inset:0;display:grid;place-items:center;background:rgba(6,10,14,.7)}
+.rpanel{background:var(--panel);border:1px solid var(--line2);padding:20px 24px;min-width:0;width:min(420px,calc(100% - 32px))}
+.rpanel h2{margin:0;font-family:var(--display);font-size:34px;letter-spacing:.12em}
+.rpanel h2.win{color:var(--gold)}.rpanel h2.lose{color:var(--red)}
+.rpanel p{margin:4px 0 12px;color:#c4c6b8}
+.rank{font-family:var(--display);font-size:64px;line-height:1;float:right;color:var(--gold)}
+.rpanel dl{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;font-size:13px;margin:0 0 16px}
+.rpanel dt{color:var(--dim)}.rpanel dd{margin:0;font-family:var(--mono)}
+.rbtns{display:flex;flex-wrap:wrap;gap:8px;clear:both}
+.side{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:8px;min-height:0}
+#mini{width:100%;aspect-ratio:2/1;max-width:100%;border:1px solid var(--line);background:#0a0f13;cursor:pointer;display:block}
+#cards{display:grid;gap:4px;overflow:auto;min-height:0;align-content:start}
+.card{display:grid;grid-template-columns:22px 1fr auto;grid-template-rows:auto auto;gap:1px 6px;align-items:center;text-align:left;background:var(--panel);border:1px solid var(--line);padding:4px 7px}
+.card.sel{border-color:var(--blue);background:var(--panel2)}
+.card.dead{opacity:.4}
+.card .cno{font-family:var(--mono);color:var(--blue);grid-row:1 / 3;font-size:15px}
+.card .cname{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .cname small{color:var(--faint);margin-left:5px;font-size:11px}
+.card .cst{font-size:11px;color:var(--dim)}
+.card .hpb{grid-column:2 / 4;height:4px;background:#1f2a31;position:relative}
+.card .hpb i{position:absolute;inset:0 auto 0 0;background:var(--good)}
+#detail{background:var(--panel);border:1px solid var(--line);padding:7px 9px;font-size:12px;color:#c4c6b8;min-height:64px}
+#detail b{color:var(--text)}
+.cmdbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.cmdbar .hint{color:var(--faint);font-size:12px;margin-left:auto}
+.cmdbar button.on{border-color:var(--gold);color:var(--gold)}
+@media (max-width:760px){
+  .bmain{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}
+  .side{grid-template-rows:auto;grid-template-columns:minmax(0,1fr)}
+  #mini,#detail{display:none}
+  #cards{grid-auto-flow:column;grid-auto-columns:140px;overflow-x:auto;overflow-y:hidden}
+  .cmdbar .hint{display:none}
+  .tb-obj{order:5;flex-basis:100%}
+}
+</style>
+
+<div id="app">
+<section id="hq">
+  <header class="hq-head">
+    <div class="brand"><span class="mark">OCTA</span><h1>オクタ小隊戦記</h1></div>
+    <p class="sub">作戦を選び、格納庫の8機を組み替えて出撃する。戦闘はリアルタイム、一時停止中も命令できる。</p>
+  </header>
+  <div class="hq-grid">
+    <div>
+      <h2 class="lbl">Operations<b>作戦一覧</b></h2>
+      <div id="mlist"></div>
+      <h2 class="lbl">Difficulty<b>難易度</b></h2>
+      <div class="diff" id="diff" role="group" aria-label="難易度"></div>
+      <div id="brief" class="brief"></div>
+      <h2 class="lbl" style="margin-top:20px">Replays<b>リプレイ</b></h2>
+      <div id="rplist"></div>
+      <details class="help" id="rpImport"><summary>リプレイを読み込む（JSON）</summary>
+        <textarea id="rpIn" rows="4" placeholder="octa.replay() の出力やコピーしたJSONを貼り付け"></textarea>
+        <div class="rpimp"><input type="file" id="rpFile" accept=".json,application/json"><button class="btn" id="rpLoad">再生</button></div>
+        <div id="rpErr"></div>
+      </details>
+    </div>
+    <div>
+      <div class="hangar-head">
+        <h2 class="lbl">Hangar<b>格納庫・出撃編成</b></h2>
+        <div id="budget"></div>
+      </div>
+      <details class="guide" id="guide" open><summary>装備ガイド ― 各パーツの役割と数値の意味</summary><div id="guideBody"></div></details>
+      <div id="slots"></div>
+      <div class="deploy-row">
+        <div id="deployMsg"></div>
+        <div class="gobtns"><button id="aiGoBtn" class="btn">AIに任せて観戦</button><button id="goBtn" class="btn primary">出撃</button></div>
+      </div>
+      <details class="help">
+        <summary>AIインターフェース（window.octa）</summary>
+        <p style="margin:8px 0 4px">ブラウザのコンソールや Playwright から、プログラムやLLMでこのゲームを操作できます。AIモードでは時間は <code>step()</code> を呼んだ分だけ進みます（ターン制のように扱える）。</p>
+        <pre style="overflow-x:auto;background:var(--panel2);padding:8px;font-family:var(--mono);font-size:12px;margin:6px 0">octa.rules()                      // ルールと仕様の説明（LLMに渡す用）
+octa.start({mission:'m1', difficulty:'easy', seed:1,
+  loadout:[{slot:1,chassis:'heavy',weapon:'rifle',equip:'plate'}, ...]})
+octa.observe()                    // 見えている情報だけのJSON
+octa.text()                       // ASCIIマップ付きの文章版（LLM向け）
+octa.act([{cmd:'move',units:[1,2],x:12,y:9},
+          {cmd:'attack',units:[3],target:'e17'},
+          {cmd:'stance',units:[6],stance:'nofire'}])
+octa.step(1.0)                    // 1秒進めて observe() を返す
+octa.replay()                     // 直前の戦闘のリプレイJSON
+octa.playReplay(json,{speed:4})   // リプレイを画面で再生</pre>
+        <p style="margin:4px 0 0">別ページに埋め込んだ場合は <code>postMessage({octa:1,id,method:'act',args:[...]})</code> でも呼べます（返信は同じ id で届く）。</p>
+      </details>
+      <details class="help">
+        <summary>操作方法</summary>
+        <ul>
+          <li>左クリック/タップで味方を選択。左ドラッグで範囲選択、<kbd>Shift</kbd>+クリックで追加選択。<kbd>1</kbd>〜<kbd>8</kbd>で機体選択、<kbd>E</kbd>（または<kbd>Ctrl</kbd>+<kbd>A</kbd>）で全機。</li>
+          <li>選択中に地面をクリックで移動、敵をクリックで攻撃目標指定。右クリックでも命令できる。</li>
+          <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>・矢印キー、右/中ドラッグ、タッチのドラッグで画面スクロール。マップ上にカーソルを置くと右上に地形・機体の情報が出る。ミニマップのクリックで移動。</li>
+          <li><kbd>T</kbd>ツール使用（選択機のツール。もう一度押すと種類を切替、<kbd>Esc</kbd>で取消）　<kbd>Space</kbd>一時停止　<kbd>F</kbd>倍速　<kbd>X</kbd>停止　<kbd>Q</kbd>交戦姿勢の切替（待機射撃→自由交戦→射撃禁止）　<kbd>C</kbd>選択機へカメラ移動</li>
+          <li>森林は移動が遅いが、中にいる機体は見つかりにくく被弾が減る。丘陵の上では索敵と射程が+1。</li>
+          <li>狙撃砲は索敵範囲より射程が長い。軽量機やレーダー装備機で敵を捉えてから撃つ。</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="battle" hidden>
+  <div class="topbar">
+    <div class="tb-m"><span class="mtype" id="bType"></span><b id="bName"></b><span id="aiChip" class="aichip" hidden>AI制御</span></div>
+    <div class="tb-obj" id="bObj"></div>
+    <div class="tb-time" id="bTime"></div>
+    <div class="tb-ctl">
+      <button id="pauseBtn">▶ 再開</button>
+      <button id="spdBtn">×1</button>
+      <button id="abortBtn">撤退</button>
+    </div>
+  </div>
+  <div class="bmain">
+    <div class="stage" id="stage">
+      <canvas id="cv"></canvas>
+      <div id="log"></div>
+      <div id="insp" hidden></div>
+      <div id="aiIntent" hidden></div>
+      <div id="pauseBanner">一時停止中 ― 停止したまま命令を出せます</div>
+      <div id="result" hidden></div>
+    </div>
+    <aside class="side">
+      <canvas id="mini" width="240" height="120"></canvas>
+      <div id="detail"></div>
+      <div id="cards"></div>
+    </aside>
+  </div>
+  <div class="rpbar" id="rpbar" hidden>
+    <span class="rpchip">REPLAY</span>
+    <div class="rpseek"><div id="rpMarks"></div><input type="range" id="rpSeek" min="0" max="100" step="1" value="0" aria-label="再生位置"></div>
+    <span id="rpTime" class="num">0:00 / 0:00</span>
+    <label class="rprev"><input type="checkbox" id="rpReveal"> 敵を全表示</label>
+    <span id="rpInfo"></span>
+  </div>
+  <div class="cmdbar">
+    <button data-cmd="all">全機選択 E</button>
+    <button data-cmd="stop">停止 X</button>
+    <button data-cmd="stance" id="stanceBtn">姿勢: 待機射撃 Q</button>
+    <button data-cmd="convoy" id="convoyBtn" hidden>輸送隊: 停止中</button>
+    <button data-cmd="center">選択機へ C</button>
+    <button data-cmd="det" id="detBtn" class="on">警戒圏表示 V</button>
+    <button data-cmd="tool" id="toolBtn">ツール T</button>
+    <button data-cmd="mode" id="modeBtn">移動: 通常 M</button>
+    <button data-cmd="hide" id="hideBtn">隠蔽 H</button>
+    <button data-cmd="ammo" id="ammoBtn">弾種: 通常 R</button>
+    <button data-cmd="arty" id="artyBtn">砲撃支援 B</button>
+    <button data-cmd="ai" id="aiBtn">AI指揮: OFF G</button>
+    <span class="hint">WASD スクロール / クリックで移動 / 敵クリックで攻撃 / Space 一時停止</span>
+  </div>
+</section>
+</div>
+
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s);
+let SIMR=Math.random;const RND=()=>SIMR();
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+
+/* ================= DATA ================= */
+const CHASSIS={
+  light:  {name:'ライト',  hp:70, armor:1,speed:2.1, sensor:6.5,cost:120,shape:'tri', desc:'足が速く視界が広い偵察役。打たれ弱いので前に出しすぎない',tip:'索敵・狙撃の観測役'},
+  assault:{name:'アサルト',hp:110,armor:3,speed:1.55,sensor:5,  cost:180,shape:'sq',  desc:'速度・装甲・視界が平均的な主力。迷ったらこれ',tip:'主力'},
+  heavy:  {name:'ヘヴィ',  hp:180,armor:6,speed:1.0, sensor:4.5,cost:260,shape:'hex', desc:'とても硬いが遅い。先頭に立って敵の弾を受ける盾役',tip:'盾役'},
+  support:{name:'サポート',hp:90, armor:2,speed:1.45,sensor:5.5,cost:160,shape:'circ',desc:'近く(2.5マス)の味方を毎秒3.5回復。本機は後方に置く',tip:'回復役',repair:3.5},
+};
+const WEAPONS={
+  mg:     {name:'マシンガン',tag:'MG',range:3.2,dmg:6, cd:0.35,ps:16,cost:60,desc:'射程は短いが連射で火力最大。近づける機体向け'},
+  rifle:  {name:'ライフル',  tag:'RF',range:4.8,dmg:14,cd:1.1, ps:20,cost:90,desc:'中距離で安定。どの機体にも合う標準武装'},
+  sniper: {name:'狙撃砲',    tag:'SN',range:8.5,dmg:40,cd:3.4, ps:36,cost:150,min:2,desc:'最長射程・一撃が重い。ただし自分の視界(5前後)より遠くは味方が見ていないと撃てない。2マス以内も撃てない'},
+};
+const EQUIP={
+  none:   {name:'なし',cost:0,desc:'追加装備なし。予算を節約できる'},
+  radar:  {name:'レーダー',sensor:2.5,emit:2.5,cost:60,desc:'視界 +2.5。ただし電波を出すので、敵からも2.5遠くで見つかる。後方から狙撃砲の観測をするのに向く'},
+  plate:  {name:'増加装甲',hp:50,armor:2,speed:-0.25,cost:70,desc:'HP +50・装甲 +2、ただし少し遅くなる。前衛向け'},
+  booster:{name:'ブースター',speed:0.6,cost:50,desc:'速度 +0.6。離脱・護衛や、マシンガン機が距離を詰めるのに'},
+  stealth:{name:'ステルス',stealth:true,cost:90,desc:'敵に見つかる距離が半分になる（森ならさらに7割）。撃つと2.5秒間は効果が切れる。射撃禁止と組み合わせて索敵に'},
+  repair: {name:'自己修復',regen:1.5,cost:80,desc:'自分のHPを毎秒1.5回復。長期戦・単独行動向け'},
+};
+const TOOLS={
+  none:   {name:'なし',tag:'',ammo:0,cost:0,desc:'ツールなし'},
+  missile:{name:'ミサイル',tag:'MSL',ammo:4,range:9,dmg:45,splash:1.2,cd:3,cost:120,target:'enemy',desc:'射程9・威力45＋周囲に半分。ロックオンには、目標が自分の視界内か、レーダー装備の味方の視界内にいる必要がある（レーダーがないと実質の射程は自分の視界まで）。チャフの中では誘導を失って外れる。4発'},
+  chaff:  {name:'チャフ',tag:'CHF',ammo:2,range:3.5,radius:2.5,dur:12,cd:1,cost:60,target:'point',desc:'半径2.5に12秒。中ではミサイルの誘導が切れ、レーダーが効かない（レーダー装備の視界ボーナスと電波が消え、レーダー塔にも探知されない）。2回'},
+  smoke:  {name:'煙幕',tag:'SMK',ammo:2,range:3.5,radius:2.2,dur:15,cd:1,cost:50,target:'point',desc:'半径2.2に15秒。撃つ側か撃たれる側が煙の中だと射撃の命中率35%。中の機体は目では見つかりにくい（×0.4）が、レーダーには映る。2回'},
+  flare:  {name:'照明弾',tag:'FLR',ammo:2,range:8,radius:4,dur:10,cd:1,cost:50,target:'point',desc:'射程8、半径4を10秒照らして中の敵を視認できる。狙撃砲の観測や索敵の先読みに。2回'},
+  decoy:  {name:'デコイ',tag:'DCY',ammo:1,range:4,dur:25,cd:1,cost:70,target:'point',desc:'電波を出す囮を置く（HP60・25秒）。敵には本物と区別できず、優先して狙われる。1回'},
+  charge: {name:'爆薬',tag:'EXP',ammo:2,range:1.2,dmg:260,cd:1,cost:70,target:'struct',desc:'敵の建造物に隣接して仕掛ける（5秒後に爆発）。建造物に260、周囲の機体に100。砲台や司令塔を短時間で壊せる。2個'},
+  jammer: {name:'電障弾',tag:'ECM',ammo:2,range:6,radius:3,dur:12,cd:1,cost:70,target:'point',desc:'射程6、半径3に12秒。中の敵は視界が4割に落ち、レーダー塔も働かない。敵ミサイルのロックも外れやすくなる。2回'},
+  probe:  {name:'プローブ',tag:'PRB',ammo:2,range:5,dur:60,cd:1,cost:50,target:'point',desc:'小型センサーを置く（視界5・60秒・HP25）。見つかりにくいが撃たれると壊れる。前哨や死角の監視に。2個'},
+  mine:   {name:'地雷',tag:'MIN',ammo:3,range:1.5,dmg:60,splash:1.2,cd:1,cost:60,target:'point',desc:'足元近くに設置（1.5秒後に作動）。敵が踏むと威力60＋周囲に半分。敵からは見えない。殿や待ち伏せに。3個'},
+};
+const AMMO={std:{name:'通常弾',tag:'通常'},ap:{name:'徹甲弾',tag:'徹甲',desc:'装甲の効果を7割無視（威力0.9倍）。重装型に'},he:{name:'榴弾',tag:'榴弾',desc:'着弾点の周囲1にも半分。建造物に1.6倍、森の遮蔽を無視。装甲には弱い'}};
+const AMMO_CAP={mg:{ap:40,he:30},rifle:{ap:12,he:10},sniper:{ap:5,he:4}};
+const MMODES={normal:{name:'通常'},fast:{name:'高速'},careful:{name:'警戒'}};
+const PILOTS=[['ミナト','HERON'],['カイ','MARLIN'],['リン','WREN'],['ソウマ','BISON'],['アオイ','LARK'],['ハヤト','SHRIKE'],['ユキ','OWL'],['レン','RAM']];
+const DEFAULT_LOAD=[
+  ['assault','rifle','plate','none'],['assault','mg','booster','smoke'],['light','rifle','radar','flare'],['heavy','rifle','none','missile'],
+  ['support','rifle','none','chaff'],['light','mg','stealth','smoke'],['light','sniper','radar','none'],['heavy','mg','plate','mine']];
+function migrateSlot(x){x={...x};if(x.weapon==='missile'){x.weapon='rifle';x.tool=x.tool||'missile'}if(!TOOLS[x.tool])x.tool='none';if(!WEAPONS[x.weapon])x.weapon='rifle';return x}
+
+function stats(c){
+  const ch=CHASSIS[c.chassis],w=WEAPONS[c.weapon]||WEAPONS.rifle,e=EQUIP[c.equip],tl=TOOLS[c.tool||'none']||TOOLS.none;
+  return {hp:ch.hp+(e.hp||0),armor:ch.armor+(e.armor||0),speed:Math.max(0.5,+(ch.speed+(e.speed||0)).toFixed(2)),
+    sensor:ch.sensor+(e.sensor||0),weapon:w,stealth:!!e.stealth,regen:e.regen||0,repair:ch.repair||0,
+    cost:ch.cost+w.cost+e.cost+tl.cost,shape:ch.shape,emit:e.emit||0,radarBonus:e.emit?e.sensor:0,tool:c.tool||'none'};
+}
+const ETYPES={
+  scout:  {name:'偵察型',c:{chassis:'light',weapon:'mg',equip:'none'}},
+  trooper:{name:'突撃型',c:{chassis:'assault',weapon:'rifle',equip:'none'}},
+  gunner: {name:'機銃型',c:{chassis:'assault',weapon:'mg',equip:'none'}},
+  heavy:  {name:'重装型',c:{chassis:'heavy',weapon:'rifle',equip:'none',tool:'missile'}},
+  sniper: {name:'狙撃型',c:{chassis:'light',weapon:'sniper',equip:'none'}},
+  turret: {name:'砲台',   s:{hp:160,armor:4,sensor:6,weapon:'rifle',shape:'turret'}},
+  radar:  {name:'レーダー塔',s:{hp:110,armor:2,sensor:9,weapon:null,shape:'radar'}},
+  hq:     {name:'司令塔', s:{hp:560,armor:5,sensor:5,weapon:'mg',shape:'hq'}},
+  site:   {name:'敵野営地',s:{hp:150,armor:3,sensor:3,weapon:null,shape:'site'}},
+};
+
+/* ================= MAP ================= */
+const N=28,TW=64,TH=32,HILL_H=8,ROCK_H=14;
+const T={PLAIN:0,FOREST:1,HILL:2,ROCK:3,WATER:4,ROAD:5};
+const TERR=[{move:1,pass:1},{move:1.7,pass:1},{move:1.35,pass:1},{move:9,pass:0},{move:9,pass:0},{move:0.8,pass:1}];
+const TCOL=[[74,84,68],[46,72,52],[108,100,78],[88,90,94],[38,70,92],[117,104,82]];
+const OX=N*TW/2+24,OY=40,WPX=N*TW+48,HPX=N*TH+80;
+function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ================= MISSIONS ================= */
+const ROAD4=[[0.5,20.5],[7.5,18.5],[13.5,12.5],[20.5,10.5],[27.5,6.5]];
+const MISSIONS=[
+{id:'m1',type:'殲滅',code:'OP-01',name:'灰原掃討戦',budget:2000,max:8,limit:0,seed:11,arty:1,
+ terr:{forest:7,hills:5,water:1,rocks:6},spawn:[4,23],keys:[[15,12],[22,6],[20,18],[9,8]],
+ brief:'平原に展開した敵機動部隊4群を撃滅する。敵は各個に布陣しており、一群ずつ叩けば数的優位を保てる。',
+ win:'敵部隊の全滅',lose:'全機喪失',
+ hint:'重装機を前に、ミサイルと狙撃で後方から削ると損害が少ない。',
+ setup(G){grp(G,['trooper','trooper','gunner'],15,12);grp(G,['heavy','trooper','sniper'],22,6);
+   grp(G,['scout','scout','gunner'],20,18,{patrol:[[20,18],[12,21]]});grp(G,['trooper','sniper'],9,8);},
+ obj(G){return `敵残存 ${countE(G)} 機`},
+ check(G){if(countE(G)===0)return{win:true,reason:'敵部隊を全滅させた'}}},
+{id:'m2',type:'強襲',code:'OP-02',name:'第七レーダー基地',budget:1900,max:6,limit:420,seed:27,arty:2,
+ emines:[[13.5,14.5],[14.5,13.5],[15.5,12.5],[16.5,13.5],[12.5,15.5],[17.5,11.5],[18.5,10.5],[19.5,11.5]],
+ terr:{forest:8,hills:4,water:1,rocks:7},spawn:[3,24],keys:[[23,5],[16,11],[21,7],[15,15],[12,8]],
+ brief:'敵前線基地の司令塔を制限時間内に破壊する。基地の手前には地雷原がある（警戒移動で発見・処理できる）。基地手前のレーダー塔は探知範囲が広く、見つかると守備隊が一斉に集まってくる。',
+ win:'司令塔の破壊（7分以内）',lose:'全機喪失／時間切れ',
+ hint:'ステルス機と狙撃砲でまずレーダー塔を落とすと、守備隊を分断できる。',
+ setup(G){G.hq=spawnE(G,'hq',23.5,4.5,{obj:true});spawnE(G,'turret',20.5,5.5);spawnE(G,'turret',23.5,8.5);spawnE(G,'turret',19.5,8.5);
+   G.radar=spawnE(G,'radar',16.5,11.5);grp(G,['trooper','trooper'],21,7);spawnE(G,'heavy',24.5,7.5);
+   grp(G,['gunner','gunner'],15,15,{patrol:[[15,15],[12,8]]});spawnE(G,'sniper',19.5,3.5);},
+ obj(G){const p=Math.max(0,Math.ceil(G.hq.hp/G.hq.maxHp*100));return `司令塔 耐久 ${p}%　／　レーダー塔 ${G.radar.alive?'稼働中':'破壊'}`},
+ check(G){if(!G.hq.alive)return{win:true,reason:'司令塔を破壊した'}}},
+{id:'m3',type:'索敵',code:'OP-03',name:'霧の森林帯',budget:1250,max:4,limit:360,seed:43,arty:0,
+ terr:{forest:13,hills:3,water:1,rocks:5},spawn:[4,23],keys:[[7,6],[20,4],[23,17],[14,13]],
+ brief:'森林地帯に潜む敵野営地4か所の位置を特定し、出撃地点に帰還する。敵を倒す必要はない。推定区域は実際の位置から少しずれている。',
+ win:'4か所を2秒間視界に収め、1機以上がLZへ帰還',lose:'全機喪失／時間切れ',
+ hint:'少数・高速・広視界。ステルスやレーダー装備の軽量機が向いている。交戦は避ける。',
+ setup(G){
+   const S=[[7.5,6.5,['scout','gunner']],[20.5,4.5,['trooper','sniper']],[23.5,17.5,['heavy','gunner']],[14.5,13.5,['trooper','trooper','scout']]];
+   const R=rng(99);G.sites=[];
+   S.forEach(([x,y,g],i)=>{const s=spawnE(G,'site',x,y,{label:'ABCD'[i]});s.scan=0;G.sites.push(s);grp(G,g,x+1.2,y+1.2);
+     G.zones.push({kind:'hint',x:x+(R()-.5)*3,y:y+(R()-.5)*3,r:3.3,label:'推定区域 '+'ABCD'[i]});});
+   G.zones.push({kind:'lz',x:4,y:23,r:2.3,label:'LZ'});},
+ obj(G){const n=G.sites.filter(s=>s.scanned).length;return n<4?`敵野営地の特定 ${n}/4`:'全拠点特定 ― LZへ帰還せよ'},
+ check(G){if(G.sites.every(s=>s.scanned)&&G.units.some(u=>u.alive&&u.ctrl&&inZone(u,'lz')))return{win:true,reason:'偵察情報を持ち帰った'}}},
+{id:'m4',type:'護衛',code:'OP-04',name:'補給路ルート12',budget:1800,max:6,limit:0,seed:58,arty:1,
+ emines:[[9.3,17],[10.6,15.6],[16,11.8],[18.2,11.1],[23.1,9.1]],
+ terr:{forest:9,hills:4,water:1,rocks:6},spawn:[3,23],keys:ROAD4.concat([[10,14],[17,14],[19,6],[25,10],[14,1.5]]),road:ROAD4,
+ brief:'輸送車3両を道路沿いに東端まで送り届ける。道路には地雷が埋設されている（警戒移動の機体で先に処理する）。道路脇の森に待ち伏せがあり、途中で増援も来る。輸送隊は命令で停止・前進できる。',
+ win:'輸送車2両以上が東端に到達',lose:'輸送車が2両未満になる／全機喪失',
+ hint:'輸送隊を止めて先行偵察、待ち伏せを潰してから前進させるのが基本。修理機が有効。',
+ setup(G){
+   const pts=ROAD4.slice(1).map(([x,y])=>({x,y}));
+   [[2.6,20.2],[1.6,20.4],[0.6,20.6]].forEach(([x,y],i)=>{
+     const u=mkUnit('P',{hp:210,armor:4,speed:0.8,sensor:3,weapon:null,stealth:false,regen:0,repair:0,shape:'truck'},x,y,
+       {ctrl:false,truck:true,name:'輸送車'+(i+1),path:pts.map(p=>({...p}))});G.units.push(u);});
+   grp(G,['gunner','gunner'],10,14);grp(G,['trooper','heavy'],17,14);grp(G,['sniper','trooper'],19,6);grp(G,['gunner','trooper','scout'],25,10);
+   G.zones.push({kind:'goal',x:27,y:6.5,r:1.6,label:'到達点'});G.arrived=0;G.convoyGo=false;
+   G.events.push({t:80,fn:G=>{grp(G,['trooper','trooper','gunner'],14,1.5,{hunt:true});G.log('増援：北から敵3機','e')}});},
+ obj(G){const alive=G.units.filter(u=>u.truck&&u.alive).length;return `輸送車 到達 ${G.arrived}/3　健在 ${alive}　（必要 2）`},
+ check(G){const alive=G.units.filter(u=>u.truck&&u.alive).length;
+   if(alive+G.arrived<2)return{win:false,reason:'輸送車を失いすぎた'};
+   if(alive===0&&G.arrived>=2)return{win:true,reason:'補給物資を届けた'}}},
+{id:'m5',type:'離脱',code:'OP-05',name:'包囲網突破',budget:1700,max:6,limit:0,seed:71,arty:2,
+ terr:{forest:8,hills:5,water:2,rocks:6},spawn:[6,21],keys:[[24,4],[4,10],[18,20],[18,14],[15,10],[22,8],[26,1],[27,9]],
+ brief:'敵の包囲下に取り残された。北東のLZに入ると回収機を要請でき、到着まで45秒かかる。到着の瞬間にLZ内にいた機体だけが回収される。敵は回収地点を知っており、最後はLZに押し寄せてくる。',
+ win:'回収機到着時、LZ内に出撃数の6割以上（6機なら4機）',lose:'必要数を回収できない',
+ hint:'おとりで引き離しても、敵は見失うと最後に報告された位置かLZへ向かう。LZで45秒守り切れる火力と、到着を早めすぎない判断が要る。',
+ setup(G){grp(G,['gunner','trooper'],4,10);grp(G,['scout','trooper'],18,20,{patrol:[[18,20],[18,14]]});grp(G,['sniper','trooper'],15,10);grp(G,['gunner','gunner','heavy'],22,8);
+   G.zones.push({kind:'lz',x:24,y:4,r:2.2,label:'LZ'});G.extracted=0;G.pickup=0;
+   G.need=Math.max(2,Math.ceil(G.units.filter(u=>u.ctrl).length*0.6));G.huntGoal={x:24,y:4};
+   const P=[[1,27],[12,27],[1,10],[1,18],[20,27]];
+   for(let k=0;k<7;k++)G.events.push({t:25+k*24,fn:G=>{if(G.pickup)return;const p=P[k%P.length];grp(G,k%3===2?['heavy','gunner','scout']:['trooper','gunner'],p[0],p[1],{hunt:true});G.log('敵増援接近','e')}});},
+ obj(G){const inLZ=G.units.filter(u=>u.ctrl&&u.alive&&inZone(u,'lz')).length;
+   return G.pickup?`回収機到着まで ${Math.max(0,Math.ceil(G.pickup-G.time))} 秒　LZ内 ${inLZ}/${G.need}　残存 ${countP(G)}`:`LZに入って回収機を要請せよ　残存 ${countP(G)} 機（必要 ${G.need}）`},
+ tick(G){
+   if(!G.pickup&&G.units.some(u=>u.ctrl&&u.alive&&inZone(u,'lz'))){G.pickup=G.time+45;G.log('回収機を要請。到着まで45秒、LZを確保せよ','g');
+     grp(G,['trooper','gunner','scout'],26,0.5,{hunt:true});G.log('北方から敵部隊、LZへ接近中','e');
+     G.events.push({t:G.time+18,fn:G=>{grp(G,['heavy','trooper'],27,9,{hunt:true});G.log('東から敵増援','e')}});
+     G.events.push({t:G.time+30,fn:G=>{grp(G,['gunner','gunner'],18,1,{hunt:true});G.log('北西から敵増援','e')}});}
+   if(G.pickup&&G.time>=G.pickup&&!G.over){const inLZ=G.units.filter(u=>u.ctrl&&u.alive&&inZone(u,'lz'));
+     G.extracted=inLZ.length;const left=countP(G)-inLZ.length;
+     inLZ.forEach(u=>{u.alive=false;u.gone=true});
+     return G.extracted>=G.need?{win:true,reason:`回収機が到着し ${G.extracted} 機を回収した${left?`（${left} 機取り残し）`:''}`}:{win:false,reason:`回収できたのは ${G.extracted} 機。必要数 ${G.need} に届かなかった`}}},
+ check(G){if(countP(G)<G.need)return{win:false,reason:'回収に必要な機数を割り込んだ'}}},
+];
+const countE=G=>G.units.filter(u=>u.team==='E'&&u.alive).length;
+const countP=G=>G.units.filter(u=>u.ctrl&&u.alive).length;
+function inZone(u,kind){return G.zones.some(z=>z.kind===kind&&Math.hypot(u.x-z.x,u.y-z.y)<=z.r)}
+
+/* ================= SAVE ================= */
+const DIFFS={easy:{name:'やさしい',dmg:0.55,hp:0.8},normal:{name:'ふつう',dmg:0.8,hp:1},hard:{name:'むずかしい',dmg:1,hp:1.15}};
+let SAVE={diff:'easy',slots:DEFAULT_LOAD.map(([chassis,weapon,equip,tool])=>({chassis,weapon,equip,tool})),deploy:{},mission:'m1'};
+try{const s=JSON.parse(localStorage.getItem('octa-save')||'null');if(s&&s.slots&&s.slots.length===8){SAVE=Object.assign(SAVE,s);SAVE.slots=SAVE.slots.map(migrateSlot)}}catch(e){}
+const DIFF=()=>DIFFS[(G&&G.diff)||SAVE.diff]||DIFFS.easy;
+function persist(){try{localStorage.setItem('octa-save',JSON.stringify(SAVE))}catch(e){}}
+function mission(){return MISSIONS.find(m=>m.id===SAVE.mission)||MISSIONS[0]}
+function deployOf(m){
+  if(!SAVE.deploy[m.id]){let cost=0,n=0;SAVE.deploy[m.id]=SAVE.slots.map(s=>{const c=stats(s).cost;if(n<m.max&&cost+c<=m.budget){cost+=c;n++;return true}return false})}
+  return SAVE.deploy[m.id];
+}
+
+/* ================= HQ UI ================= */
+function shapeSVG(shape,col){
+  const s={tri:'<polygon points="12,3 21,20 3,20"/>',sq:'<rect x="4" y="4" width="16" height="16"/>',
+    hex:'<polygon points="12,2 21,7 21,17 12,22 3,17 3,7"/>',circ:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10" stroke="#07131b" stroke-width="2.4"/>'}[shape];
+  return `<svg width="24" height="24" viewBox="0 0 24 24" fill="${col}" stroke="#07131b" stroke-width="1.2" aria-hidden="true">${s}</svg>`;
+}
+function roleOf(s){const c=s.chassis,w=s.weapon,e=s.equip;
+  if(c==='support')return'【回復役】';if(w==='sniper')return'【狙撃役】';if(c==='heavy'||e==='plate')return'【前衛・盾役】';
+  if(c==='light'&&(e==='radar'||e==='stealth'))return'【偵察役】';if(s.tool==='missile')return'【後方火力】';if(w==='mg')return'【近接アタッカー】';return'【主力】'}
+function guideHTML(){
+  const row=(o,f)=>Object.values(o).map(v=>`<tr><th>${v.name}</th><td class="num">${f(v)}</td><td>${v.desc}</td></tr>`).join('');
+  return `<h3>機体</h3><div class="tw"><table>${row(CHASSIS,v=>`HP${v.hp} 装甲${v.armor} 速${v.speed} 視界${v.sensor} / ${v.cost}`)}</table></div>
+  <h3>武装</h3><div class="tw"><table>${row(WEAPONS,v=>`射程${v.range} 威力${v.dmg} 間隔${v.cd}s / ${v.cost}`)}</table></div>
+  <h3>装備</h3><div class="tw"><table>${row(EQUIP,v=>`${v.cost}`)}</table></div>
+  <h3>ツール（弾数制限あり・戦闘中に <kbd>T</kbd> で使用）</h3><div class="tw"><table>${Object.entries(TOOLS).filter(([k])=>k!=='none').map(([k,v])=>`<tr><th>${v.name}</th><td class="num">${v.range?'射程'+v.range+' ':''}${v.radius?'半径'+v.radius+' ':''}${v.dur?v.dur+'秒 ':''}×${v.ammo} / ${v.cost}</td><td>${v.desc}</td></tr>`).join('')}</table></div>
+  <h3>戦闘中の行動</h3><ul>
+   <li><b>移動モード</b>（<kbd>M</kbd>）：<b>通常</b>／<b>高速</b>＝速度1.5倍・視界0.7倍・敵に1.5遠くから見つかる／<b>警戒</b>＝速度0.6倍・視界+1.5・見つかりにくさ×0.85。警戒移動の機体は半径2.5の敵地雷を発見し、隣で止まると2秒で処理する（発見済みの地雷は踏んでも爆発しない）。</li>
+   <li><b>隠蔽</b>（<kbd>H</kbd>）：その場で止まり、2秒で隠蔽完了。見つかりにくさ×0.35、自動射撃はしない。移動・攻撃命令で解除。敵が近づいてから攻撃命令を出す待ち伏せに。</li>
+   <li><b>弾種</b>（<kbd>R</kbd>）：通常弾（無限）／<b>徹甲弾</b>＝装甲の効果を7割無視／<b>榴弾</b>＝周囲1にも半分、建造物に1.6倍、森の遮蔽を無視、装甲に弱い。切替に2.5秒かかり、その間は撃てない。数は武装ごと（ライフル：徹甲12・榴弾10、マシンガン：40・30、狙撃砲：5・4）。</li>
+   <li><b>砲撃支援</b>（<kbd>B</kbd>）：作戦ごとに回数が決まっている。味方の視界内の地点を指定すると8秒後に5発が半径1.8に着弾（1発55）。<b>味方も巻き込む</b>。</li>
+   <li><b>ミサイル迎撃</b>：マシンガン装備の機体は、2.2以内を通る敵ミサイルを35%で撃ち落とす（1発につき1回）。</li>
+   <li><b>損傷</b>：大きな被弾で一定確率（HPが減るほど高い）で <b>火器管制</b>（連射が1.6倍遅い・迎撃率低下）、<b>脚部</b>（速度0.55倍）、<b>センサー</b>（視界0.6倍）が壊れる。修理機の2.5以内で6秒ごとに1つ回復、自己修復装備は20秒ごと。</li></ul>
+  <h3>見つかる仕組み</h3><ul><li>敵がこちらを見つける距離 ＝ 敵の視界 × 見つかりにくさ ＋ レーダーの電波（2.5）。</li><li>見つかりにくさ：ステルス ×0.5、森林の中 ×0.7（重ねると ×0.35）。ステルスは撃つと2.5秒間 ×1 に戻る。</li><li>戦闘中は見えている敵の「警戒圏」（選択機が見つかる距離）を黄色い点線で表示する（<kbd>V</kbd>で切替）。機体の左上の <b style="color:#e2b84a">!</b> は警戒圏まで1.5以内、<b style="color:#e4643c">!</b> は発見されている。</li><li>1機でも見つかると、その敵の周囲5.5（レーダー塔は13）の敵が集まってくる。</li></ul><h3>数値の意味</h3><ul><li><b>装甲</b>：1につき受けるダメージ7%減（最大70%減）。</li><li><b>視界（索敵）</b>：この距離内の敵が見える。見えない敵は撃てない。森の中の敵は7割の距離まで近づかないと見えない。</li><li><b>DPS</b>：1秒あたりの平均ダメージ。</li><li><b>COST</b>：作戦ごとの予算から引かれる。</li></ul>
+  <h3>迷ったらこの形</h3><ul><li><b>盾</b>：ヘヴィ＋ライフル＋増加装甲</li><li><b>主力</b>：アサルト＋ライフル（予算に余裕があれば増加装甲）</li><li><b>回復</b>：サポート＋ライフル</li><li><b>偵察</b>：ライト＋ライフル＋レーダー（索敵任務はステルス）</li><li><b>火力</b>：ヘヴィ＋ライフル＋ミサイル（レーダー機とセットで）、またはライト＋狙撃砲＋レーダー（偵察役とセットで）</li></ul>`}
+function opts(obj,sel){return Object.entries(obj).map(([k,v])=>`<option value="${k}"${k===sel?' selected':''}>${v.name}${v.cost?'  '+v.cost:''}</option>`).join('')}
+function renderHQ(){
+  const m=mission();
+  $('#mlist').innerHTML=MISSIONS.map(x=>`<button class="mcard${x.id===m.id?' on':''}" data-m="${x.id}"><span class="mtype t-${x.type}">${x.type}</span><span class="nm">${x.name}</span><span class="cd">${x.code}</span></button>`).join('');
+  $('#diff').innerHTML=Object.entries(DIFFS).map(([k,d])=>`<button data-d="${k}" class="${SAVE.diff===k?'on':''}">${d.name}</button>`).join('');
+  $('#brief').innerHTML=`<h3>${m.code}　${m.name}</h3><p>${m.brief}</p>
+   <dl><dt>勝利条件</dt><dd>${m.win}</dd><dt>敗北条件</dt><dd>${m.lose}</dd>
+   <dt>出撃枠</dt><dd class="num">${m.max} 機</dd><dt>予算</dt><dd class="num">${m.budget}</dd>
+   <dt>制限時間</dt><dd class="num">${m.limit?Math.floor(m.limit/60)+' 分':'なし'}</dd></dl>
+   <div class="hint">助言：${m.hint}</div>`;
+  const dep=deployOf(m);
+  $('#slots').innerHTML=SAVE.slots.map((s,i)=>{const st=stats(s);return `<div class="slot${dep[i]?' on':''}" data-i="${i}">
+    <label class="dep"><input type="checkbox" id="dep${i}" ${dep[i]?'checked':''} aria-label="${PILOTS[i][0]}を出撃させる"><span class="no">0${i+1}</span></label>
+    <div class="pilot">${shapeSVG(st.shape,dep[i]?'#5fb0e0':'#56656c')}<div><b>${PILOTS[i][0]}</b><small>${PILOTS[i][1]}</small></div></div>
+    <select id="ch${i}" data-k="chassis" aria-label="機体">${opts(CHASSIS,s.chassis)}</select>
+    <select id="wp${i}" data-k="weapon" aria-label="武装">${opts(WEAPONS,s.weapon)}</select>
+    <select id="eq${i}" data-k="equip" aria-label="装備">${opts(EQUIP,s.equip)}</select>
+    <select id="tl${i}" data-k="tool" aria-label="ツール">${opts(TOOLS,s.tool||'none')}</select>
+    <div class="cost">${st.cost}<small>COST</small></div>
+    <div class="st"><span>HP <b>${st.hp}</b></span><span>装甲 <b>${st.armor}</b></span><span>速度 <b>${st.speed}</b></span><span>視界 <b>${st.sensor}</b></span><span>射程 <b>${st.weapon.range}</b></span><span>DPS <b>${(st.weapon.dmg/st.weapon.cd).toFixed(1)}</b></span>${st.repair?'<span>修理 <b>'+st.repair+'/s</b></span>':''}${st.stealth?'<span><b>ステルス</b></span>':''}${st.regen?'<span>再生 <b>'+st.regen+'/s</b></span>':''}${st.tool!=='none'?'<span>'+TOOLS[st.tool].name+' <b>×'+TOOLS[st.tool].ammo+'</b></span>':''}</div>
+    <div class="desc"><span>${roleOf(s)}</span>　${CHASSIS[s.chassis].desc}。${WEAPONS[s.weapon].desc}。${s.equip!=='none'?EQUIP[s.equip].name+'：'+EQUIP[s.equip].desc+'。':''}${s.tool&&s.tool!=='none'?TOOLS[s.tool].name+'：'+TOOLS[s.tool].desc+'。':''}</div>
+  </div>`}).join('');
+  updateBudget();
+}
+function updateBudget(){
+  const m=mission(),dep=deployOf(m);let cost=0,n=0;
+  SAVE.slots.forEach((s,i)=>{if(dep[i]){cost+=stats(s).cost;n++}});
+  const over=cost>m.budget;
+  $('#budget').innerHTML=`<div class="btxt"><span>予算 <b class="num">${cost} / ${m.budget}</b></span><span>出撃 <b class="num">${n} / ${m.max}</b> 機</span></div><div class="bbar${over?' over':''}"><i style="width:${Math.min(100,cost/m.budget*100)}%"></i></div>`;
+  let msg='',bad=true;
+  if(n===0)msg='出撃する機体を選んでください';
+  else if(n>m.max)msg=`出撃枠を ${n-m.max} 機超えています`;
+  else if(over)msg=`予算を ${cost-m.budget} 超えています。装備を軽くするか機数を減らしてください`;
+  else {msg=`${n} 機で出撃可能`;bad=false}
+  const el=$('#deployMsg');el.textContent=msg;el.className=bad?'bad':'';$('#goBtn').disabled=bad;$('#aiGoBtn').disabled=bad;
+}
+$('#mlist').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;SAVE.mission=b.dataset.m;persist();renderHQ()});
+$('#diff').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(!b)return;SAVE.diff=b.dataset.d;persist();renderHQ()});
+$('#slots').addEventListener('change',e=>{
+  const row=e.target.closest('.slot');if(!row)return;const i=+row.dataset.i;
+  if(e.target.type==='checkbox'){deployOf(mission())[i]=e.target.checked}
+  else SAVE.slots[i][e.target.dataset.k]=e.target.value;
+  persist();renderHQ();const f=document.getElementById(e.target.id);if(f)f.focus();
+});
+$('#goBtn').addEventListener('click',()=>startBattle(mission()));
+$('#aiGoBtn').addEventListener('click',()=>{if($('#goBtn').disabled)return;startBattle(mission());setAuto(true);G.speed=2;$('#spdBtn').textContent='×2'});
+
+/* ================= GAME STATE ================= */
+let G=null,UID=0;
+function mkUnit(team,st,x,y,extra){
+  return Object.assign({id:++UID,team,x,y,hp:st.hp,maxHp:st.hp,armor:st.armor,speed:st.speed,sensor:st.sensor,
+    weapon:typeof st.weapon==='string'?WEAPONS[st.weapon]:st.weapon,stealth:st.stealth,emit:st.emit||0,radarBonus:st.radarBonus||0,
+    tool:st.tool||'none',ammo:(TOOLS[st.tool||'none']||TOOLS.none).ammo,toolCd:0,pending:null,
+    mmode:'normal',hidden:false,hideT:0,ammoType:'std',nextAmmo:null,reloadT:0,dmgd:{fcs:false,legs:false,sensor:false},fixP:0,regen:st.regen||0,repair:st.repair||0,shape:st.shape,
+    cd:RND()*0.6,path:[],target:null,order:'idle',alive:true,revealT:0,repathT:0,fireT:0,ctrl:team==='P',stance:'hold'},extra);
+}
+function spawnE(G,type,x,y,extra={}){
+  const d=ETYPES[type];let st;
+  if(d.s)st={...d.s,stealth:false,speed:0};else st=stats(d.c);
+  const p=nearestPass(x,y);
+  st={...st,hp:Math.round(st.hp*DIFF().hp)};
+  const u=mkUnit('E',st,p.x,p.y,Object.assign({etype:type,name:d.name,struct:!!d.s,home:{x:p.x,y:p.y},state:'guard',lostT:0},extra));
+  if(extra.patrol){u.state='patrol';u.patrol=extra.patrol.map(([a,b])=>({x:a+.5,y:b+.5}));u.pi=0}
+  if(extra.hunt)u.state='hunt';
+  G.units.push(u);return u;
+}
+const OFFS=[[0,0],[1.1,0],[0,1.1],[-1.1,0],[0,-1.1],[1.1,1.1],[-1.1,1.1],[1.1,-1.1],[-1.1,-1.1],[2.2,0],[0,2.2],[-2.2,0]];
+function grp(G,types,cx,cy,extra={}){types.forEach((t,i)=>spawnE(G,t,cx+.5+OFFS[i][0],cy+.5+OFFS[i][1],{...extra}))}
+
+function genMap(m){
+  const R=rng(m.seed),g=new Uint8Array(N*N);
+  const blob=(type,count,r0,r1)=>{for(let k=0;k<count;k++){const cx=R()*N,cy=R()*N,r=r0+R()*(r1-r0);
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++){if(Math.hypot(x+.5-cx,y+.5-cy)+(R()-.5)*1.3<r)g[y*N+x]=type}}};
+  blob(T.FOREST,m.terr.forest,1.6,3.6);blob(T.HILL,m.terr.hills,1.2,2.6);blob(T.WATER,m.terr.water,1.2,2.6);blob(T.ROCK,m.terr.rocks,0.6,1.4);
+  const clear=(cx,cy,r,to=T.PLAIN)=>{for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=y*N+x;if(Math.hypot(x+.5-cx,y+.5-cy)<r&&(to!==T.PLAIN||g[i]===T.ROCK||g[i]===T.WATER||r>2.5))g[i]=to}};
+  clear(m.spawn[0]+.5,m.spawn[1]+.5,3.2);
+  m.keys.forEach(([x,y])=>clear(x+.5,y+.5,1.3));
+  if(m.road){for(let k=0;k<m.road.length-1;k++){const[a,b]=m.road[k],[c,d]=m.road[k+1],L=Math.hypot(c-a,d-b);
+    for(let s=0;s<=L;s+=0.2){const x=a+(c-a)*s/L,y=b+(d-b)*s/L,tx=Math.floor(x),ty=Math.floor(y);
+      for(const[dx,dy]of[[0,0],[1,0],[-1,0],[0,1],[0,-1]]){const X=tx+dx,Y=ty+dy;if(X<0||Y<0||X>=N||Y>=N)continue;const i=Y*N+X;
+        if(dx||dy){if(g[i]===T.ROCK||g[i]===T.WATER)g[i]=T.PLAIN}else g[i]=T.ROAD}}}}
+  // connectivity
+  const reach=()=>{const seen=new Uint8Array(N*N),s=Math.floor(m.spawn[1])*N+Math.floor(m.spawn[0]),q=[s];seen[s]=1;
+    while(q.length){const c=q.pop(),cx=c%N,cy=(c/N)|0;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const X=cx+dx,Y=cy+dy;if(X<0||Y<0||X>=N||Y>=N)continue;const i=Y*N+X;if(!seen[i]&&TERR[g[i]].pass){seen[i]=1;q.push(i)}}}return seen};
+  let seen=reach();
+  for(const[kx,ky]of m.keys){const ki=Math.floor(ky)*N+Math.floor(kx);if(seen[ki])continue;
+    const[a,b]=m.spawn,L=Math.hypot(kx-a,ky-b);for(let s=0;s<=L;s+=0.25){const x=Math.floor(a+(kx-a)*s/L),y=Math.floor(b+(ky-b)*s/L);const i=y*N+x;if(!TERR[g[i]].pass)g[i]=T.PLAIN}
+    seen=reach();}
+  for(let i=0;i<N*N;i++)if(!seen[i]&&TERR[g[i]].pass)g[i]=T.ROCK; // seal unreachable pockets
+  return g;
+}
+const tAt=(x,y)=>{const X=Math.floor(x),Y=Math.floor(y);if(X<0||Y<0||X>=N||Y>=N)return T.ROCK;return G.grid[Y*N+X]};
+const passAt=(x,y)=>TERR[tAt(x,y)].pass===1;
+const tileH=t=>t===T.HILL?HILL_H:t===T.ROCK?ROCK_H:0;
+function nearestPass(x,y){
+  if(passAt(x,y))return{x,y};
+  for(let r=1;r<8;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;
+    const X=Math.floor(x)+dx,Y=Math.floor(y)+dy;if(X>=0&&Y>=0&&X<N&&Y<N&&TERR[G.grid[Y*N+X]].pass)return{x:X+.5,y:Y+.5}}
+  return{x,y};
+}
+
+/* ================= PATHFINDING ================= */
+const DIRS=[[1,0,1],[-1,0,1],[0,1,1],[0,-1,1],[1,1,1.414],[1,-1,1.414],[-1,1,1.414],[-1,-1,1.414]];
+function hpush(h,n){h.push(n);let i=h.length-1;while(i>0){const p=(i-1)>>1;if(h[p][0]<=h[i][0])break;[h[p],h[i]]=[h[i],h[p]];i=p}}
+function hpop(h){const top=h[0],last=h.pop();if(h.length){h[0]=last;let i=0;for(;;){const l=2*i+1,r=l+1;let m=i;if(l<h.length&&h[l][0]<h[m][0])m=l;if(r<h.length&&h[r][0]<h[m][0])m=r;if(m===i)break;[h[m],h[i]]=[h[i],h[m]];i=m}}return top}
+function los(a,b){const L=Math.hypot(b.x-a.x,b.y-a.y);for(let s=0;s<=L;s+=0.2){const x=a.x+(b.x-a.x)*s/L,y=a.y+(b.y-a.y)*s/L;
+  if(!passAt(x,y)||!passAt(x+.22,y)||!passAt(x-.22,y)||!passAt(x,y+.22)||!passAt(x,y-.22))return false;
+  if(tAt(x,y)===T.FOREST&&tAt(a.x,a.y)!==T.FOREST&&tAt(b.x,b.y)!==T.FOREST)return false}return true}
+function findPath(sx,sy,tx,ty){
+  const sp=nearestPass(sx,sy),tp=nearestPass(tx,ty);tx=tp.x;ty=tp.y;
+  const s=Math.floor(sp.y)*N+Math.floor(sp.x),t=Math.floor(ty)*N+Math.floor(tx);
+  if(s===t)return[{x:tx,y:ty}];
+  const g=new Float32Array(N*N).fill(1e9),came=new Int32Array(N*N).fill(-1),closed=new Uint8Array(N*N),h=[];
+  const H=i=>{const dx=Math.abs(i%N-t%N),dy=Math.abs(((i/N)|0)-((t/N)|0));return (dx+dy-0.586*Math.min(dx,dy))*0.8};
+  g[s]=0;hpush(h,[H(s),s]);
+  while(h.length){const c=hpop(h)[1];if(closed[c])continue;closed[c]=1;if(c===t)break;const cx=c%N,cy=(c/N)|0;
+    for(const[dx,dy,dc]of DIRS){const X=cx+dx,Y=cy+dy;if(X<0||Y<0||X>=N||Y>=N)continue;const n=Y*N+X;
+      if(closed[n]||!TERR[G.grid[n]].pass)continue;
+      if(dx&&dy&&(!TERR[G.grid[cy*N+X]].pass||!TERR[G.grid[Y*N+cx]].pass))continue;
+      const ng=g[c]+dc*TERR[G.grid[n]].move;if(ng<g[n]){g[n]=ng;came[n]=c;hpush(h,[ng+H(n),n])}}}
+  if(came[t]===-1)return[];
+  const pts=[];let c=t;while(c!==s){pts.push({x:c%N+.5,y:((c/N)|0)+.5});c=came[c]}
+  pts.reverse();pts[pts.length-1]={x:tx,y:ty};
+  const out=[];let cur={x:sx,y:sy},i=0;
+  while(i<pts.length){let j=pts.length-1;while(j>i&&!los(cur,pts[j]))j--;out.push(pts[j]);cur=pts[j];i=j+1}
+  return out;
+}
+
+/* ================= BATTLE SETUP ================= */
+const cv=$('#cv'),ctx=cv.getContext('2d'),mini=$('#mini'),mctx=mini.getContext('2d');
+let DPR=1,VW=800,VH=500;
+function resize(){const r=cv.getBoundingClientRect();DPR=window.devicePixelRatio||1;VW=r.width;VH=r.height;cv.width=Math.round(VW*DPR);cv.height=Math.round(VH*DPR)}
+new ResizeObserver(()=>{if(!$('#battle').hidden)resize()}).observe($('#stage'));
+
+function startBattle(m,opt={}){
+  UID=0;const seed=opt.seed!=null?(opt.seed>>>0):(Math.random()*4294967296)>>>0;SIMR=rng(seed);setTimeout(()=>$('#detBtn').classList.toggle('on',G.showDet));keys.clear();
+  G={m,units:[],projs:[],fx:[],zones:[],events:[],logs:[],time:0,paused:true,speed:1,sel:new Set(),cam:{x:0,y:0},
+     vis:new Uint8Array(N*N),showDet:true,explored:new Uint8Array(N*N),seenE:new Set(),detP:new Set(),tick:0,over:null,kills:0,lost:0,hudT:0,miniT:0};
+  G.seed=seed;G.diff=opt.diff||SAVE.diff;G.clouds=[];G.mines=[];G.shells=[];G.charges=[];G.arty=m.arty||0;G.rec=[];G.tickN=0;G.acc=0;
+  G.replay=opt.replay?{rep:opt.replay,cmds:opt.replay.cmds,i:0}:null;
+  G.grid=genMap(m);
+  G.evq=[];G.log=(t,k='')=>{G.evq.push({t:+G.time.toFixed(1),text:t,kind:k==='e'?'warning':k==='g'?'info':'note'});if(G.evq.length>60)G.evq.shift();G.logs.push({t,k,at:performance.now()});if(G.logs.length>5)G.logs.shift();renderLog()};
+  const SL=(opt.slots||SAVE.slots).map(migrateSlot),dep=[...(opt.deploy||deployOf(m))];let k=0;G.ai=!!opt.ai;G.slots=SL;G.deploy=dep;
+  SL.forEach((s,i)=>{if(!dep[i])return;const st=stats(s);const o=OFFS[k++]||[0,0];
+    const p=nearestPass(m.spawn[0]+.5+o[0]*.9,m.spawn[1]+.5+o[1]*.9);
+    G.units.push(mkUnit('P',st,p.x,p.y,{no:i+1,pilot:PILOTS[i][0],cfg:s,name:PILOTS[i][0]}))});
+  m.setup(G);
+  for(const u of G.units)if(u.weapon){const cap=AMMO_CAP[u.weapon.tag==='MG'?'mg':u.weapon.tag==='RF'?'rifle':'sniper'];u.ap=cap.ap;u.he=cap.he}
+  (m.emines||[]).forEach(([x,y])=>G.mines.push({x,y,team:'E',arm:0,revealed:false,disarm:0}));
+  G.terrain=buildTerrain();
+  $('#hq').hidden=true;$('#battle').hidden=false;$('#result').hidden=true;
+  $('#bType').textContent=m.type;$('#bType').className='mtype t-'+m.type;$('#bName').textContent=m.name;
+  $('#convoyBtn').hidden=!m.road;
+  resize();
+  const[sx,sy]=w2p(m.spawn[0]+.5,m.spawn[1]+.5);G.cam.x=sx-VW*.45;G.cam.y=sy-VH*.55;clampCam();
+  buildCards();setPaused(true);$('#spdBtn').textContent='×1';
+  computeVis();
+  G.log(G.replay?`リプレイ：${m.code} ${m.name}（${G.replay.rep.ctrl==='ai'?'AI':G.replay.rep.ctrl==='human'?'プレイヤー':'AI＋プレイヤー'}の操作）`:`${m.code} ${m.name} 作戦開始。${G.ai?'AI制御モード':'一時停止中に命令を出せます'}`,'g');
+  setupReplayUI();
+  G.autoAI=false;$('#aiIntent').hidden=true;$('#aiBtn').textContent='AI指揮: OFF G';$('#aiBtn').classList.remove('on');
+  $('#aiChip').hidden=!G.ai;if(G.ai){setPaused(!opt.realtime);$('#pauseBanner').hidden=true;G.aiStep=!opt.realtime}
+}
+function endToHQ(){G=null;$('#battle').hidden=true;$('#hq').hidden=false;renderHQ();renderReplays()}
+
+/* ================= TERRAIN RENDER ================= */
+function w2p(x,y){return[(x-y)*TW/2+OX,(x+y)*TH/2+OY]}
+function toS(x,y){const[px,py]=w2p(x,y);return[px-G.cam.x,py-G.cam.y-tileH(tAt(x,y))]}
+function s2w(sx,sy){const a=(sx+G.cam.x-OX)/(TW/2),b=(sy+G.cam.y-OY)/(TH/2);return{x:(a+b)/2,y:(b-a)/2}}
+function shade(c,f,j=0){return `rgb(${clamp(c[0]*f+j,0,255)|0},${clamp(c[1]*f+j,0,255)|0},${clamp(c[2]*f+j,0,255)|0})`}
+function buildTerrain(){
+  const c=document.createElement('canvas');c.width=WPX;c.height=HPX;const g=c.getContext('2d');const R=rng(G.m.seed+7);
+  const J=new Float32Array(N*N).map(()=>(R()-.5)*10);
+  const quad=(pts,fill)=>{g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(const p of pts.slice(1))g.lineTo(p[0],p[1]);g.closePath();g.fillStyle=fill;g.fill()};
+  for(let d=0;d<2*N-1;d++)for(let x=0;x<N;x++){const y=d-x;if(y<0||y>=N)continue;
+    const t=G.grid[y*N+x],h=tileH(t),col=TCOL[t],j=J[y*N+x];
+    const p0=w2p(x,y),p1=w2p(x+1,y),p2=w2p(x+1,y+1),p3=w2p(x,y+1);
+    if(h){quad([p3,p2,[p2[0],p2[1]-h],[p3[0],p3[1]-h]],shade(col,.62,j));quad([p2,p1,[p1[0],p1[1]-h],[p2[0],p2[1]-h]],shade(col,.78,j))}
+    const top=[p0,p1,p2,p3].map(p=>[p[0],p[1]-h]);quad(top,shade(col,1,j));
+    g.strokeStyle='rgba(0,0,0,.16)';g.lineWidth=1;g.stroke();
+    if(t===T.WATER){g.strokeStyle='rgba(150,200,230,.18)';g.beginPath();const[cx,cy]=w2p(x+.5,y+.5);g.moveTo(cx-10,cy);g.lineTo(cx+6,cy);g.stroke()}
+    if(t===T.ROCK){g.strokeStyle='rgba(0,0,0,.3)';g.beginPath();const[cx,cy]=w2p(x+.5,y+.5);g.moveTo(cx-8,cy-h-2);g.lineTo(cx,cy-h+3);g.lineTo(cx+7,cy-h-1);g.stroke()}
+    if(t===T.ROAD){g.fillStyle='rgba(230,215,170,.25)';const[cx,cy]=w2p(x+.5,y+.5);g.fillRect(cx-2,cy-1,4,2)}}
+  // trees
+  for(let d=0;d<2*N-1;d++)for(let x=0;x<N;x++){const y=d-x;if(y<0||y>=N||G.grid[y*N+x]!==T.FOREST)continue;
+    for(const[ox,oy]of[[.3,.3],[.72,.4],[.45,.75]]){const[px,py]=w2p(x+ox+(R()-.5)*.15,y+oy+(R()-.5)*.15);const s=5+R()*2,hgt=13+R()*5;
+      g.beginPath();g.moveTo(px-s,py);g.lineTo(px,py-hgt);g.lineTo(px,py+2);g.closePath();g.fillStyle='#27442f';g.fill();
+      g.beginPath();g.moveTo(px+s,py);g.lineTo(px,py-hgt);g.lineTo(px,py+2);g.closePath();g.fillStyle='#1d3524';g.fill()}}
+  // map rim
+  g.strokeStyle='rgba(95,176,224,.25)';g.lineWidth=1.5;g.beginPath();const c0=w2p(0,0),c1=w2p(N,0),c2=w2p(N,N),c3=w2p(0,N);
+  g.moveTo(...c0);g.lineTo(...c1);g.lineTo(...c2);g.lineTo(...c3);g.closePath();g.stroke();
+  return c;
+}
+
+/* ================= SIM ================= */
+function onHill(u){return tAt(u.x,u.y)===T.HILL}
+function inForest(u){return tAt(u.x,u.y)===T.FOREST}
+function rangeOf(u){return u.weapon?u.weapon.range+(onHill(u)?1:0):0}
+function inCloud(k,p){for(const c of G.clouds)if(c.k===k&&Math.hypot(p.x-c.x,p.y-c.y)<=c.r)return true;return false}
+function effSensor(u){let s=u.sensor-(u.radarBonus&&inCloud('chaff',u)?u.radarBonus:0);
+  if(u.dmgd&&u.dmgd.sensor)s*=0.6;if(u.mmode==='fast')s*=0.7;else if(u.mmode==='careful')s+=1.5;
+  if(u.team==='E'&&inCloud('jam',u))s*=0.4;return s+(onHill(u)?1:0)}
+function hasRadar(u){return u.radarBonus>0&&!inCloud('chaff',u)}
+function computeVis(){
+  G.vis.fill(0);
+  const lights=G.clouds.filter(c=>c.k==='flare');
+  for(const c of lights)for(let y=Math.max(0,Math.floor(c.y-c.r));y<=Math.min(N-1,Math.floor(c.y+c.r));y++)for(let x=Math.max(0,Math.floor(c.x-c.r));x<=Math.min(N-1,Math.floor(c.x+c.r));x++)
+    if((x+.5-c.x)**2+(y+.5-c.y)**2<=c.r*c.r){G.vis[y*N+x]=1;G.explored[y*N+x]=1}
+  for(const u of G.units){if(!u.alive||u.team!=='P')continue;const r=effSensor(u);
+    for(let y=Math.max(0,Math.floor(u.y-r));y<=Math.min(N-1,Math.floor(u.y+r));y++)for(let x=Math.max(0,Math.floor(u.x-r));x<=Math.min(N-1,Math.floor(u.x+r));x++){
+      if((x+.5-u.x)**2+(y+.5-u.y)**2<=r*r){G.vis[y*N+x]=1;G.explored[y*N+x]=1}}}
+  G.seenE.clear();
+  for(const e of G.units){if(!e.alive||e.team!=='E')continue;
+    const f=inForest(e)&&!e.struct?0.7:1,sm=inCloud('smoke',e);
+    for(const p of G.units){if(!p.alive||p.team!=='P')continue;const ff=sm&&!hasRadar(p)?f*0.4:f;if(dist(e,p)<=effSensor(p)*ff){G.seenE.add(e.id);break}}
+    if(!sm&&!G.seenE.has(e.id))for(const c of lights)if(Math.hypot(e.x-c.x,e.y-c.y)<=c.r){G.seenE.add(e.id);break}
+    if(G.seenE.has(e.id)){if(!e.spotted&&!e.struct){e.spotted=true}e.lastSeen={x:e.x,y:e.y}}}
+  if(G.detP.size){const u=G.units.find(x=>G.detP.has(x.id));if(u&&u.alive){G.intel={x:u.x,y:u.y};G.intelT=G.time}}
+  G.detP.clear();
+  for(const p of G.units){if(!p.alive||p.team!=='P')continue;p.margin=99;p.warnBy=null;
+    for(const e of G.units){if(!e.alive||e.team!=='E')continue;const r=detRange(e,p),d=dist(e,p);
+      if(G.seenE.has(e.id)&&d-r<p.margin){p.margin=d-r;p.warnBy=e}
+      if(d<=r){G.detP.add(p.id);if(e.state==='guard'||e.state==='patrol'||e.state==='return'){alert(e,p)}if(!e.struct){e.lastKnown={x:p.x,y:p.y};e.lostT=0}}}}
+}
+function detMul(p){let f=1;if(p.stealth&&p.revealT<=0)f*=0.5;if(inForest(p))f*=0.7;if(p.hidden)f*=0.35;if(p.mmode==='careful')f*=0.85;return f}
+function detRange(e,p){const cp=inCloud('chaff',p);
+  if(e.etype==='radar'&&(cp||inCloud('chaff',e)||inCloud('jam',e)))return -1;
+  let m=detMul(p);if(e.etype!=='radar'&&inCloud('smoke',p))m*=0.4;
+  return effSensor(e)*m+(p.emit&&!cp?p.emit:0)+(p.mmode==='fast'?1.5:0)}
+function alert(src,p){
+  const rad=src.etype==='radar'?13:5.5;let n=0;
+  for(const e of G.units){if(!e.alive||e.team!=='E'||e.struct)continue;
+    if(dist(e,src)<=rad&&(e.state==='guard'||e.state==='patrol'||e.state==='return')){e.state='engage';e.lastKnown={x:p.x,y:p.y};e.lostT=0;n++}}
+  if(src.state!=='engage'&&!src.struct){src.state='engage';}
+  if(src.etype==='radar'&&!src.alerted){src.alerted=true;G.log('レーダー塔に探知された！守備隊が集結中','e')}
+  else if(n&&!src.struct&&!src.alertLogged){src.alertLogged=true;G.log(`敵に発見された（${src.name}）`,'e')}
+}
+function canSeeTarget(u,t){return u.team==='P'?G.seenE.has(t.id):G.detP.has(t.id)}
+function enemiesOf(u){return G.units.filter(o=>o.alive&&o.team!==u.team)}
+function update(dt){
+  G.time+=dt;G.tick-=dt;
+  if(G.tick<=0){G.tick=0.15;computeVis()}
+  for(const ev of G.events)if(!ev.done&&G.time>=ev.t){ev.done=true;ev.fn(G)}
+  // truck convoy
+  if(G.m.road){const trucks=G.units.filter(u=>u.truck&&u.alive);
+    trucks.forEach((u,i)=>{u.hold=!G.convoyGo||(i>0&&dist(u,trucks[i-1])<1.3)})}
+  for(const u of G.units){if(!u.alive)continue;
+    u.cd-=dt;u.revealT-=dt;u.repathT-=dt;u.fireT-=dt;u.toolCd-=dt;
+    if(u.reloadT>0){u.reloadT-=dt;if(u.reloadT<=0&&u.nextAmmo){u.ammoType=u.nextAmmo;u.nextAmmo=null}}
+    if(u.order==='hide'&&!u.path.length&&!u.hidden){u.hideT+=dt;if(u.hideT>=2){u.hidden=true;if(u.ctrl&&!G.replay)G.log(`${String(u.no).padStart(2,'0')} ${u.pilot}機、隠蔽完了`,'')}}
+    if(u.hidden&&(u.order!=='hide'||u.path.length)){u.hidden=false;u.hideT=0}
+    if((u.dmgd.fcs||u.dmgd.legs||u.dmgd.sensor)&&!u.struct){let rate=u.regen?1/20:0;
+      for(const a of G.units)if(a.alive&&a.repair&&a.team===u.team&&a!==u&&dist(a,u)<=2.5){rate=Math.max(rate,1/6)}
+      if(rate){u.fixP+=dt*rate;if(u.fixP>=1){u.fixP=0;const k=['legs','fcs','sensor'].find(k=>u.dmgd[k]);u.dmgd[k]=false;if(u.ctrl)G.log(`${String(u.no).padStart(2,'0')} ${u.pilot}機：${SYSN[k]}を修理`,'g')}}}
+    if(u.probe){u.ttl-=dt;if(u.ttl<=0){u.alive=false;u.gone=true;continue}}
+    if(u.decoy){u.ttl-=dt;if(u.ttl<=0){u.alive=false;u.gone=true;G.log('デコイの効果が切れた','');continue}}
+    if(u.regen)u.hp=Math.min(u.maxHp,u.hp+u.regen*dt);
+    if(u.repair)for(const a of G.units)if(a.alive&&a.team===u.team&&a!==u&&!a.struct&&dist(a,u)<=2.5&&a.hp<a.maxHp){a.hp=Math.min(a.maxHp,a.hp+u.repair*dt);if(RND()<dt*2)G.fx.push({k:'heal',x:a.x,y:a.y,t:0,d:.6})}
+    if(u.team==='P'&&u.ctrl)thinkP(u);else if(u.team==='E'&&!u.struct)thinkE(u,dt);
+    if(u.speed>0&&!(u.truck&&u.hold))move(u,dt);
+    fire(u);}
+  separate();
+  for(const c of G.clouds)c.t-=dt;G.clouds=G.clouds.filter(c=>c.t>0);
+  for(const m of G.mines){if(m.arm>0){m.arm-=dt;continue}
+    if(m.team==='E'){for(const u of G.units){if(!u.alive||u.team!=='P'||u.mmode!=='careful')continue;const d=Math.hypot(u.x-m.x,u.y-m.y);
+        if(d<=2.5&&!m.revealed){m.revealed=true;G.log('地雷を発見','g')}
+        if(m.revealed&&d<=1.2&&!u.path.length){m.disarm+=dt/2;if(m.disarm>=1){m.done=true;G.log(`${u.pilot?u.pilot+'機が':''}地雷を処理`,'g')}}}
+      if(m.done)continue}
+    const vic=G.units.find(e=>e.alive&&e.team!==m.team&&!e.struct&&!e.fixed&&Math.hypot(e.x-m.x,e.y-m.y)<=(m.team==='E'?0.6:0.8)&&!(m.team==='E'&&m.revealed&&e.mmode==='careful'));
+    if(vic){m.done=true;blast(m.x,m.y,m.team,TOOLS.mine.dmg,TOOLS.mine.splash,null,m.src);G.log(m.team==='E'?`地雷を踏んだ！（${vic.pilot?vic.pilot+'機':vic.name}）`:'地雷が起爆',m.team==='E'?'e':'g')}}
+  for(const sh of G.shells){if(G.time>=sh.at){sh.done=true;artyHit(sh.x,sh.y)}}G.shells=G.shells.filter(x=>!x.done);
+  for(const c of G.charges){c.t-=dt;if(c.t<=0){c.done=true;G.fx.push({k:'boom',x:c.x,y:c.y,t:0,d:1,r:1.8});
+    for(const o of G.units)if(o.alive&&o.team!==c.team&&Math.hypot(o.x-c.x,o.y-c.y)<=1.5+(o.struct?0.6:0))damage(o,(o.struct?TOOLS.charge.dmg:100)*(o.struct?1:Math.max(0.3,1-o.armor*0.07)),c.src);G.log('爆薬が爆発','g')}}
+  G.charges=G.charges.filter(c=>!c.done);
+  G.mines=G.mines.filter(m=>!m.done);
+  // projectiles
+  for(const p of G.projs){const t=p.tgt;
+    if(p.k==='MSL'&&!p.lost&&(inCloud('chaff',p)||(t.alive&&inCloud('chaff',t)))){p.lost=true;const hx=p.tx-p.x,hy=p.ty-p.y,hl=Math.hypot(hx,hy)||1;p.tx=p.x+hx/hl*2.5;p.ty=p.y+hy/hl*2.5;
+      if(t.team==='P'||p.team==='P')G.log(`ミサイルがチャフで誘導を失った`,p.team==='P'?'e':'g')}
+    const tx=t.alive&&!p.lost?t.x:p.tx,ty=t.alive&&!p.lost?t.y:p.ty;p.tx=tx;p.ty=ty;
+    const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy),s=p.spd*dt;
+    if(p.k==='MSL'&&RND()<.6)G.fx.push({k:'smoke',x:p.x,y:p.y,t:0,d:.5});
+    if(p.k==='MSL'&&!p.lost){p.tried=p.tried||[];for(const o of G.units){if(!o.alive||o.team===p.team||!o.weapon||o.weapon.tag!=='MG'||o.reloadT>0||o.hidden||p.tried.includes(o.id))continue;
+      if(Math.hypot(o.x-p.x,o.y-p.y)<=2.2){p.tried.push(o.id);if(RND()<(o.dmgd.fcs?0.15:0.35)){p.done=true;G.fx.push({k:'boom',x:p.x,y:p.y,t:0,d:.4,r:.4});G.log(`${o.ctrl?o.pilot+'機が':o.name+'が'}ミサイルを迎撃`,o.team==='P'?'g':'e');break}}}
+      if(p.done)continue}
+    if(d<=s){p.done=true;impact(p)}else{p.px=p.x;p.py=p.y;p.x+=dx/d*s;p.y+=dy/d*s}}
+  G.projs=G.projs.filter(p=>!p.done);
+  for(const f of G.fx)f.t+=dt;G.fx=G.fx.filter(f=>f.t<f.d);
+  missionLogic(dt);
+}
+const SYSN={fcs:'火器管制',legs:'脚部',sensor:'センサー'};
+function artyHit(x,y){G.fx.push({k:'boom',x,y,t:0,d:.8,r:1.2});
+  for(const o of G.units){if(!o.alive||o.fixed&&!o.decoy&&!o.probe)continue;const d=Math.hypot(o.x-x,o.y-y);if(d>1.1)continue;
+    let v=55*(d<0.5?1:0.6)*Math.max(0.3,1-o.armor*0.07);if(inForest(o)&&!o.struct)v*=0.75;damage(o,v,null)}}
+function callArty(x,y){G.arty--;const at=G.time+8;for(let i=0;i<5;i++){const a=RND()*Math.PI*2,r=Math.sqrt(RND())*1.8;G.shells.push({x:x+Math.cos(a)*r,y:y+Math.sin(a)*r,at:at+i*0.45,cx:x,cy:y})}
+  G.log(`砲撃支援を要請：8秒後に着弾（残り${G.arty}回）`,'g')}
+function canLock(u,t){
+  if(!t||!t.alive||inCloud('chaff',t))return false;const d=dist(u,t);if(d>TOOLS.missile.range+(onHill(u)?1:0))return false;
+  if(u.team==='P'){if(!G.seenE.has(t.id))return false;if(d<=effSensor(u))return true;
+    return G.units.some(a=>a.alive&&a.team==='P'&&hasRadar(a)&&dist(a,t)<=effSensor(a))}
+  if(!G.detP.has(t.id))return false;if(d<=effSensor(u))return true;
+  return G.units.some(a=>a.alive&&a.etype==='radar'&&!inCloud('chaff',a)&&dist(a,t)<=effSensor(a));
+}
+function launchMissile(u,t){const T=TOOLS.missile;u.ammo--;u.toolCd=T.cd;u.fireT=1.5;if(u.stealth)u.revealT=2.5;
+  G.projs.push({x:u.x,y:u.y,px:u.x,py:u.y,tx:t.x,ty:t.y,tgt:t,spd:7,dmg:T.dmg,splash:T.splash,team:u.team,k:'MSL',src:u,acc:1});
+  G.fx.push({k:'flash',x:u.x,y:u.y,t:0,d:.2,team:u.team});
+  if(u.team==='E'&&(t.ctrl||t.truck))G.log(`ミサイル接近！（→ ${t.pilot?t.pilot+'機':t.name}）`,'e');
+  if(u.team==='P'&&t.team==='E'&&!t.struct&&(t.state==='guard'||t.state==='patrol'))t.state='engage';}
+function blast(x,y,team,dmg,splash,primary,src){
+  G.fx.push({k:'boom',x,y,t:0,d:.6,r:splash});
+  for(const o of G.units){if(!o.alive||o.team===team)continue;const d=Math.hypot(o.x-x,o.y-y);if(o!==primary&&d>splash)continue;
+    let v=(team==='E'?DIFF().dmg:1)*dmg*(o===primary||(!primary&&d<=0.8)?1:0.5)*Math.max(0.3,1-o.armor*0.07);if(inForest(o)&&!o.struct)v*=0.75;damage(o,v,src)}}
+function useTool(u,x,y,t){const T=TOOLS[u.tool];
+  if(u.tool==='missile'){launchMissile(u,t);return}
+  u.ammo--;u.toolCd=T.cd||1;const p=nearestPass(x,y);
+  if(T.radius){G.clouds.push({k:u.tool==='jammer'?'jam':u.tool,x,y,r:T.radius,t:T.dur,dur:T.dur,team:u.team});G.fx.push({k:'puff',x,y,t:0,d:.6,r:T.radius})}
+  else if(u.tool==='decoy'){const d=mkUnit('P',{hp:60,armor:2,speed:0,sensor:1,weapon:null,stealth:false,regen:0,repair:0,shape:'decoy',emit:2.5},p.x,p.y,{ctrl:false,decoy:true,ttl:T.dur,name:'デコイ',fixed:true});G.units.push(d)}
+  else if(u.tool==='mine')G.mines.push({x:p.x,y:p.y,team:u.team,arm:1.5,src:u});
+  else if(u.tool==='charge'){G.charges.push({x:t?t.x:x,y:t?t.y:y,t:5,team:u.team,src:u})}
+  else if(u.tool==='probe'){G.units.push(mkUnit('P',{hp:25,armor:1,speed:0,sensor:5,weapon:null,stealth:true,regen:0,repair:0,shape:'probe',emit:0},p.x,p.y,{ctrl:false,probe:true,ttl:T.dur,name:'プローブ',fixed:true}))}
+  if(u.stealth&&u.tool!=='mine')u.revealT=Math.max(u.revealT,1);
+  if(!G.replay)G.log(`${String(u.no).padStart(2,'0')} ${u.pilot}機：${T.name}（残り${u.ammo}）`,'g');
+}
+function handleTool(u){
+  const P=u.pending,T=TOOLS[u.tool];
+  if(!T||u.ammo<=0){u.pending=null;u.order='idle';return}
+  let tx=P.x,ty=P.y,tgt=null;
+  if(T.target==='enemy'||T.target==='struct'){tgt=G.units.find(x=>x.id===P.t);if(!tgt||!tgt.alive){u.pending=null;u.order='idle';u.path=[];return}
+    if(G.seenE.has(tgt.id)){tx=tgt.x;ty=tgt.y;P.x=tx;P.y=ty}}
+  const d=Math.hypot(tx-u.x,ty-u.y);
+  const ok=T.target==='enemy'?canLock(u,tgt):T.target==='struct'?(d<=T.range+0.6&&G.seenE.has(tgt.id)):d<=T.range;
+  if(ok){u.path=[];if(u.toolCd>0)return;useTool(u,tx,ty,tgt);u.pending=null;u.order='idle';return}
+  if(tgt&&!G.seenE.has(tgt.id)&&d<1){u.pending=null;u.order='idle';return}
+  if(u.repathT<=0){u.path=findPath(u.x,u.y,tx,ty);u.repathT=0.6}
+}
+function thinkP(u){
+  if(u.pending){handleTool(u);if(u.pending)return}
+  if(u.order==='attack'){const t=u.target;
+    if(!t||!t.alive){u.order='idle';u.target=null;u.path=[]}
+    else if(canSeeTarget(u,t)){const d=dist(u,t),r=rangeOf(u);
+      if(d>r*0.92){if(u.repathT<=0){u.path=findPath(u.x,u.y,t.x,t.y);u.repathT=0.6}}else u.path=[];}
+    else if(!u.path.length){u.order='idle';u.target=null}}
+  if(u.order==='move'&&!u.path.length)u.order='idle';
+  if(u.order==='idle'&&u.stance==='free'&&u.weapon){let best=null,bd=u.sensor+2;
+    for(const e of enemiesOf(u)){if(!G.seenE.has(e.id))continue;const d=dist(u,e);if(d<bd){bd=d;best=e}}
+    if(best){u.order='attack';u.target=best;u.repathT=0}}
+}
+function thinkE(u,dt){
+  if(u.state==='patrol'&&!u.path.length){u.pi=(u.pi+1)%u.patrol.length;const p=u.patrol[u.pi];u.path=findPath(u.x,u.y,p.x,p.y)}
+  if(u.state==='hunt'&&G.huntGoal){
+    let best=null,bd=10;for(const p of G.units)if(p.alive&&p.team==='P'&&G.detP.has(p.id)){const d=dist(u,p);if(d<bd){bd=d;best=p}}
+    if(best){u.target=best;const r=rangeOf(u);if(bd>r*0.9){if(u.repathT<=0){u.path=findPath(u.x,u.y,best.x,best.y);u.repathT=0.8}}else u.path=[];}
+    else if(u.repathT<=0){u.target=null;const goal=(G.intel&&G.time-G.intelT<12&&!G.pickup)?G.intel:G.huntGoal;
+      if(dist(u,goal)>1.8)u.path=findPath(u.x,u.y,goal.x+(RND()-.5)*2,goal.y+(RND()-.5)*2);u.repathT=1.5}
+  }
+  else if(u.state==='hunt'){if(u.repathT<=0){let best=null,bd=1e9;for(const p of G.units)if(p.alive&&p.team==='P'){const d=dist(u,p);if(d<bd){bd=d;best=p}}
+      if(best){const d=bd,r=rangeOf(u);if(d>r*0.9||!G.detP.has(best.id))u.path=findPath(u.x,u.y,best.x,best.y);else u.path=[];}u.repathT=1}}
+  if(u.state==='engage'){
+    let best=null,bd=10;for(const p of G.units)if(p.alive&&p.team==='P'&&G.detP.has(p.id)){const d=dist(u,p);if(d<bd){bd=d;best=p}}
+    if(best){u.lastKnown={x:best.x,y:best.y};u.lostT=0;u.target=best;const r=rangeOf(u);
+      if(bd>r*0.9){if(u.repathT<=0){u.path=findPath(u.x,u.y,best.x,best.y);u.repathT=0.8}}else u.path=[];}
+    else{u.lostT+=dt;u.target=null;
+      if(u.lastKnown&&u.repathT<=0&&!u.path.length&&dist(u,u.lastKnown)>0.8){u.path=findPath(u.x,u.y,u.lastKnown.x,u.lastKnown.y);u.repathT=1.5}
+      if(u.lostT>9){u.state='return';u.path=findPath(u.x,u.y,u.home.x,u.home.y);u.alertLogged=false}}}
+  if(u.state==='return'&&!u.path.length)u.state=u.patrol?'patrol':'guard';
+  if(u.tool==='missile'&&u.ammo>0&&u.toolCd<=0&&(u.state==='engage'||u.state==='hunt')){let best=null,bd=1e9;
+    for(const p of G.units)if(p.alive&&p.team==='P'&&canLock(u,p)){const d=dist(u,p)+(p.decoy?-3:0);if(d<bd){bd=d;best=p}}
+    if(best)launchMissile(u,best)}
+}
+function move(u,dt){
+  if(!u.path.length)return;const w=u.path[0];const dx=w.x-u.x,dy=w.y-u.y,d=Math.hypot(dx,dy);
+  const s=u.speed*(u.dmgd&&u.dmgd.legs?0.55:1)*(u.mmode==='fast'?1.5:u.mmode==='careful'?0.6:1)*dt/TERR[tAt(u.x,u.y)].move;
+  if(d<=s){u.x=w.x;u.y=w.y;u.path.shift()}else{u.x+=dx/d*s;u.y+=dy/d*s}
+  // unstick: if hardly moved over 1s while trying to move (usually two units blocking each other head-on), sidestep
+  u.stT=(u.stT||0)+dt;if(u.stT>=1){const mv=u.stP?Math.hypot(u.x-u.stP.x,u.y-u.stP.y):9;u.stT=0;u.stP={x:u.x,y:u.y};
+    if(mv<0.15&&d>0.3){const side=(u.id%2?1:-1)*0.45,px=-dy/d*side,py=dx/d*side;if(passAt(u.x+px,u.y+py)){u.x+=px;u.y+=py}}}
+}
+function separate(){
+  const us=G.units.filter(u=>u.alive&&!u.struct&&!u.fixed);
+  for(let i=0;i<us.length;i++)for(let j=i+1;j<us.length;j++){const a=us[i],b=us[j];const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||0.01;
+    if(d<0.5){const push=(0.5-d)/2,nx=dx/d*push,ny=dy/d*push;
+      if(passAt(a.x-nx,a.y-ny)){a.x-=nx;a.y-=ny}if(passAt(b.x+nx,b.y+ny)){b.x+=nx;b.y+=ny}}}
+}
+function fire(u){
+  if(!u.weapon||u.cd>0||u.reloadT>0)return;const w=u.weapon,r=rangeOf(u);
+  if(u.order==='hide')return;
+  const noFire=u.ctrl&&u.stance==='nofire';if(noFire&&!(u.order==='attack'&&u.target))return;
+  let t=null;
+  if(u.target&&u.target.alive&&canSeeTarget(u,u.target)){const d=dist(u,u.target);if(d<=r&&!(w.min&&d<w.min))t=u.target}
+  if(!t&&!noFire){let bd=1e9;for(const e of G.units){if(!e.alive||e.team===u.team||!canSeeTarget(u,e))continue;const d=dist(u,e);
+    if(d<=r&&!(w.min&&d<w.min)){const score=d+(e.truck?-1.5:0)+(e.struct?3:0)+(e.decoy?-2.5:0);if(score<bd){bd=score;t=e}}}}
+  if(!t)return;
+  u.cd=w.cd*(0.9+RND()*0.2)*(u.dmgd.fcs?1.6:1);u.fireT=1.5;if(u.stealth)u.revealT=2.5;
+  const am=u.ammoType;
+  G.projs.push({x:u.x,y:u.y,px:u.x,py:u.y,tx:t.x,ty:t.y,tgt:t,spd:w.ps,dmg:w.dmg,splash:am==='he'?1:0,team:u.team,k:w.tag,src:u,am,acc:(inCloud('smoke',u)||inCloud('smoke',t))?0.35:1});
+  if(am!=='std'){u[am]--;if(u[am]<=0){u.nextAmmo='std';u.reloadT=2.5;if(u.ctrl)G.log(`${String(u.no).padStart(2,'0')} ${u.pilot}機：${AMMO[am].name}切れ、通常弾へ`,'')}}
+  G.fx.push({k:'flash',x:u.x,y:u.y,t:0,d:.12,team:u.team});
+  if(u.team==='P'&&t.team==='E'&&(t.state==='guard'||t.state==='patrol')&&!t.struct){t.state='engage'}
+}
+function impact(p){
+  if(p.k==='MSL'){if(p.lost)G.fx.push({k:'boom',x:p.tx,y:p.ty,t:0,d:.4,r:.5});else blast(p.tx,p.ty,p.team,p.dmg,p.splash,p.tgt.alive?p.tgt:null,p.src);return}
+  if(p.acc<1&&RND()>p.acc){G.fx.push({k:'miss',x:p.tx+.3,y:p.ty-.2,t:0,d:.4});return}
+  const am=p.am||'std',ak=am==='ap'?0.3:am==='he'?1.3:1;
+  const hitOne=(t,m)=>{if(!t.alive)return;let dmg=(p.team==='E'?DIFF().dmg:1)*p.dmg*m*Math.max(0.3,1-t.armor*0.07*ak)*(am==='ap'?0.9:1)*(am==='he'&&t.struct?1.6:1);if(inForest(t)&&!t.struct&&am!=='he')dmg*=0.75;damage(t,dmg,p.src)};
+  if(p.tgt.alive)hitOne(p.tgt,1);
+  if(p.splash){G.fx.push({k:'boom',x:p.tx,y:p.ty,t:0,d:.5,r:p.splash});
+    for(const o of G.units)if(o.alive&&o!==p.tgt&&o.team!==p.team&&Math.hypot(o.x-p.tx,o.y-p.ty)<=p.splash)hitOne(o,0.5)}
+  else G.fx.push({k:'hit',x:p.tx,y:p.ty,t:0,d:.2});
+}
+function damage(t,d,src){
+  t.hp-=d;t.hitT=0.15;
+  if(t.hp>0&&t.dmgd&&!t.struct&&!t.fixed&&!t.truck&&d>=8&&RND()<0.10+0.25*(1-t.hp/t.maxHp)){const ks=['fcs','legs','sensor'].filter(k=>!t.dmgd[k]);
+    if(ks.length){const k=ks[Math.floor(RND()*ks.length)];t.dmgd[k]=true;t.fixP=0;if(t.ctrl)G.log(`${String(t.no).padStart(2,'0')} ${t.pilot}機：${SYSN[k]}損傷`,'e')}}
+  if(t.team==='E'&&!t.struct&&src&&src.alive&&(t.state==='guard'||t.state==='patrol'||t.state==='return')){t.state='engage';t.lastKnown={x:src.x,y:src.y};t.lostT=0}
+  if(t.hp<=0){t.alive=false;t.hp=0;G.fx.push({k:'boom',x:t.x,y:t.y,t:0,d:.9,r:t.struct?1.6:1});
+    G.sel.delete(t.id);
+    if(t.team==='E'){G.kills++;if(t.struct)G.log(`${t.name}を破壊`,'g')}
+    else if(t.truck)G.log(`${t.name}が撃破された`,'e');
+    else if(t.decoy)G.log('デコイが破壊された','g');
+    else{G.lost++;G.log(`${String(t.no).padStart(2,'0')} ${t.pilot}機、大破`,'e')}}
+}
+function missionLogic(dt){
+  const m=G.m;
+  if(G.sites)for(const s of G.sites){if(s.scanned||!s.alive&&!s.scanned){}
+    if(!s.scanned&&G.seenE.has(s.id)){s.scan+=dt/2;if(s.scan>=1){s.scanned=true;G.log(`敵野営地 ${s.label} を特定`,'g')}}}
+  if(m.road)for(const u of G.units)if(u.truck&&u.alive&&!u.path.length){u.alive=false;u.gone=true;G.arrived++;G.log(`${u.name} 到達`,'g')}
+  if(m.id==='__none')for(const u of G.units)if(u.ctrl&&u.alive&&inZone(u,'lz')){u.alive=false;u.gone=true;G.extracted++;G.sel.delete(u.id);G.log(`${String(u.no).padStart(2,'0')} ${u.pilot}機、回収完了`,'g')}
+  let r=(m.tick&&m.tick(G))||m.check(G);
+  if(!r&&countP(G)===0)r={win:false,reason:'全機を失った'};
+  if(!r&&m.limit&&G.time>=m.limit)r={win:false,reason:'作戦時間切れ'};
+  if(r)finish(r);
+}
+
+/* ================= ORDERS ================= */
+function selUnits(){return G.units.filter(u=>G.sel.has(u.id)&&u.alive)}
+function exec(c){
+  if(G.replay||(c.src==='ai'&&c.k!=='stance'&&c.k!=='mode'))G.log(describeCmd(c),c.src==='ai'?'ai':'');
+  if(c.k==='arty'){if(G.arty>0)callArty(c.x,c.y);return}
+  if(c.k==='abort'){finish({win:false,reason:'作戦を放棄して撤退した'});return}
+  if(c.k==='convoy'){G.convoyGo=!!c.go;if(!G.replay)G.log(G.convoyGo?'輸送隊、前進開始':'輸送隊、停止','g');updateCmd();return}
+  const keep=G.sel;G.sel=new Set(c.u);
+  if(c.k==='move')orderMove({x:c.x,y:c.y});
+  else if(c.k==='attack'){const t=G.units.find(x=>x.id===c.t);if(t&&t.alive)orderAttack(t)}
+  else if(c.k==='stop')orderStop();
+  else if(c.k==='stance')selUnits().forEach(u=>u.stance=c.s);
+  else if(c.k==='mode')selUnits().forEach(u=>u.mmode=c.s);
+  else if(c.k==='hide')selUnits().forEach(u=>{u.path=[];u.order='hide';u.target=null;u.pending=null;u.hideT=0});
+  else if(c.k==='ammo')selUnits().forEach(u=>{if(!u.weapon)return;const a=c.s==='std'||u[c.s]>0?c.s:null;if(!a||(a===u.ammoType&&!u.nextAmmo))return;u.nextAmmo=a;u.reloadT=2.5});
+  else if(c.k==='arty'){if(G.arty>0)callArty(c.x,c.y)}
+  else if(c.k==='tool')for(const u of selUnits()){if(u.tool!==c.tool||u.ammo<=0)continue;u.pending={x:c.x,y:c.y,t:c.t||null};u.order='tool';u.target=null;u.repathT=0}
+  G.sel=keep;updateCmd();
+}
+function issue(c,src='human'){
+  if(!G||G.over||G.replay)return false;
+  c.src=src;G.rec.push([G.tickN,c]);exec(c);return true;
+}
+function describeCmd(c){
+  const who=(c.src==='ai'?'AI':'操作')+'▶ ';
+  const nos=(c.u||[]).map(id=>{const u=G.units.find(x=>x.id===id);return u&&u.no}).filter(Boolean).join(',');
+  if(c.k==='move')return `${who}${nos} 移動 (${c.x.toFixed(1)}, ${c.y.toFixed(1)})`;
+  if(c.k==='attack'){const t=G.units.find(x=>x.id===c.t);return `${who}${nos} 攻撃 → ${t?t.name:'?'}`}
+  if(c.k==='stop')return `${who}${nos} 停止`;
+  if(c.k==='stance')return `${who}${nos} 姿勢：${STANCES[c.s]}`;
+  if(c.k==='convoy')return `${who}輸送隊 ${c.go?'前進':'停止'}`;
+  if(c.k==='abort')return `${who}撤退`;
+  if(c.k==='mode')return `${who}${nos} 移動モード：${MMODES[c.s].name}`;
+  if(c.k==='hide')return `${who}${nos} 隠蔽`;
+  if(c.k==='ammo')return `${who}${nos} 弾種：${AMMO[c.s].name}`;
+  if(c.k==='arty')return `${who}砲撃支援 (${c.x.toFixed(1)}, ${c.y.toFixed(1)})`;
+  if(c.k==='tool'){const t=c.t&&G.units.find(x=>x.id===c.t);return `${who}${nos} ${TOOLS[c.tool].name}${t?' → '+t.name:` (${c.x.toFixed(1)}, ${c.y.toFixed(1)})`}`}
+  return who+c.k;
+}
+const r3=v=>Math.round(v*1000)/1000;
+function simStep(){
+  if(G.replay){const Rp=G.replay;while(Rp.i<Rp.cmds.length&&Rp.cmds[Rp.i][0]<=G.tickN){exec(Rp.cmds[Rp.i][1]);Rp.i++;if(G.over)return}}
+  update(1/30);G.tickN++;
+  if(G.autoAI&&!G.replay&&!G.over&&G.tickN%30===0&&window.octaBrain)window.octaBrain();
+}
+function orderMove(pt){
+  const us=selUnits();if(!us.length)return;
+  const p=nearestPass(pt.x,pt.y);
+  us.forEach((u,i)=>{const o=OFFS[i%OFFS.length];let d={x:p.x+o[0]*0.75,y:p.y+o[1]*0.75};if(!passAt(d.x,d.y))d=p;
+    u.path=findPath(u.x,u.y,d.x,d.y);u.order='move';u.target=null;u.pending=null});
+  G.fx.push({k:'ping',x:p.x,y:p.y,t:0,d:.6});
+}
+function orderAttack(t){for(const u of selUnits()){if(!u.weapon)continue;u.order='attack';u.target=t;u.repathT=0;u.pending=null}G.fx.push({k:'ping',x:t.x,y:t.y,t:0,d:.6,red:true})}
+function orderStop(){for(const u of selUnits()){u.path=[];u.order='idle';u.target=null;u.pending=null;u.hidden=false}}
+const STANCES={hold:'待機射撃',free:'自由交戦',nofire:'射撃禁止'},SNEXT={hold:'free',free:'nofire',nofire:'hold'};
+function setAuto(on){if(!G||G.replay)return;G.autoAI=on;$('#aiBtn').textContent='AI指揮: '+(on?'ON':'OFF')+' G';$('#aiBtn').classList.toggle('on',on);$('#aiChip').hidden=!on&&!G.ai;$('#aiIntent').hidden=!on;
+  if(on){G.ai=true;if(G.paused&&!G.aiStep)setPaused(false);G.log('AIが指揮を引き継いだ','ai');window.octaBrain&&window.octaBrain()}else G.log('プレイヤーが指揮を引き継いだ','g')}
+function toggleDet(){G.showDet=!G.showDet;$('#detBtn').classList.toggle('on',G.showDet)}
+function toggleStance(){if(G.replay)return;const us=selUnits();if(!us.length)return;const ns=SNEXT[us[0].stance]||'hold';issue({k:'stance',u:us.map(u=>u.id),s:ns});G.log(`${us.length===1?us[0].pilot+'機':us.length+'機'}：${STANCES[ns]}`,ns==='nofire'?'g':'');updateCmd()}
+function selectAll(){G.sel=new Set(G.units.filter(u=>u.ctrl&&u.alive).map(u=>u.id));updateCmd()}
+function centerSel(){const us=selUnits();if(!us.length)return;const cx=us.reduce((a,u)=>a+u.x,0)/us.length,cy=us.reduce((a,u)=>a+u.y,0)/us.length;const[px,py]=w2p(cx,cy);G.cam.x=px-VW/2;G.cam.y=py-VH/2;clampCam()}
+
+/* ================= INPUT ================= */
+function cpos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+function pick(p){let best=null,bd=18;
+  for(const u of G.units){if(!u.alive)continue;if(u.team==='E'&&!G.seenE.has(u.id))continue;
+    const[sx,sy]=toS(u.x,u.y);const d=Math.hypot(sx-p.x,sy-12-p.y);const lim=u.struct?22:16;if(d<lim&&d<bd){bd=d;best=u}}return best}
+let ptr=null;
+cv.addEventListener('pointerleave',()=>{if(G){G.hover=null;inspect()}});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('pointerdown',e=>{if(!G||G.over)return;cv.setPointerCapture(e.pointerId);const p=cpos(e);
+  ptr={sx:p.x,sy:p.y,x:p.x,y:p.y,btn:e.button,touch:e.pointerType!=='mouse',moved:false,cx:G.cam.x,cy:G.cam.y,shift:e.shiftKey||e.ctrlKey||e.metaKey}});
+cv.addEventListener('pointermove',e=>{if(!G)return;const p=cpos(e);if(e.pointerType==='mouse'){G.hover=p;inspect()}if(!ptr)return;ptr.x=p.x;ptr.y=p.y;
+  if(Math.hypot(p.x-ptr.sx,p.y-ptr.sy)>6)ptr.moved=true;
+  if(ptr.moved&&(ptr.touch||ptr.btn===1||ptr.btn===2)){G.cam.x=ptr.cx-(p.x-ptr.sx);G.cam.y=ptr.cy-(p.y-ptr.sy);clampCam()}});
+cv.addEventListener('pointerup',e=>{if(!ptr||!G){ptr=null;return}const p=cpos(e),P=ptr;ptr=null;if(G.over)return;
+  if(!P.moved){
+    if(G.targeting){if(P.btn===2)cancelTargeting();else if(G.targeting.arty){const w=s2w(p.x,p.y),X=Math.floor(w.x),Y=Math.floor(w.y);
+        if(X<0||Y<0||X>=N||Y>=N||!G.vis[Y*N+X]){G.log('砲撃は味方の視界内（観測できる地点）にしか要請できない','');return}
+        issue({k:'arty',x:r3(w.x),y:r3(w.y)});G.targeting=null;updateCmd()}else toolClick(p);return}
+    if(P.btn===2){command(p);return}
+    const u=pick(p);
+    if(u&&u.ctrl){if(P.shift){G.sel.has(u.id)?G.sel.delete(u.id):G.sel.add(u.id)}else G.sel=new Set([u.id]);updateCmd();return}
+    if(G.sel.size)command(p);
+    return}
+  if(P.btn===0&&!P.touch){const x0=Math.min(P.sx,p.x),x1=Math.max(P.sx,p.x),y0=Math.min(P.sy,p.y),y1=Math.max(P.sy,p.y);
+    if(!P.shift)G.sel.clear();
+    for(const u of G.units){if(!u.alive||!u.ctrl)continue;const[sx,sy]=toS(u.x,u.y);if(sx>=x0&&sx<=x1&&sy-12>=y0&&sy-12<=y1)G.sel.add(u.id)}
+    updateCmd()}});
+function command(p){if(!G.sel.size||G.replay)return;const u=pick(p);const ids=[...G.sel];
+  if(u&&u.team==='E')issue({k:'attack',u:ids,t:u.id});else{const w=s2w(p.x,p.y);issue({k:'move',u:ids,x:r3(clamp(w.x,0,N-.01)),y:r3(clamp(w.y,0,N-.01))})}}
+function stopSel(){if(G.sel.size)issue({k:'stop',u:[...G.sel]})}
+function selTools(){const t=[];for(const u of selUnits())if(u.ctrl&&u.tool!=='none'&&u.ammo>0&&!t.includes(u.tool))t.push(u.tool);return t}
+function startTargeting(){if(!G||G.replay||G.over)return;const ts=selTools();
+  if(!ts.length){G.log('ツールを持つ機体（弾数あり）を選択してください','');return}
+  const cur=G.targeting?ts.indexOf(G.targeting.tool):-1;
+  G.targeting={tool:ts[(cur+1)%ts.length]};updateCmd()}
+function cycleMode(){if(!G||G.replay)return;const us=selUnits().filter(u=>u.ctrl);if(!us.length)return;const o=['normal','fast','careful'];issue({k:'mode',u:us.map(u=>u.id),s:o[(o.indexOf(us[0].mmode)+1)%3]})}
+function hideSel(){if(!G||G.replay)return;const us=selUnits().filter(u=>u.ctrl);if(us.length)issue({k:'hide',u:us.map(u=>u.id)})}
+function cycleAmmo(){if(!G||G.replay)return;const us=selUnits().filter(u=>u.ctrl&&u.weapon);if(!us.length)return;const o=['std','ap','he'];let cur=us[0].nextAmmo||us[0].ammoType;
+  let n=o[(o.indexOf(cur)+1)%3];if(n!=='std'&&!us.some(u=>u[n]>0))n=o[(o.indexOf(n)+1)%3];if(n!=='std'&&!us.some(u=>u[n]>0))n='std';issue({k:'ammo',u:us.map(u=>u.id),s:n})}
+function startArty(){if(!G||G.replay||G.over)return;if(G.arty<=0){G.log('砲撃支援は使い切った','');return}G.targeting={arty:true};updateCmd()}
+function cancelTargeting(){if(G&&G.targeting){G.targeting=null;updateCmd();return true}return false}
+function toolClick(p){const tool=G.targeting.tool,T=TOOLS[tool];const carriers=selUnits().filter(u=>u.ctrl&&u.tool===tool&&u.ammo>0);
+  if(!carriers.length){cancelTargeting();return}
+  if(T.target==='enemy'||T.target==='struct'){const e=pick(p);if(!e||e.team!=='E'||(T.target==='struct'&&!e.struct)){G.log(`${T.name}：目標の${T.target==='struct'?'敵建造物':'敵'}をクリックしてください`,'');return}
+    issue({k:'tool',tool,u:carriers.map(u=>u.id),t:e.id,x:r3(e.x),y:r3(e.y)})}
+  else{const w=s2w(p.x,p.y),x=r3(clamp(w.x,0,N-.01)),y=r3(clamp(w.y,0,N-.01));
+    const c=carriers.sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y))[0];issue({k:'tool',tool,u:[c.id],x,y})}
+  G.targeting=null;updateCmd()}
+const keys=new Set();
+const PANK={ArrowLeft:'L',ArrowRight:'R',ArrowUp:'U',ArrowDown:'D',a:'L',A:'L',d:'R',D:'R',w:'U',W:'U',s:'D',S:'D'};
+addEventListener('keydown',e=>{if(!G||$('#battle').hidden)return;if(e.target.closest&&e.target.closest('select,input'))return;
+  const k=e.key;
+  if(e.ctrlKey||e.metaKey){if(k==='a'||k==='A'){e.preventDefault();if(!G.over)selectAll()}return}
+  const pk=PANK[k];if(pk){keys.add(pk);e.preventDefault();return}
+  if(G.over)return;
+  if(k===' '){e.preventDefault();setPaused(!G.paused)}
+  else if(k>='1'&&k<='8'){const u=G.units.find(u=>u.ctrl&&u.alive&&u.no===+k);if(u){if(e.shiftKey)G.sel.add(u.id);else G.sel=new Set([u.id]);updateCmd()}}
+  else if(k==='e'||k==='E'){selectAll()}
+  else if(k==='x'||k==='X')stopSel();
+  else if(k==='q'||k==='Q')toggleStance();
+  else if(k==='c'||k==='C')centerSel();
+  else if(k==='f'||k==='F')toggleSpeed();
+  else if(k==='v'||k==='V')toggleDet();
+  else if((k==='g'||k==='G')&&!G.replay)setAuto(!G.autoAI);
+  else if(k==='t'||k==='T')startTargeting();
+  else if(k==='m'||k==='M')cycleMode();
+  else if(k==='h'||k==='H')hideSel();
+  else if(k==='r'||k==='R')cycleAmmo();
+  else if(k==='b'||k==='B')startArty();
+  else if(k==='Escape'){if(!cancelTargeting()){G.sel.clear();updateCmd()}}});
+addEventListener('keyup',e=>{const pk=PANK[e.key];if(pk)keys.delete(pk)});
+addEventListener('blur',()=>keys.clear());
+function clampCam(){G.cam.x=clamp(G.cam.x,-VW*.4,WPX-VW*.6);G.cam.y=clamp(G.cam.y,-VH*.4,HPX-VH*.6)}
+mini.addEventListener('click',e=>{if(!G)return;const r=mini.getBoundingClientRect();const s=WPX/r.width;
+  G.cam.x=(e.clientX-r.left)*s-VW/2;G.cam.y=(e.clientY-r.top)*(HPX/r.height)-VH/2;clampCam()});
+
+function setPaused(v){G.paused=v;const b=$('#pauseBtn');b.textContent=v?'▶ 再開':'❚❚ 一時停止';b.classList.toggle('pulse',v);$('#pauseBanner').hidden=!v}
+function toggleSpeed(){const sp=G.replay?[1,2,4,8]:[1,2];G.speed=sp[(sp.indexOf(G.speed)+1)%sp.length];$('#spdBtn').textContent='×'+G.speed}
+$('#pauseBtn').onclick=()=>{if(G&&!G.over)setPaused(!G.paused)};
+$('#spdBtn').onclick=()=>G&&toggleSpeed();
+let abortT=0;
+$('#abortBtn').onclick=()=>{if(!G)return;const b=$('#abortBtn');
+  if(G.over||G.replay){endToHQ();return}
+  if(performance.now()-abortT<3000){b.classList.remove('arm');b.textContent='撤退';issue({k:'abort'})}
+  else{abortT=performance.now();b.classList.add('arm');b.textContent='もう一度押して撤退';setTimeout(()=>{b.classList.remove('arm');b.textContent=G&&G.replay?'リプレイ終了':'撤退'},3000)}};
+document.querySelector('.cmdbar').addEventListener('click',e=>{const b=e.target.closest('[data-cmd]');if(!b||!G||G.over)return;
+  ({all:selectAll,stop:stopSel,stance:toggleStance,det:toggleDet,tool:startTargeting,mode:cycleMode,hide:hideSel,ammo:cycleAmmo,arty:startArty,ai:()=>setAuto(!G.autoAI),center:centerSel,convoy:()=>issue({k:'convoy',go:!G.convoyGo})})[b.dataset.cmd]()});
+
+/* ================= HUD ================= */
+function buildCards(){
+  $('#cards').innerHTML=G.units.filter(u=>u.ctrl).map(u=>`<button class="card" data-id="${u.id}"><span class="cno">${u.no}</span><span class="cname">${u.pilot}<small>${CHASSIS[u.cfg.chassis].name}/${u.weapon.tag}<span class="ctl"></span></small></span><span class="cst"></span><span class="hpb"><i></i></span></button>`).join('');
+  updateCmd();
+}
+$('#cards').addEventListener('click',e=>{const b=e.target.closest('.card');if(!b||!G)return;const id=+b.dataset.id;const u=G.units.find(x=>x.id===id);if(!u||!u.alive)return;
+  if(e.shiftKey||e.ctrlKey||e.metaKey){G.sel.has(id)?G.sel.delete(id):G.sel.add(id)}else G.sel=new Set([id]);updateCmd()});
+$('#cards').addEventListener('dblclick',()=>G&&centerSel());
+function stateText(u){if(u.gone)return'回収済';if(!u.alive)return'大破';if(u.hidden)return'隠蔽中';if(u.order==='hide')return'隠蔽準備';if(u.nextAmmo)return'装填中';if(u.pending)return TOOLS[u.tool].name;if(u.fireT>0)return'交戦';if(u.order==='attack')return'攻撃';if(u.path.length)return'移動';return'待機'}
+function updateCmd(){
+  if(!G)return;const us=selUnits();
+  const stv=(us[0]||{}).stance||'hold';$('#stanceBtn').textContent='姿勢: '+STANCES[stv]+' Q';$('#stanceBtn').classList.toggle('on',stv==='nofire');
+  const ts=selTools(),tb=$('#toolBtn');
+  if(G.targeting&&G.targeting.tool&&!ts.includes(G.targeting.tool))G.targeting=null;
+  const ab=$('#artyBtn');ab.textContent=G.targeting&&G.targeting.arty?'砲撃：視界内の地点をクリック（Esc取消）':`砲撃支援 ×${G.arty} B`;ab.disabled=!G.arty&&!(G.targeting&&G.targeting.arty);ab.classList.toggle('on',!!(G.targeting&&G.targeting.arty));
+  const u0=us.find(u=>u.ctrl);
+  $('#modeBtn').textContent='移動: '+MMODES[(u0||{}).mmode||'normal'].name+' M';$('#modeBtn').classList.toggle('on',!!u0&&u0.mmode!=='normal');
+  $('#hideBtn').classList.toggle('on',!!u0&&u0.order==='hide');
+  $('#ammoBtn').textContent='弾種: '+(u0&&u0.weapon?(u0.nextAmmo?AMMO[u0.nextAmmo].tag+'に装填中':AMMO[u0.ammoType].tag+(u0.ammoType!=='std'?'×'+u0[u0.ammoType]:'')):'通常')+' R';$('#ammoBtn').classList.toggle('on',!!u0&&u0.ammoType!=='std');
+  if(G.targeting&&G.targeting.tool){tb.textContent=`${TOOLS[G.targeting.tool].name}：${TOOLS[G.targeting.tool].target==='enemy'?'敵を':TOOLS[G.targeting.tool].target==='struct'?'建造物を':'地点を'}クリック（Esc取消）`;tb.classList.add('on')}
+  else{tb.classList.remove('on');tb.disabled=!ts.length;tb.textContent=ts.length?`${ts.map(t=>{const n=us.filter(u=>u.tool===t).reduce((a,u)=>a+u.ammo,0);return TOOLS[t].name+'×'+n}).join(' / ')} T`:'ツール T'}
+  cv.style.cursor=G.targeting?'crosshair':'';
+  const cb=$('#convoyBtn');cb.textContent='輸送隊: '+(G.convoyGo?'前進中':'停止中');cb.classList.toggle('on',!!G.convoyGo);
+  hud(true);
+}
+function hud(force){
+  document.querySelectorAll('.card').forEach(c=>{const u=G.units.find(x=>x.id===+c.dataset.id);
+    c.classList.toggle('sel',G.sel.has(u.id));c.classList.toggle('dead',!u.alive);
+    c.querySelector('.cst').textContent=(u.alive&&G.detP.has(u.id)?'被発見 ':'')+stateText(u)+(u.alive&&u.stance!=='hold'?'｜'+(u.stance==='nofire'?'禁射':'自由'):'');const pct=u.hp/u.maxHp;const bar=c.querySelector('.hpb i');
+    c.querySelector('.ctl').textContent=(u.tool!=='none'?` ${TOOLS[u.tool].tag}×${u.ammo}`:'')+(u.ammoType!=='std'?` ${AMMO[u.ammoType].tag}${u[u.ammoType]}`:'')+(u.alive&&(u.dmgd.fcs||u.dmgd.legs||u.dmgd.sensor)?' ['+['fcs','legs','sensor'].filter(k=>u.dmgd[k]).map(k=>SYSN[k]).join('・')+'損傷]':'');
+    bar.style.width=(pct*100)+'%';bar.style.background=pct>.6?'#8cc67e':pct>.3?'#e2b84a':'#e4643c'});
+  $('#bObj').textContent=G.m.obj(G);
+  const t=G.m.limit?Math.max(0,G.m.limit-G.time):G.time;$('#bTime').textContent=`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`;
+  $('#bTime').style.color=G.m.limit&&t<60?'#e4643c':'';
+  const us=selUnits();const d=$('#detail');
+  if(us.length===1){const u=us[0];d.innerHTML=`<b>${String(u.no).padStart(2,'0')} ${u.pilot}</b>　${CHASSIS[u.cfg.chassis].name} / ${u.weapon.name} / ${EQUIP[u.cfg.equip].name}<br>HP <b class="num">${Math.ceil(u.hp)}/${u.maxHp}</b>　装甲 ${u.armor}　速度 ${u.speed}<br>視界 ${u.sensor}${onHill(u)?'+1':''}　射程 ${rangeOf(u)}　姿勢 ${STANCES[u.stance]}${u.tool!=='none'?`<br>ツール ${TOOLS[u.tool].name} ×${u.ammo}${u.pending?'（使用に向かう）':''}`:''}<br>移動 ${MMODES[u.mmode].name}　弾 ${AMMO[u.ammoType].tag}（徹甲${u.ap}・榴弾${u.he}）${u.hidden?'　<b>隠蔽中</b>':''}${(u.dmgd.fcs||u.dmgd.legs||u.dmgd.sensor)?'<br><span style="color:#ffb38f">損傷：'+['fcs','legs','sensor'].filter(k=>u.dmgd[k]).map(k=>SYSN[k]).join('・')+'（修理機の近くで回復）</span>':''}　${u.stealth?(u.revealT>0?'<span style="color:#e4643c">ステルス露見</span>':'ステルス'):''}${inForest(u)?'　森林内':''}`}
+  else if(us.length)d.innerHTML=`<b>${us.length} 機選択中</b><br>地面クリックで移動、敵クリックで集中攻撃。`;
+  else d.innerHTML='<span style="color:#86949a">機体未選択。カードかマップ上の味方をクリック。</span>';
+}
+const TINFO=[
+  {name:'平地',fx:'特になし'},
+  {name:'森林',fx:'移動コスト×1.7 ／ 中の機体は発見距離×0.7・被ダメージ-25%'},
+  {name:'丘陵',fx:'移動コスト×1.35 ／ 上の機体は視界+1・射程+1'},
+  {name:'岩場',fx:'通行不可'},
+  {name:'水域',fx:'通行不可'},
+  {name:'道路',fx:'移動コスト×0.8（速く移動できる）'}];
+const ESTATE={guard:'待機警戒',patrol:'巡回中',engage:'交戦中',hunt:'追跡中',return:'帰投中'};
+function inspect(){
+  const el=$('#insp');if(!G||!G.hover){el.hidden=true;return}
+  const w=s2w(G.hover.x,G.hover.y),X=Math.floor(w.x),Y=Math.floor(w.y);
+  if(X<0||Y<0||X>=N||Y>=N){el.hidden=true;return}
+  const i=Y*N+X,t=G.grid[i],ti=TINFO[t];
+  const vis=G.vis[i]?'<span class="ok">視界内</span>':G.explored[i]?'<span class="gd">探索済（敵は見えない）</span>':'<span class="ng">未探索</span>';
+  let h=`<h4>${ti.name}<small>X${X} Y${Y}</small></h4><div>${ti.fx}</div><div class="row"><span>状態</span><span>${vis}</span></div>`;
+  for(const c of G.clouds)if(Math.hypot(w.x-c.x,w.y-c.y)<=c.r)h+=`<div class="row"><span>効果</span><span class="gd">${(TOOLS[c.k]||TOOLS.jammer).name}（残り${Math.ceil(c.t)}秒）</span></div>`;
+  for(const z of G.zones)if(Math.hypot(w.x-z.x,w.y-z.y)<=z.r)h+=`<div class="row"><span>区域</span><span class="gd">${z.label}</span></div>`;
+  const u=pick(G.hover);
+  if(u){const pct=Math.ceil(u.hp/u.maxHp*100);h+='<div class="sec">';
+    if(u.team==='E'){
+      h+=`<h4><span class="E">${u.name}${u.label?' '+u.label:''}</span><small>敵</small></h4><div class="row"><span>HP</span><span class="num">${Math.ceil(u.hp)}/${u.maxHp}（${pct}%）</span></div><div class="row"><span>装甲</span><span>${u.armor}</span></div>`;
+      if(u.weapon)h+=`<div class="row"><span>武装</span><span>${u.weapon.name}　射程${rangeOf(u)}</span></div>`;else h+=`<div class="row"><span>武装</span><span>なし</span></div>`;
+      h+=`<div class="row"><span>視界</span><span>${u.sensor+(onHill(u)?1:0)}</span></div>`;
+      {const ref=selUnits().find(x=>x.team==='P');if(ref){const r=detRange(u,ref),d=dist(u,ref);h+=`<div class="row"><span>${ref.pilot}機を見つける距離</span><span class="${d<=r?'ng':d-r<1.5?'gd':'ok'}">${r.toFixed(1)}（今${d.toFixed(1)}）</span></div>`}}
+      if(!u.struct)h+=`<div class="row"><span>行動</span><span>${ESTATE[u.state]||'—'}</span></div>`;
+      if(u.etype==='site')h+=`<div class="row"><span>特定</span><span>${u.scanned?'<span class="ok">完了</span>':Math.floor(u.scan*100)+'%'}</span></div>`;
+      if(u.etype==='radar')h+='<div>探知すると広範囲の敵を呼び寄せる。チャフの中の機体は探知できない</div>';
+      if(u.tool==='missile')h+=`<div class="row"><span>ミサイル</span><span class="${u.ammo?'ng':''}">残 ${u.ammo} 発</span></div>`;
+      {const ms=selUnits().filter(x=>x.tool==='missile'&&x.ammo>0);if(ms.length)h+=`<div class="row"><span>ミサイルのロック</span><span class="${ms.some(x=>canLock(x,u))?'ok':'gd'}">${ms.some(x=>canLock(x,u))?'可能':inCloud('chaff',u)?'不可（チャフ）':dist(ms[0],u)>TOOLS.missile.range?'射程外':'不可（視界・レーダー不足）'}</span></div>`}
+    }else if(u.truck){h+=`<h4><span class="P">${u.name}</span><small>護衛対象</small></h4><div class="row"><span>HP</span><span class="num">${Math.ceil(u.hp)}/${u.maxHp}</span></div><div class="row"><span>状態</span><span>${u.hold?'停止':'前進'}</span></div>`}
+    else{h+=`<h4><span class="P">${String(u.no).padStart(2,'0')} ${u.pilot}</span><small>${CHASSIS[u.cfg.chassis].name}</small></h4><div class="row"><span>HP</span><span class="num">${Math.ceil(u.hp)}/${u.maxHp}（${pct}%）</span></div><div class="row"><span>武装</span><span>${u.weapon.name}　射程${rangeOf(u)}</span></div><div class="row"><span>装備</span><span>${EQUIP[u.cfg.equip].name}</span></div><div class="row"><span>姿勢</span><span${u.stance==='nofire'?' class="gd"':''}>${STANCES[u.stance]}</span></div><div class="row"><span>状態</span><span>${stateText(u)}${G.detP.has(u.id)?'　<span class="ng">被発見</span>':''}</span></div><div class="row"><span>見つかりにくさ</span><span>×${detMul(u).toFixed(2)}${u.emit?' ＋'+u.emit+'（レーダー）':''}${u.stealth&&u.revealT>0?' <span class="ng">発砲で露見</span>':''}</span></div>${u.warnBy&&u.margin<99?`<div class="row"><span>最寄りの警戒圏まで</span><span class="${u.margin<=0?'ng':u.margin<1.5?'gd':'ok'}">${u.margin<=0?'圏内':u.margin.toFixed(1)}</span></div>`:''}`}
+    h+='</div>'}
+  const us=selUnits().filter(s=>s.weapon);
+  if(us.length&&(!u||u.team!=='P')){const tp=u||w;h+='<div class="sec">';
+    for(const s of us.slice(0,4)){const d=dist(s,tp),r=rangeOf(s),mn=s.weapon.min||0;
+      const st=d<mn?'<span class="ng">近すぎ</span>':d<=r?'<span class="ok">射程内</span>':`<span class="gd">あと${(d-r).toFixed(1)}</span>`;
+      h+=`<div class="row"><span>${s.no} ${s.pilot}　距離${d.toFixed(1)}</span><span>${st}</span></div>`}
+    if(us.length>4)h+=`<div style="color:var(--faint)">ほか ${us.length-4} 機</div>`;
+    h+='</div>'}
+  el.innerHTML=h;el.hidden=false;
+}
+function renderLog(){$('#log').innerHTML=G.logs.map(l=>`<div class="${l.k}">${l.t}</div>`).join('')}
+
+function finish(r){
+  if(G.over)return;G.over=r;setPaused(true);$('#pauseBanner').hidden=true;$('#pauseBtn').classList.remove('pulse');
+  const m=G.m,alive=G.units.filter(u=>u.ctrl&&u.alive).length+(G.extracted||0),total=G.units.filter(u=>u.ctrl).length;
+  let score=0,rank='—';
+  if(r.win){score=1000+alive*120-G.lost*150+G.kills*20+(m.limit?Math.floor((m.limit-G.time)*2):Math.max(0,Math.floor(600-G.time)));
+    rank=score>=1700?'S':score>=1400?'A':score>=1100?'B':'C'}
+  const tm=`${Math.floor(G.time/60)}:${String(Math.floor(G.time%60)).padStart(2,'0')}`;
+  $('#result').innerHTML=`<div class="rpanel">${r.win?`<div class="rank">${rank}</div>`:''}<h2 class="${r.win?'win':'lose'}">${r.win?'MISSION COMPLETE':'MISSION FAILED'}</h2>
+   <p>${r.reason}</p><dl><dt>作戦</dt><dd>${m.code} ${m.name}</dd><dt>経過時間</dt><dd>${tm}</dd><dt>撃破</dt><dd>${G.kills}</dd><dt>損失</dt><dd>${G.lost} / ${total}</dd>${r.win?`<dt>スコア</dt><dd>${score}</dd>`:''}</dl>
+   <div class="rbtns"><button class="btn" id="rRetry">同じ編成で再出撃</button><button class="btn" id="rHQ">編成に戻る</button></div></div>`;
+  $('#result').hidden=false;
+  if(G.replay){$('#result h2').insertAdjacentHTML('beforebegin','<div class="rpchip">REPLAY</div>');
+    $('.rbtns').innerHTML='<button class="btn" id="rpAgain">最初から再生</button><button class="btn" id="rHQ">リプレイ終了</button>';
+    $('#rpAgain').onclick=()=>{seekTo(0);setPaused(false)};$('#rHQ').onclick=endToHQ;return}
+  const srcs=new Set(G.rec.map(x=>x[1].src));
+  const rep={v:2,mission:m.id,diff:G.diff,seed:G.seed,slots:G.slots,deploy:G.deploy,
+    ctrl:srcs.size>1?'mixed':srcs.size?[...srcs][0]:(G.ai?'ai':'human'),date:Date.now(),ticks:G.tickN,
+    result:{win:!!r.win,reason:r.reason,time:+G.time.toFixed(2),kills:G.kills,lost:G.lost},cmds:G.rec};
+  G.lastReplay=rep;saveReplay(rep);
+  $('.rbtns').insertAdjacentHTML('afterbegin','<button class="btn" id="rWatch">リプレイを見る</button>');
+  $('#rWatch').onclick=()=>playReplay(rep);
+  $('#rRetry').onclick=()=>startBattle(m,{slots:G.slots,deploy:G.deploy});$('#rHQ').onclick=endToHQ;
+}
+/* ================= REPLAY ================= */
+function loadReplays(){try{return JSON.parse(localStorage.getItem('octa-replays')||'[]')}catch(e){return[]}}
+function saveReplay(rep){const L=loadReplays();L.unshift(rep);while(L.length>15)L.pop();
+  for(;;){try{localStorage.setItem('octa-replays',JSON.stringify(L));break}catch(e){if(L.length<=1)break;L.pop()}}}
+function validRep(r){return r&&(r.v===1||r.v===2)&&MISSIONS.some(m=>m.id===r.mission)&&Array.isArray(r.cmds)&&Array.isArray(r.slots)&&r.slots.length===8}
+function playReplay(rep,autoplay=true){
+  if(typeof rep==='string')rep=JSON.parse(rep);if(!validRep(rep))throw new Error('リプレイの形式が正しくありません');
+  const m=MISSIONS.find(x=>x.id===rep.mission);
+  startBattle(m,{slots:rep.slots,deploy:rep.deploy,seed:rep.seed,diff:rep.diff,replay:rep});
+  if(rep.v!==2)G.log('旧バージョンのリプレイです。ゲームの仕様変更により展開が記録と一致しない場合があります','e');
+  setPaused(!autoplay);return true;
+}
+function seekTo(tick){
+  const rep=G.replay.rep,cam={...G.cam},spd=G.speed,rev=G.reveal,paused=G.paused,sel=G.sel;
+  if(tick<G.tickN||G.over){playReplay(rep,false);G.cam=cam;G.speed=spd;G.reveal=rev;G.sel=sel;$('#spdBtn').textContent='×'+spd;$('#rpReveal').checked=!!rev}
+  const logs=G.log;G.log=()=>{};
+  while(G.tickN<tick&&!G.over)simStep();
+  G.log=logs;G.fx=[];G.projs=G.projs.filter(p=>p.tgt.alive);computeVis();
+  if(!G.over)setPaused(paused);hud();
+}
+function fmtT(sec){return `${Math.floor(sec/60)}:${String(Math.floor(sec%60)).padStart(2,'0')}`}
+function setupReplayUI(){
+  const on=!!G.replay;$('#rpbar').hidden=!on;document.querySelector('.cmdbar').hidden=on;
+  $('#abortBtn').textContent=on?'リプレイ終了':'撤退';
+  if(!on)return;const rep=G.replay.rep,sk=$('#rpSeek');sk.max=rep.ticks;sk.value=0;
+  $('#rpMarks').innerHTML=rep.cmds.map(c=>`<i class="${c[1].src==='ai'?'ai':''}" style="left:${(c[0]/Math.max(1,rep.ticks)*100).toFixed(2)}%"></i>`).join('');
+  $('#rpInfo').textContent=`${rep.ctrl==='ai'?'AI':rep.ctrl==='human'?'プレイヤー':'AI＋プレイヤー'}・${DIFFS[rep.diff]?.name||''}・${rep.result.win?'勝利':'敗北'}・指令 ${rep.cmds.length}`;
+  $('#rpReveal').checked=!!G.reveal;
+}
+function replayHud(){if(!G.replay)return;const sk=$('#rpSeek');if(document.activeElement!==sk||!sk.dragging)sk.value=G.tickN;
+  $('#rpTime').textContent=`${fmtT(G.tickN/30)} / ${fmtT(G.replay.rep.ticks/30)}`}
+$('#rpSeek').addEventListener('pointerdown',()=>{$('#rpSeek').dragging=true});
+$('#rpSeek').addEventListener('input',e=>{$('#rpTime').textContent=`${fmtT(e.target.value/30)} / ${fmtT(G.replay.rep.ticks/30)}`});
+$('#rpSeek').addEventListener('change',e=>{$('#rpSeek').dragging=false;if(G&&G.replay){$('#result').hidden=true;seekTo(+e.target.value)}});
+$('#rpReveal').addEventListener('change',e=>{if(G)G.reveal=e.target.checked});
+function renderReplays(){
+  const L=loadReplays(),el=$('#rplist');
+  if(!L.length){el.innerHTML='<p class="rpempty">まだありません。作戦を終えると自動で保存されます（最新15件）。</p>';return}
+  el.innerHTML=L.map((r,i)=>{const m=MISSIONS.find(x=>x.id===r.mission)||{type:'?',name:r.mission};const d=new Date(r.date);
+    return `<div class="rpitem"><span class="mtype t-${m.type}">${m.type}</span><div class="rpmeta"><b>${m.name}</b><small>${r.ctrl==='ai'?'AI':r.ctrl==='human'?'プレイヤー':'AI＋プレイヤー'}・<span class="${r.result.win?'w':'l'}">${r.result.win?'勝利':'敗北'}</span>・${fmtT(r.result.time)}・${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}</small></div>
+      <div class="rpbtns"><button class="btn" data-play="${i}">再生</button><button class="btn" data-copy="${i}">コピー</button><button class="btn" data-del="${i}" aria-label="削除">×</button></div></div>`}).join('');
+}
+$('#rplist').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const L=loadReplays();
+  if(b.dataset.play)playReplay(L[+b.dataset.play]);
+  else if(b.dataset.del){L.splice(+b.dataset.del,1);try{localStorage.setItem('octa-replays',JSON.stringify(L))}catch(_){}renderReplays()}
+  else if(b.dataset.copy){const txt=JSON.stringify(L[+b.dataset.copy]);const ta=$('#rpIn');
+    const fallback=()=>{ta.value=txt;$('#rpImport').open=true;ta.select();$('#rpErr').textContent='下の欄に表示しました。選択してコピーしてください'};
+    try{navigator.clipboard.writeText(txt).then(()=>{b.textContent='コピー済';setTimeout(()=>b.textContent='コピー',1500)},fallback)}catch(_){fallback()}}});
+$('#rpLoad').addEventListener('click',()=>{try{playReplay($('#rpIn').value.trim());$('#rpErr').textContent=''}catch(e){$('#rpErr').textContent='読み込めません：'+e.message}});
+$('#rpFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const fr=new FileReader();fr.onload=()=>{$('#rpIn').value=fr.result;$('#rpErr').textContent='読み込みました。「再生」を押してください'};fr.readAsText(f)});
+
+/* ================= DRAW ================= */
+function ell(x,y,r){ctx.beginPath();ctx.ellipse(x,y,r*TW/2*1.414,r*TH/2*1.414,0,0,Math.PI*2)}
+function drawShape(shape,x,y,r,fill,stroke){
+  ctx.beginPath();
+  switch(shape){
+    case'tri':ctx.moveTo(x,y-r);ctx.lineTo(x+r*.95,y+r*.75);ctx.lineTo(x-r*.95,y+r*.75);break;
+    case'sq':ctx.rect(x-r*.8,y-r*.8,r*1.6,r*1.6);break;
+    case'hex':for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/2;ctx.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r)}break;
+    case'circ':ctx.arc(x,y,r*.85,0,Math.PI*2);break;
+    case'truck':ctx.rect(x-r*1.1,y-r*.6,r*2.2,r*1.2);break;
+    case'turret':ctx.arc(x,y,r*.8,0,Math.PI*2);break;
+    case'radar':ctx.moveTo(x,y-r*1.2);ctx.lineTo(x+r*.7,y+r*.7);ctx.lineTo(x-r*.7,y+r*.7);break;
+    case'hq':ctx.rect(x-r,y-r,r*2,r*2);break;
+    case'probe':ctx.arc(x,y,r*.5,0,Math.PI*2);break;
+    case'decoy':ctx.moveTo(x,y-r);ctx.lineTo(x+r*.95,y+r*.75);ctx.lineTo(x-r*.95,y+r*.75);break;
+    case'site':ctx.moveTo(x,y-r);ctx.lineTo(x+r,y+r*.7);ctx.lineTo(x-r,y+r*.7);break;
+  }
+  ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=stroke;ctx.stroke();
+  ctx.strokeStyle=stroke;ctx.lineWidth=2;
+  if(shape==='circ'){ctx.beginPath();ctx.moveTo(x-r*.45,y);ctx.lineTo(x+r*.45,y);ctx.moveTo(x,y-r*.45);ctx.lineTo(x,y+r*.45);ctx.stroke()}
+  if(shape==='hq'){ctx.strokeRect(x-r*.5,y-r*.5,r,r)}
+  if(shape==='turret'){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+r*1.1,y-r*.5);ctx.stroke()}
+  if(shape==='radar'){ctx.beginPath();ctx.arc(x,y-r*1.2,r*.6,Math.PI*1.1,Math.PI*1.9);ctx.stroke()}
+}
+function draw(){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.fillStyle='#0a0f13';ctx.fillRect(0,0,VW,VH);
+  ctx.drawImage(G.terrain,-G.cam.x,-G.cam.y);
+  // fog
+  const dim=new Path2D(),dark=new Path2D();
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=y*N+x;if(G.vis[i])continue;const h=tileH(G.grid[i]);const P=G.explored[i]?dim:dark;
+    const a=w2p(x,y),b=w2p(x+1,y),c=w2p(x+1,y+1),d=w2p(x,y+1);const ox=-G.cam.x,oy=-G.cam.y-h;
+    P.moveTo(a[0]+ox,a[1]+oy);P.lineTo(b[0]+ox,b[1]+oy);P.lineTo(c[0]+ox,c[1]+oy+h);P.lineTo(d[0]+ox,d[1]+oy+h);P.closePath()}
+  ctx.fillStyle='rgba(8,12,16,.38)';ctx.fill(dim);ctx.fillStyle='rgba(8,12,16,.64)';ctx.fill(dark);
+  // clouds, mines
+  const nowT=performance.now()/1000;
+  for(const c of G.clouds){const[px,py]=w2p(c.x,c.y);const sx=px-G.cam.x,sy=py-G.cam.y;const fade=Math.min(1,c.t/2);
+    if(c.k==='smoke'){for(let i=0;i<7;i++){const a=i*0.9+nowT*0.15,rr=c.r*(0.25+0.45*((i*37)%10)/10);ell(sx+Math.cos(a)*rr*22,sy+Math.sin(a)*rr*11-6,c.r*0.55);ctx.fillStyle=`rgba(168,170,164,${0.22*fade})`;ctx.fill()}
+      ell(sx,sy,c.r);ctx.strokeStyle=`rgba(200,200,190,${0.35*fade})`;ctx.setLineDash([3,4]);ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([])}
+    else if(c.k==='chaff'){ell(sx,sy,c.r);ctx.fillStyle=`rgba(190,205,220,${0.1*fade})`;ctx.fill();ctx.strokeStyle=`rgba(200,220,240,${0.45*fade})`;ctx.setLineDash([1,3]);ctx.lineWidth=1.2;ctx.stroke();ctx.setLineDash([]);
+      for(let i=0;i<26;i++){const a=i*2.4+nowT*(0.3+(i%5)*0.07),rr=((i*53)%100)/100*c.r;const x=sx+Math.cos(a)*rr*TW/2*1.3,y=sy+Math.sin(a)*rr*TH/2*1.3-8-((i*17+nowT*20)%14);
+        ctx.fillStyle=`rgba(230,240,255,${(0.35+0.5*Math.abs(Math.sin(nowT*6+i)))*fade})`;ctx.fillRect(x,y,1.6,1.6)}}
+    else if(c.k==='jam'){for(let i=0;i<3;i++){const ph=((nowT*0.6+i/3)%1);ell(sx,sy,c.r*ph);ctx.strokeStyle=`rgba(190,140,230,${0.5*(1-ph)*fade})`;ctx.lineWidth=1.5;ctx.stroke()}ell(sx,sy,c.r);ctx.fillStyle=`rgba(190,140,230,${0.07*fade})`;ctx.fill()}
+    else if(c.k==='flare'){ell(sx,sy,c.r);const g=ctx.createRadialGradient(sx,sy,2,sx,sy,c.r*TW*0.7);g.addColorStop(0,`rgba(255,226,150,${0.22*fade})`);g.addColorStop(1,'rgba(255,226,150,0)');ctx.fillStyle=g;ctx.fill();
+      ctx.strokeStyle=`rgba(255,226,150,${0.4*fade})`;ctx.lineWidth=1;ctx.stroke();ctx.fillStyle=`rgba(255,240,200,${fade})`;ctx.beginPath();ctx.arc(sx,sy-38+Math.sin(nowT*3)*2,3,0,7);ctx.fill()}
+    ctx.font='10px "IBM Plex Sans JP",sans-serif';ctx.textAlign='center';ctx.fillStyle=`rgba(220,220,205,${0.8*fade})`;ctx.fillText(`${(TOOLS[c.k]||TOOLS.jammer).name} ${Math.ceil(c.t)}s`,sx,sy+c.r*TH*0.7+12)}
+  for(const m of G.mines){if(m.team!=='P'&&!m.revealed&&!(G.reveal&&G.replay))continue;const[sx,sy]=toS(m.x,m.y);
+    if(m.team==='E'){ctx.beginPath();ctx.moveTo(sx,sy-5);ctx.lineTo(sx+7,sy);ctx.lineTo(sx,sy+5);ctx.lineTo(sx-7,sy);ctx.closePath();ctx.fillStyle='#2a1612';ctx.fill();ctx.strokeStyle='#e4643c';ctx.lineWidth=1.4;ctx.stroke();
+      if(m.disarm>0){ctx.fillStyle='#8cc67e';ctx.fillRect(sx-8,sy+7,16*m.disarm,2)}continue}ctx.beginPath();ctx.moveTo(sx,sy-5);ctx.lineTo(sx+7,sy);ctx.lineTo(sx,sy+5);ctx.lineTo(sx-7,sy);ctx.closePath();
+    ctx.fillStyle='#1a2229';ctx.fill();ctx.strokeStyle=m.arm>0?'#56656c':'#5fb0e0';ctx.lineWidth=1.2;ctx.stroke();ctx.fillStyle=m.arm>0?'#56656c':'#5fb0e0';ctx.fillRect(sx-1,sy-1,2,2)}
+  // tool targeting preview
+  if(G.targeting&&G.targeting.arty&&G.hover){const w=s2w(G.hover.x,G.hover.y);const[px,py]=w2p(w.x,w.y);ell(px-G.cam.x,py-G.cam.y,1.8);ctx.fillStyle='rgba(228,100,60,.12)';ctx.fill();ctx.strokeStyle='rgba(228,100,60,.8)';ctx.setLineDash([6,4]);ctx.stroke();ctx.setLineDash([])}
+  {const seen=new Set();for(const sh of G.shells){const key=sh.cx+','+sh.cy;if(seen.has(key))continue;seen.add(key);const[px,py]=w2p(sh.cx,sh.cy);const sx=px-G.cam.x,sy=py-G.cam.y;
+    ell(sx,sy,1.8);ctx.strokeStyle='rgba(228,100,60,.9)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);ctx.font='600 11px "IBM Plex Mono",monospace';ctx.textAlign='center';ctx.fillStyle='#ffb38f';ctx.fillText(`着弾 ${Math.max(0,sh.at-G.time).toFixed(1)}s`,sx,sy-30)}}
+  for(const c of G.charges){const[sx,sy]=toS(c.x,c.y);ctx.fillStyle='#e2b84a';ctx.fillRect(sx-4,sy-14,8,6);ctx.font='600 10px "IBM Plex Mono",monospace';ctx.textAlign='center';ctx.fillText(c.t.toFixed(1),sx,sy-18)}
+  if(G.targeting&&G.targeting.tool){const T=TOOLS[G.targeting.tool];
+    for(const u of selUnits().filter(u=>u.tool===G.targeting.tool&&u.ammo>0)){const[sx,sy]=toS(u.x,u.y);ell(sx,sy,T.range+(T.target==='enemy'&&onHill(u)?1:0));ctx.strokeStyle='rgba(226,184,74,.75)';ctx.setLineDash([7,4]);ctx.lineWidth=1.4;ctx.stroke();ctx.setLineDash([]);
+      if(T.target==='enemy'){ell(sx,sy,effSensor(u));ctx.strokeStyle='rgba(226,184,74,.35)';ctx.setLineDash([2,4]);ctx.stroke();ctx.setLineDash([])}}
+    if(G.hover&&T.radius){const w=s2w(G.hover.x,G.hover.y);const[px,py]=w2p(w.x,w.y);ell(px-G.cam.x,py-G.cam.y,T.radius);ctx.fillStyle='rgba(226,184,74,.1)';ctx.fill();ctx.strokeStyle='rgba(226,184,74,.8)';ctx.stroke()}}
+  // zones
+  for(const z of G.zones){const[px,py]=w2p(z.x,z.y);const sx=px-G.cam.x,sy=py-G.cam.y;
+    ell(sx,sy,z.r);ctx.setLineDash(z.kind==='hint'?[4,5]:[8,4]);ctx.lineWidth=z.kind==='hint'?1.2:2;
+    ctx.strokeStyle=z.kind==='hint'?'rgba(140,198,126,.65)':'rgba(226,184,74,.9)';ctx.stroke();ctx.setLineDash([]);
+    if(z.kind!=='hint'){ctx.fillStyle='rgba(226,184,74,.08)';ctx.fill()}
+    ctx.font='600 12px "IBM Plex Sans JP",sans-serif';ctx.textAlign='center';ctx.fillStyle=z.kind==='hint'?'#8cc67e':'#e2b84a';ctx.fillText(z.label,sx,sy+4)}
+  // orders
+  for(const u of selUnits()){const[sx,sy]=toS(u.x,u.y);
+    if(u.path.length){ctx.beginPath();ctx.moveTo(sx,sy);for(const p of u.path){const[a,b]=toS(p.x,p.y);ctx.lineTo(a,b)}ctx.setLineDash([3,4]);ctx.strokeStyle='rgba(95,176,224,.6)';ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([])}
+    if(u.target&&u.target.alive){const[a,b]=toS(u.target.x,u.target.y);ctx.beginPath();ctx.moveTo(sx,sy-10);ctx.lineTo(a,b-10);ctx.setLineDash([5,4]);ctx.strokeStyle='rgba(228,100,60,.7)';ctx.stroke();ctx.setLineDash([])}
+    ell(sx,sy,rangeOf(u));ctx.strokeStyle='rgba(95,176,224,.35)';ctx.setLineDash([6,5]);ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);
+    if(u.repair){ell(sx,sy,2.5);ctx.strokeStyle='rgba(140,198,126,.3)';ctx.stroke()}}
+  // enemy detection rings (vs first selected unit)
+  if(G.showDet){const ref=selUnits().find(u=>u.team==='P');
+    for(const e of G.units){if(!e.alive||e.team!=='E'||!G.seenE.has(e.id))continue;const[sx,sy]=toS(e.x,e.y);
+      const r=ref?detRange(e,ref):e.sensor+(onHill(e)?1:0);ell(sx,sy,r);
+      const close=ref&&dist(e,ref)-r<1.5;ctx.strokeStyle=close?'rgba(226,184,74,.75)':'rgba(226,184,74,.3)';ctx.setLineDash([2,4]);ctx.lineWidth=1.2;ctx.stroke();ctx.setLineDash([]);
+      if(e.etype==='radar'){ctx.fillStyle='rgba(226,184,74,.05)';ctx.fill()}}}
+  // enemy ghosts
+  for(const e of G.units){if(e.team!=='E'||!e.alive||G.seenE.has(e.id)||!e.lastSeen||e.struct)continue;
+    const[sx,sy]=toS(e.lastSeen.x,e.lastSeen.y);ctx.globalAlpha=.4;drawShape(CHASSIS[ETYPES[e.etype].c.chassis].shape,sx,sy-10,8,'transparent','#e4643c');ctx.globalAlpha=1;
+    ctx.fillStyle='rgba(228,100,60,.6)';ctx.font='10px "IBM Plex Mono",monospace';ctx.textAlign='center';ctx.fillText('?',sx,sy-6)}
+  // units
+  const list=G.units.filter(u=>u.alive&&(u.team==='P'||G.seenE.has(u.id)||(u.struct&&u.scanned)||(G.reveal&&G.replay))).sort((a,b)=>(a.x+a.y)-(b.x+b.y));
+  const now=performance.now();
+  for(const u of list){const[sx,sy]=toS(u.x,u.y);const r=u.struct?13:u.truck?9:10;const iy=sy-12;
+    ctx.beginPath();ctx.ellipse(sx,sy,r*.95,r*.45,0,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.35)';ctx.fill();
+    if(G.sel.has(u.id)){ctx.beginPath();ctx.ellipse(sx,sy,r+5,(r+5)*.5,0,0,Math.PI*2);ctx.strokeStyle='#e8f4ff';ctx.lineWidth=1.5;ctx.stroke()}
+    ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx,iy+r*.6);ctx.strokeStyle='rgba(0,0,0,.45)';ctx.lineWidth=1;ctx.stroke();
+    let fill=u.decoy?'rgba(95,176,224,.35)':u.probe?'#bfe6ff':u.team==='P'?(u.truck?'#d8c690':'#5fb0e0'):(u.struct?'#b9503a':'#e4643c');
+    if(u.hitT>0){u.hitT-=1/60;fill='#fff'}
+    const ghost=(u.team==='P'&&u.stealth&&u.revealT<=0)||u.hidden||(u.team==='E'&&!G.seenE.has(u.id));if(ghost)ctx.globalAlpha=.5;
+    drawShape(u.shape,sx,iy,r,fill,'#081017');ctx.globalAlpha=1;
+    if(u.obj||(u.etype==='site')){ctx.beginPath();ctx.arc(sx,iy,r+5+Math.sin(now/250)*1.5,0,Math.PI*2);ctx.strokeStyle=u.scanned?'#8cc67e':'#e2b84a';ctx.lineWidth=1.5;ctx.stroke()}
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    if(u.ctrl&&u.stance==='nofire'){const bx=sx+r+2,by=iy-r+1;ctx.beginPath();ctx.arc(bx,by,4.5,0,7);ctx.fillStyle='#0c1217';ctx.fill();ctx.strokeStyle='#e2b84a';ctx.lineWidth=1.3;ctx.stroke();ctx.beginPath();ctx.moveTo(bx-3,by+3);ctx.lineTo(bx+3,by-3);ctx.stroke()}
+    if(u.ctrl&&(u.hidden||u.mmode!=='normal'||u.dmgd.fcs||u.dmgd.legs||u.dmgd.sensor||u.ammoType!=='std')){const tags=[u.hidden?'隠':u.order==='hide'?'隠…':'',u.mmode==='fast'?'速':u.mmode==='careful'?'警':'',u.ammoType==='ap'?'徹':u.ammoType==='he'?'榴':'',u.dmgd.fcs?'F✕':'',u.dmgd.legs?'脚✕':'',u.dmgd.sensor?'S✕':''].filter(Boolean).join(' ');
+      ctx.font='500 9px "IBM Plex Sans JP",sans-serif';const tw=ctx.measureText(tags).width+6;ctx.fillStyle='rgba(8,12,16,.75)';ctx.fillRect(sx-tw/2,sy+4,tw,11);ctx.fillStyle=(u.dmgd.fcs||u.dmgd.legs||u.dmgd.sensor)?'#ffb38f':'#bfe6ff';ctx.fillText(tags,sx,sy+10)}
+    if(u.probe){ctx.font='500 9px "IBM Plex Sans JP",sans-serif';ctx.fillStyle='#bfe6ff';ctx.fillText('PRB '+Math.ceil(u.ttl)+'s',sx,sy+9)}
+    if(u.decoy){ctx.font='500 9px "IBM Plex Sans JP",sans-serif';ctx.fillStyle='#bfe6ff';ctx.fillText('囮 '+Math.ceil(u.ttl)+'s',sx,sy+9)}
+    if(u.ctrl){ctx.font='700 11px "IBM Plex Mono",monospace';ctx.fillStyle='#07131b';ctx.fillText(u.no,sx,iy+(u.shape==='tri'?3:0.5))}
+    else if(u.team==='E'&&!u.struct){ctx.font='500 9px "IBM Plex Mono",monospace';ctx.fillStyle='#e4643c';ctx.fillText(u.weapon.tag,sx,sy+8)}
+    if(u.struct){ctx.font='500 10.5px "IBM Plex Sans JP",sans-serif';ctx.fillStyle='#f0c9b8';ctx.fillText(u.name+(u.label?' '+u.label:''),sx,sy+10);
+      if(u.etype==='site'&&!u.scanned&&u.scan>0){ctx.fillStyle='#8cc67e';ctx.fillRect(sx-14,iy-r-12,28*u.scan,3)}}
+    if(u.team==='P'&&!u.struct){const det=G.detP.has(u.id),warn=!det&&u.margin<1.5;
+      if(det||warn){const bx=sx-r-3,by=iy-r;ctx.beginPath();ctx.arc(bx,by,6,0,7);ctx.fillStyle=det?'#e4643c':'#e2b84a';ctx.fill();ctx.fillStyle='#0c1217';ctx.font='700 10px "IBM Plex Mono",monospace';ctx.fillText('!',bx,by+.5)}}
+    ctx.textBaseline='alphabetic';
+    const pct=u.hp/u.maxHp;if(pct<1||G.sel.has(u.id)){const bw=u.struct?30:22;ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(sx-bw/2-1,iy-r-7,bw+2,4);
+      ctx.fillStyle=u.team==='E'?'#e4643c':pct>.6?'#8cc67e':pct>.3?'#e2b84a':'#e4643c';ctx.fillRect(sx-bw/2,iy-r-6,bw*pct,2)}}
+  // projectiles
+  for(const p of G.projs){const[sx,sy]=toS(p.x,p.y);const[qx,qy]=toS(p.px,p.py);
+    ctx.strokeStyle=p.team==='P'?'#bfe6ff':'#ffb38f';ctx.lineWidth=p.k==='SN'?2.2:1.4;
+    if(p.k==='MSL'){ctx.fillStyle=p.lost?'#9aa4a8':ctx.strokeStyle;ctx.beginPath();ctx.arc(sx,sy-12,2.8,0,7);ctx.fill()}
+    else{const dx=sx-qx,dy=sy-qy,L=Math.hypot(dx,dy)||1,len=p.k==='SN'?18:8;ctx.beginPath();ctx.moveTo(sx,sy-12);ctx.lineTo(sx-dx/L*len,sy-12-dy/L*len);ctx.stroke()}}
+  // fx
+  for(const f of G.fx){const[sx,sy]=toS(f.x,f.y);const k=f.t/f.d;
+    if(f.k==='boom'){ctx.beginPath();ctx.ellipse(sx,sy-6,(f.r||1)*22*k+4,(f.r||1)*11*k+2,0,0,7);ctx.fillStyle=`rgba(255,170,90,${.55*(1-k)})`;ctx.fill();ctx.strokeStyle=`rgba(255,220,160,${1-k})`;ctx.lineWidth=1.5;ctx.stroke()}
+    else if(f.k==='miss'){ctx.fillStyle=`rgba(200,200,190,${1-k})`;ctx.font='600 9px "IBM Plex Mono",monospace';ctx.textAlign='center';ctx.fillText('MISS',sx,sy-20-k*8)}
+    else if(f.k==='puff'){ell(sx,sy,(f.r||1)*(0.3+k*0.7));ctx.strokeStyle=`rgba(230,230,220,${0.7*(1-k)})`;ctx.lineWidth=2;ctx.stroke()}
+    else if(f.k==='hit'){ctx.fillStyle=`rgba(255,230,180,${1-k})`;ctx.beginPath();ctx.arc(sx,sy-12,3*(1-k)+1,0,7);ctx.fill()}
+    else if(f.k==='flash'){ctx.fillStyle=f.team==='P'?'rgba(200,235,255,.9)':'rgba(255,190,140,.9)';ctx.beginPath();ctx.arc(sx,sy-12,4,0,7);ctx.fill()}
+    else if(f.k==='smoke'){ctx.fillStyle=`rgba(180,180,170,${.35*(1-k)})`;ctx.beginPath();ctx.arc(sx,sy-12,2+k*3,0,7);ctx.fill()}
+    else if(f.k==='heal'){ctx.fillStyle=`rgba(140,198,126,${1-k})`;ctx.font='700 11px monospace';ctx.textAlign='center';ctx.fillText('+',sx+6,sy-24-k*10)}
+    else if(f.k==='ping'){ell(sx,sy,.3+k*.6);ctx.strokeStyle=f.red?`rgba(228,100,60,${1-k})`:`rgba(95,176,224,${1-k})`;ctx.lineWidth=2;ctx.stroke()}}
+  // hover
+  if(G.hover&&!ptr){const w=s2w(G.hover.x,G.hover.y),X=Math.floor(w.x),Y=Math.floor(w.y);
+    if(X>=0&&Y>=0&&X<N&&Y<N){const h=tileH(G.grid[Y*N+X]);ctx.beginPath();for(const[a,b]of[[X,Y],[X+1,Y],[X+1,Y+1],[X,Y+1]]){const[px,py]=w2p(a,b);ctx.lineTo(px-G.cam.x,py-G.cam.y-h)}ctx.closePath();ctx.strokeStyle='rgba(232,244,255,.7)';ctx.lineWidth=1.2;ctx.stroke()}
+    const hu=pick(G.hover);if(hu&&hu.team==='E'&&hu.weapon){const[sx,sy]=toS(hu.x,hu.y);ell(sx,sy,rangeOf(hu));ctx.strokeStyle='rgba(228,100,60,.55)';ctx.setLineDash([6,5]);ctx.lineWidth=1.2;ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='rgba(228,100,60,.06)';ctx.fill()}}
+  // box
+  if(ptr&&ptr.moved&&ptr.btn===0&&!ptr.touch){ctx.strokeStyle='rgba(95,176,224,.9)';ctx.fillStyle='rgba(95,176,224,.08)';ctx.lineWidth=1;
+    const x=Math.min(ptr.sx,ptr.x),y=Math.min(ptr.sy,ptr.y),w=Math.abs(ptr.x-ptr.sx),h=Math.abs(ptr.y-ptr.sy);ctx.fillRect(x,y,w,h);ctx.strokeRect(x,y,w,h)}
+}
+function drawMini(){
+  const w=mini.width,h=mini.height;mctx.fillStyle='#0a0f13';mctx.fillRect(0,0,w,h);mctx.drawImage(G.terrain,0,0,w,h);
+  const sx=w/WPX,sy=h/HPX;
+  mctx.fillStyle='rgba(8,12,16,.55)';
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){if(G.explored[y*N+x])continue;const[px,py]=w2p(x+.5,y+.5);mctx.fillRect(px*sx-2.5,py*sy-1.3,5,2.6)}
+  for(const z of G.zones){if(z.kind==='hint')continue;const[px,py]=w2p(z.x,z.y);mctx.strokeStyle='#e2b84a';mctx.beginPath();mctx.ellipse(px*sx,py*sy,z.r*TW*.7*sx,z.r*TH*.7*sy,0,0,7);mctx.stroke()}
+  for(const u of G.units){if(!u.alive)continue;if(u.team==='E'&&!G.seenE.has(u.id)&&!(G.reveal&&G.replay))continue;const[px,py]=w2p(u.x,u.y);
+    mctx.fillStyle=u.team==='P'?(u.truck?'#d8c690':'#5fb0e0'):'#e4643c';mctx.fillRect(px*sx-2,py*sy-2,u.struct?5:4,u.struct?5:4)}
+  mctx.strokeStyle='#e8f4ff';mctx.lineWidth=1;mctx.strokeRect(G.cam.x*sx,G.cam.y*sy,VW*sx,VH*sy);
+}
+
+/* ================= LOOP ================= */
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(G&&!$('#battle').hidden){
+    const pan=560*dt;if(keys.has('L'))G.cam.x-=pan;if(keys.has('R'))G.cam.x+=pan;if(keys.has('U'))G.cam.y-=pan;if(keys.has('D'))G.cam.y+=pan;if(keys.size)clampCam();
+    if(!G.paused&&!G.over&&!G.aiStep){G.acc+=dt*G.speed;let n=0;while(G.acc>=1/30&&n<90&&!G.over){simStep();G.acc-=1/30;n++}if(n>=90)G.acc=0}
+    draw();
+    G.hudT-=dt;if(G.hudT<=0){G.hudT=0.2;updateCmd();inspect();replayHud()}
+    G.miniT-=dt;if(G.miniT<=0){G.miniT=0.25;drawMini()}
+    if(G.logs.length&&now-G.logs[0].at>9000){G.logs.shift();renderLog()}
+  }
+  requestAnimationFrame(frame);
+}
+$('#guideBody').innerHTML=guideHTML();
+try{if(localStorage.getItem('octa-guide')==='0')$('#guide').open=false}catch(e){}
+$('#guide').addEventListener('toggle',()=>{try{localStorage.setItem('octa-guide',$('#guide').open?'1':'0')}catch(e){}});
+
+/* ================= AI INTERFACE ================= */
+(()=>{
+const TCH='.FH#~=';
+const r2=v=>Math.round(v*100)/100;
+const tname=['plain','forest','hill','rock','water','road'];
+function need(){if(!G)throw new Error('no battle running: call octa.start() first')}
+function ownObs(u){const t=G.units.find(x=>x.id===u.target?.id);return{id:u.no,pilot:u.pilot,alive:u.alive,extracted:!!u.gone,x:r2(u.x),y:r2(u.y),hp:Math.ceil(u.hp),maxHp:u.maxHp,
+  chassis:u.cfg.chassis,weapon:u.cfg.weapon,equip:u.cfg.equip,armor:u.armor,speed:u.speed,sensor:u.sensor+(onHill(u)?1:0),range:u.weapon?rangeOf(u):0,minRange:u.weapon?.min||0,
+  repairRadius:u.repair?2.5:0,stance:u.stance,order:u.order,target:t&&t.alive?'e'+t.id:null,moving:u.path.length>0,dest:u.path.length?{x:r2(u.path.at(-1).x),y:r2(u.path.at(-1).y)}:null,
+  cooldown:r2(Math.max(0,u.cd)),terrain:tname[tAt(u.x,u.y)],detected:G.detP.has(u.id),detectionMultiplier:r2(detMul(u)),radarEmission:u.emit||0,
+  stealthBroken:!!(u.stealth&&u.revealT>0),nearestEnemyAlertMargin:u.margin!=null&&u.margin<99?r2(u.margin):null,
+  moveMode:u.mmode,hidden:u.hidden,hiding:u.order==='hide',ammoType:u.ammoType,apRounds:u.ap,heRounds:u.he,reloading:u.reloadT>0,
+  damaged:['fcs','legs','sensor'].filter(k=>u.dmgd[k]),
+  tool:u.tool,ammo:u.ammo,toolRange:TOOLS[u.tool].range||0,toolReady:u.toolCd<=0,pendingTool:!!u.pending,inCloud:G.clouds.filter(c=>Math.hypot(u.x-c.x,u.y-c.y)<=c.r).map(c=>c.k),
+  lockable:u.alive&&u.tool==='missile'&&u.ammo>0?G.units.filter(e=>e.alive&&e.team==='E'&&canLock(u,e)).map(e=>'e'+e.id):[]}}
+function enemyObs(e){const o={id:'e'+e.id,type:e.etype,name:e.name,structure:!!e.struct,x:r2(e.x),y:r2(e.y),hp:Math.ceil(e.hp),maxHp:e.maxHp,armor:e.armor,
+  weapon:e.weapon?e.weapon.tag:null,range:e.weapon?rangeOf(e):0,minRange:e.weapon?.min||0,sensor:e.sensor+(onHill(e)?1:0),terrain:tname[tAt(e.x,e.y)]};
+  if(!e.struct)o.state=e.state;if(e.tool==='missile')o.missiles=e.ammo;const dm=['fcs','legs','sensor'].filter(k=>e.dmgd&&e.dmgd[k]);if(dm.length)o.damaged=dm;if(e.obj)o.objective=true;if(e.etype==='site'){o.label=e.label;o.scanned=!!e.scanned;o.scanProgress=r2(Math.min(1,e.scan))}return o}
+function observe(opt={}){
+  if(!G)return{status:'idle',missions:MISSIONS.map(m=>m.id)};
+  const m=G.m,o={mission:m.id,type:m.type,name:m.name,difficulty:SAVE.diff,time:r2(G.time),timeLimit:m.limit||null,
+    status:G.over?(G.over.win?'win':'lose'):'running',result:G.over?G.over.reason:null,objective:m.obj(G),
+    squad:G.units.filter(u=>u.ctrl).map(ownObs),
+    enemies:G.units.filter(e=>e.alive&&e.team==='E'&&G.seenE.has(e.id)).map(enemyObs),
+    lastSeen:G.units.filter(e=>e.alive&&e.team==='E'&&!G.seenE.has(e.id)&&e.lastSeen&&!e.struct).map(e=>({id:'e'+e.id,type:e.etype,x:r2(e.lastSeen.x),y:r2(e.lastSeen.y)})),
+    zones:G.zones.map(z=>({kind:z.kind,label:z.label,x:r2(z.x),y:r2(z.y),r:z.r})),
+    events:opt.peek?[]:G.evq.splice(0)};
+  if(m.road)o.convoy={moving:!!G.convoyGo,arrived:G.arrived,trucks:G.units.filter(u=>u.truck).map((u,i)=>({id:'t'+(i+1),alive:u.alive,arrived:!!u.gone,x:r2(u.x),y:r2(u.y),hp:Math.ceil(u.hp),maxHp:u.maxHp}))};
+  if(G.sites)o.sites=G.sites.map(s=>({label:s.label,scanned:!!s.scanned,scanProgress:r2(Math.min(1,s.scan)),...((s.scanned||G.seenE.has(s.id))?{x:r2(s.x),y:r2(s.y)}:{})}));
+  if(m.id==='m5')o.extraction={need:G.need,pickupRequested:!!G.pickup,pickupIn:G.pickup?r2(Math.max(0,G.pickup-G.time)):null,extracted:G.extracted};
+  o.clouds=G.clouds.map(c=>({kind:c.k,x:r2(c.x),y:r2(c.y),r:c.r,ttl:r2(c.t)}));
+  o.mines=G.mines.filter(m=>m.team==='P').map(m=>({x:r2(m.x),y:r2(m.y),armed:m.arm<=0}));
+  o.enemyMines=G.mines.filter(m=>m.team==='E'&&m.revealed).map(m=>({x:r2(m.x),y:r2(m.y),disarm:r2(m.disarm)}));
+  o.artillery={left:G.arty,incoming:[...new Set(G.shells.map(x=>x.cx+','+x.cy))].map(k=>{const sh=G.shells.find(x=>x.cx+','+x.cy===k);return{x:r2(sh.cx),y:r2(sh.cy),in:r2(sh.at-G.time)}})};
+  o.probes=G.units.filter(u=>u.probe&&u.alive).map(u=>({x:r2(u.x),y:r2(u.y),ttl:r2(u.ttl)}));
+  o.charges=G.charges.map(c=>({x:r2(c.x),y:r2(c.y),t:r2(c.t)}));
+  o.decoys=G.units.filter(u=>u.decoy&&u.alive).map(u=>({x:r2(u.x),y:r2(u.y),hp:Math.ceil(u.hp),ttl:r2(u.ttl)}));
+  o.incomingMissiles=G.projs.filter(p=>p.k==='MSL'&&p.team==='E'&&!p.lost&&p.tgt.alive).map(p=>({x:r2(p.x),y:r2(p.y),target:p.tgt.ctrl?p.tgt.no:p.tgt.decoy?'decoy':p.tgt.truck?'truck':null}));
+  if(G.hq)o.hq={alive:G.hq.alive,hpPct:Math.ceil(G.hq.hp/G.hq.maxHp*100),radarTowerAlive:G.radar.alive};
+  return o;
+}
+function mapInfo(){need();const rows=[],exp=[],vis=[];
+  for(let y=0;y<N;y++){let a='',b='',c='';for(let x=0;x<N;x++){const i=y*N+x;a+=TCH[G.grid[i]];b+=G.explored[i]?'1':'0';c+=G.vis[i]?'1':'0'}rows.push(a);exp.push(b);vis.push(c)}
+  return{size:N,note:'rows[y][x]. tile (x,y) covers x..x+1, y..y+1; its center is (x+0.5,y+0.5). Terrain is known in advance; explored/visible are fog masks.',
+    legend:{'.':'plain (move x1)','F':'forest (move x1.7, cover)','H':'hill (move x1.35, +1 sensor/range)','#':'rock (impassable)','~':'water (impassable)','=':'road (move x0.8)'},rows,explored:exp,visible:vis}}
+function text(){need();const o=observe();G.evq.unshift(...o.events);
+  const g=[];for(let y=0;y<N;y++){const r=[];for(let x=0;x<N;x++){const i=y*N+x;r.push(G.vis[i]?TCH[G.grid[i]]:G.explored[i]?TCH[G.grid[i]].toLowerCase().replace('.',',').replace('=','-'):'?')}g.push(r)}
+  const put=(x,y,ch)=>{const X=Math.floor(x),Y=Math.floor(y);if(X>=0&&Y>=0&&X<N&&Y<N)g[Y][X]=ch};
+  for(const z of o.zones.filter(z=>z.kind!=='hint'))put(z.x,z.y,'Z');
+  o.lastSeen.forEach(e=>put(e.x,e.y,'e'));o.enemies.forEach(e=>put(e.x,e.y,e.structure?'S':'E'));
+  (o.convoy?.trucks||[]).filter(t=>t.alive).forEach(t=>put(t.x,t.y,'T'));o.squad.filter(u=>u.alive).forEach(u=>put(u.x,u.y,String(u.id)));
+  let t=`[${o.mission} ${o.type} ${o.name}] t=${o.time}s${o.timeLimit?' / limit '+o.timeLimit+'s':''} status=${o.status}${o.result?' ('+o.result+')':''}\nOBJECTIVE: ${o.objective}\n`;
+  t+='MAP (x→ 0..27, y↓ 0..27). visible: . plain F forest H hill # rock ~ water = road | explored-but-not-visible lowercase (, f h # ~ -) | ? unexplored\n   digits=your units  E=enemy  S=enemy structure  e=last seen enemy  T=truck  Z=LZ/goal center\n';
+  t+='    '+Array.from({length:N},(_,x)=>x%10).join('')+'\n'+g.map((r,y)=>String(y).padStart(3)+' '+r.join('')).join('\n')+'\n';
+  t+='SQUAD:\n'+o.squad.map(u=>u.alive?`  ${u.id} ${u.pilot} ${u.chassis}/${u.weapon}/${u.equip} (${u.x},${u.y}) HP${u.hp}/${u.maxHp} range${u.range} sensor${u.sensor} ${u.stance} ${u.order}${u.target?'→'+u.target:''}${u.tool!=='none'?' '+u.tool+'x'+u.ammo:''}${u.moveMode!=='normal'?' mode:'+u.moveMode:''}${u.hidden?' HIDDEN':''}${u.ammoType!=='std'?' ammo:'+u.ammoType:''}${u.damaged.length?' dmg:'+u.damaged.join('/'):''}${u.detected?' DETECTED':''}${u.terrain!=='plain'?' ['+u.terrain+']':''}`:`  ${u.id} ${u.pilot} ${u.extracted?'EXTRACTED':'DESTROYED'}`).join('\n')+'\n';
+  t+='VISIBLE ENEMIES:\n'+(o.enemies.map(e=>`  ${e.id} ${e.type} (${e.x},${e.y}) HP${e.hp}/${e.maxHp} ${e.weapon?e.weapon+' range'+e.range:'unarmed'} sensor${e.sensor}${e.state?' '+e.state:''}${e.objective?' OBJECTIVE':''}${e.label?' site '+e.label+(e.scanned?' scanned':' scan '+Math.round(e.scanProgress*100)+'%'):''}`).join('\n')||'  (none)')+'\n';
+  if(o.convoy)t+=`CONVOY: ${o.convoy.moving?'moving':'halted'} arrived ${o.convoy.arrived}; `+o.convoy.trucks.map(x=>`${x.id} ${x.alive?`(${x.x},${x.y}) HP${x.hp}`:x.arrived?'arrived':'destroyed'}`).join(', ')+'\n';
+  if(o.sites)t+='SITES: '+o.sites.map(x=>`${x.label}:${x.scanned?'scanned':Math.round(x.scanProgress*100)+'%'}`).join(' ')+'\n';
+  t+=`ARTILLERY: ${o.artillery.left} left${o.artillery.incoming.length?'; incoming '+o.artillery.incoming.map(a=>`(${a.x},${a.y}) in ${a.in}s`).join(', '):''}\n`;
+  if(o.enemyMines.length)t+='KNOWN ENEMY MINES: '+o.enemyMines.map(m=>`(${m.x},${m.y})`).join(' ')+'\n';
+  if(o.clouds.length)t+='CLOUDS: '+o.clouds.map(c=>`${c.kind} (${c.x},${c.y}) r${c.r} ${Math.ceil(c.ttl)}s`).join(', ')+'\n';
+  if(o.incomingMissiles.length)t+='INCOMING ENEMY MISSILES: '+o.incomingMissiles.map(m=>`(${m.x},${m.y})→${m.target}`).join(', ')+'\n';
+  if(o.extraction)t+=`EXTRACTION: need ${o.extraction.need}, ${o.extraction.pickupRequested?'pickup in '+o.extraction.pickupIn+'s':'not requested (enter LZ to request)'}\n`;
+  const hints=o.zones.filter(z=>z.kind==='hint');if(hints.length)t+='SEARCH AREAS: '+hints.map(z=>`${z.label} (${z.x},${z.y}) r${z.r}`).join(', ')+'\n';
+  const ev=G.evq.splice(0);if(ev.length)t+='EVENTS:\n'+ev.map(e=>`  [${e.t}s] ${e.text}`).join('\n')+'\n';
+  return t}
+function unitsOf(ids){const all=G.units.filter(u=>u.ctrl&&u.alive);if(ids==null||ids==='all')return all;return (Array.isArray(ids)?ids:[ids]).map(i=>all.find(u=>u.no===+i)).filter(Boolean)}
+function act(cmds){need();if(G.over)return[{ok:false,error:'battle is over'}];if(G.replay)return[{ok:false,error:'replay is playing'}];if(!Array.isArray(cmds))cmds=[cmds];
+  return cmds.map(c=>{try{if(G.over)throw new Error('battle is over');const us=unitsOf(c.units);if(c.cmd!=='convoy'&&c.cmd!=='artillery'&&c.cmd!=='abort'&&!us.length)return{ok:false,error:'no living units matched '+JSON.stringify(c.units)};
+    const ids=us.map(u=>u.id);let res={ok:true};
+    switch(c.cmd){
+      case'move':{if(typeof c.x!=='number'||typeof c.y!=='number')throw new Error('move needs numeric x,y');issue({k:'move',u:ids,x:r3(clamp(c.x,0,N-.01)),y:r3(clamp(c.y,0,N-.01))},'ai');
+        const bad=us.filter(u=>!u.path.length);if(bad.length)res={ok:true,warning:'no path for units '+bad.map(u=>u.no).join(',')};break}
+      case'attack':{const id=+String(c.target).replace(/^e/,'');const t=G.units.find(u=>u.id===id&&u.team==='E'&&u.alive);
+        if(!t)throw new Error('unknown or dead target '+c.target);if(!G.seenE.has(t.id))throw new Error('target '+c.target+' is not currently visible');issue({k:'attack',u:ids,t:t.id},'ai');break}
+      case'stop':issue({k:'stop',u:ids},'ai');break;
+      case'stance':{if(!STANCES[c.stance])throw new Error("stance must be 'hold' | 'free' | 'nofire'");issue({k:'stance',u:ids,s:c.stance},'ai');break}
+      case'convoy':{if(!G.m.road)throw new Error('this mission has no convoy');issue({k:'convoy',go:!!c.go},'ai');break}
+      case'abort':issue({k:'abort'},'ai');break;
+      case'mode':{if(!MMODES[c.mode])throw new Error("mode must be 'normal'|'fast'|'careful'");issue({k:'mode',u:ids,s:c.mode},'ai');break}
+      case'hide':issue({k:'hide',u:ids},'ai');break;
+      case'ammo':{if(!AMMO[c.ammo])throw new Error("ammo must be 'std'|'ap'|'he'");issue({k:'ammo',u:ids,s:c.ammo},'ai');break}
+      case'artillery':{if(G.arty<=0)throw new Error('no artillery left');const X=Math.floor(c.x),Y=Math.floor(c.y);if(!(X>=0&&Y>=0&&X<N&&Y<N)||!G.vis[Y*N+X])throw new Error('artillery target must be inside your current vision');issue({k:'arty',x:r3(c.x),y:r3(c.y)},'ai');break}
+      case'tool':{const tool=c.tool||us.find(u=>u.tool!=='none')?.tool;if(!tool||!TOOLS[tool]||tool==='none')throw new Error('units have no tool');
+        const car=us.filter(u=>u.tool===tool&&u.ammo>0);if(!car.length)throw new Error('no unit with ammo for '+tool);const T=TOOLS[tool];
+        if(T.target==='enemy'||T.target==='struct'){const id=+String(c.target).replace(/^e/,'');const t=G.units.find(u=>u.id===id&&u.team==='E'&&u.alive&&(T.target!=='struct'||u.struct));if(!t)throw new Error(tool+' needs a live enemy '+(T.target==='struct'?'structure':'')+' target');
+          if(!G.seenE.has(t.id))throw new Error('target not visible');issue({k:'tool',tool,u:car.map(u=>u.id),t:t.id,x:r3(t.x),y:r3(t.y)},'ai');
+          if(tool==='missile'&&!car.some(u=>canLock(u,t)))res={ok:true,warning:'no lock yet: units will close in until the target is inside their own sensor or a radar ally sees it'}}
+        else{if(typeof c.x!=='number'||typeof c.y!=='number')throw new Error(tool+' needs numeric x,y');const x=r3(clamp(c.x,0,N-.01)),y=r3(clamp(c.y,0,N-.01));
+          const u=car.sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y))[0];issue({k:'tool',tool,u:[u.id],x,y},'ai');
+          if(Math.hypot(u.x-x,u.y-y)>T.range)res={ok:true,warning:`out of range (${T.range}); unit ${u.no} will move closer first`}}
+        break}
+      default:throw new Error('unknown cmd '+c.cmd)}
+    return res}catch(e){return{ok:false,error:e.message}}})}
+function step(sec=1){need();const n=Math.max(1,Math.round(Math.min(sec,60)*30));for(let i=0;i<n&&!G.over;i++)simStep();hud();return observe()}
+function start(o={}){
+  const m=MISSIONS.find(x=>x.id===(o.mission||'m1'));if(!m)throw new Error('unknown mission '+o.mission);
+  if(o.difficulty){if(!DIFFS[o.difficulty])throw new Error('difficulty must be easy|normal|hard');SAVE.diff=o.difficulty}
+  let slots=SAVE.slots.map(migrateSlot),deploy=[...deployOf(m)];
+  if(o.loadout){deploy=Array(8).fill(false);for(const l of o.loadout){const i=(l.slot||0)-1;if(i<0||i>7)throw new Error('slot must be 1..8');
+      for(const k of['chassis','weapon','equip','tool'])if(l[k]!=null){const tbl={chassis:CHASSIS,weapon:WEAPONS,equip:EQUIP,tool:TOOLS}[k];if(!tbl[l[k]])throw new Error(`unknown ${k} '${l[k]}' (options: ${Object.keys(tbl).join(', ')})`);slots[i][k]=l[k]}
+      deploy[i]=l.deploy!==false}}
+  const cost=slots.reduce((a,x,i)=>a+(deploy[i]?stats(x).cost:0),0),n=deploy.filter(Boolean).length;
+  if(!n)throw new Error('no units deployed');if(n>m.max)throw new Error(`too many units: ${n} > max ${m.max}`);if(cost>m.budget)throw new Error(`over budget: ${cost} > ${m.budget}`);
+  startBattle(m,{slots,deploy,ai:o.ai!==false,realtime:!!o.realtime,seed:o.seed});
+  return observe()}
+function rules(){return `# OCTA SQUAD — rules for an AI player
+Real-time tactics on a ${N}x${N} tile grid. Coordinates are continuous (x,y); x grows to the right-down, y to the left-down in the isometric view, but you can reason on the plain grid (octa.map()).
+In AI mode time only advances when you call octa.step(seconds). 30 simulation ticks per second.
+
+## Loadout (before battle)
+Each mission has a budget and a max unit count. Unit cost = chassis + weapon + equip.
+Chassis: ${Object.entries(CHASSIS).map(([k,v])=>`${k}(hp${v.hp} armor${v.armor} speed${v.speed} sensor${v.sensor} cost${v.cost}${v.repair?' repairs allies within 2.5 at '+v.repair+'hp/s':''})`).join('; ')}
+Weapons: ${Object.entries(WEAPONS).map(([k,v])=>`${k}(range${v.range} dmg${v.dmg} every${v.cd}s cost${v.cost}${v.splash?' splash'+v.splash:''}${v.min?' minRange'+v.min:''})`).join('; ')}
+Equip: ${Object.entries(EQUIP).map(([k,v])=>`${k}(cost${v.cost}${v.sensor?' sensor+'+v.sensor:''}${v.emit?' enemies detect you '+v.emit+' farther':''}${v.hp?' hp+'+v.hp:''}${v.armor?' armor+'+v.armor:''}${v.speed?' speed'+(v.speed>0?'+':'')+v.speed:''}${v.stealth?' detection x0.5, broken for 2.5s after firing':''}${v.regen?' regen'+v.regen+'/s':''})`).join('; ')}
+
+## Combat
+- Damage = weapon dmg × max(0.3, 1 − 0.07×armor) × (0.75 if the target stands in forest). Enemy damage is further scaled by difficulty (easy 0.55, normal 0.8, hard 1.0).
+- You only see enemies within some unit's sensor radius (enemies in forest only within 0.7× that). You can only shoot what you see.
+- Hills: +1 sensor and +1 range for the unit standing on them.
+- Enemies detect a unit of yours at distance (enemySensor+hill) × mult + radarEmission, where mult = 0.5 for stealth (unless it fired in the last 2.5s) × 0.7 in forest.
+- A detecting enemy alerts other enemies within 5.5 (radar tower: 13). Alerted enemies chase within ~10 tiles; they give up ~9s after losing sight.
+- Units fire automatically at the nearest visible enemy in range unless stance is 'nofire'. 'hold' = fire but don't chase. 'free' = chase visible enemies when idle. 'nofire' = only fire at an explicit attack target.
+
+Tools (one per unit, limited uses, used with the 'tool' command): ${Object.entries(TOOLS).filter(([k])=>k!=='none').map(([k,v])=>`${k}(uses${v.ammo} cost${v.cost}${v.range?' range'+v.range:''}${v.radius?' radius'+v.radius:''}${v.dur?' '+v.dur+'s':''})`).join('; ')}
+- missile: dmg45 + half in radius 1.2. Needs a LOCK: target visible and not in chaff, and either within the launcher's own sensor or within the sensor of an ally whose radar works (radar equip, not inside chaff). Loses guidance and misses if it or its target enters chaff. Enemy heavies carry missiles too (guided by their own sensor or the radar tower).
+- chaff: inside the cloud missiles lose lock and radar stops working (no radar sensor bonus/emission; the radar tower cannot detect units inside).
+- smoke: shots where shooter or target stands in smoke hit only 35%. Units in smoke are seen only at 0.4x distance by eyes; radar still sees them.
+- flare: lights radius 4 for 10s; enemies inside become visible (not those in smoke).
+- decoy: fake unit (hp60, 25s, emits radar) that enemies detect and prefer to shoot.
+- mine: arms after 1.5s, invisible to enemies, explodes (dmg60 + half in 1.2) when an enemy steps within 0.8.
+
+- charge: walk up to an enemy STRUCTURE (target:'e<ID>') and plant it; explodes after 5s (260 to structures, 100 to units within 1.5).
+- jammer: enemies inside get 0.4x sensor, the radar tower inside stops working.
+- probe: static sensor (sensor 5, 60s, hp 25, hard to detect).
+
+## Unit modes and other systems
+- Move mode: normal | fast (speed x1.5, own sensor x0.7, enemies detect you 1.5 farther) | careful (speed x0.6, sensor +1.5, detection x0.85; reveals enemy mines within 2.5 and disarms a revealed mine within 1.2 in 2s while standing still; careful units never trigger revealed mines). Missions m2 and m4 have hidden enemy minefields (60 dmg).
+- hide: unit stops; after 2s it is hidden (detection x0.35) and does not auto-fire. Any move/attack order cancels it.
+- Ammo: std (infinite) | ap (armor effect x0.3, dmg x0.9) | he (splash 1 at half, x1.6 vs structures, ignores forest cover, armor effect x1.3). Switching takes 2.5s (no firing). Limited rounds per unit (rifle ap12/he10, mg 40/30, sniper 5/4).
+- Subsystem damage: heavy hits may break fcs (fire interval x1.6), legs (speed x0.55) or sensor (x0.6). A support unit within 2.5 fixes one every 6s.
+- Missile interception: units with MG shoot down enemy missiles passing within 2.2 with 35% chance.
+- Artillery: limited per mission (octa.observe().artillery.left). Target must be inside your vision. 5 shells land 8s later within radius 1.8 (55 each) and hit EVERYONE, including your units.
+
+## Commands (octa.act)
+{cmd:'move', units:[ids]|'all', x, y}   pathfinds; groups spread around the point
+{cmd:'attack', units, target:'e<ID>'}  target must currently be visible
+{cmd:'stop', units}
+{cmd:'stance', units, stance:'hold'|'free'|'nofire'}
+{cmd:'convoy', go:true|false}         escort mission only
+{cmd:'tool', units:[ids], target:'e<ID>'}      missile (all listed carriers fire; they close in if no lock yet)
+{cmd:'tool', units:[ids], x, y}               chaff/smoke/flare/decoy/mine/jammer/probe (nearest carrier uses it; walks into range first)
+{cmd:'tool', units:[ids], target:'e<ID>'}      charge (target must be a structure)
+{cmd:'mode', units, mode:'normal'|'fast'|'careful'}
+{cmd:'hide', units}
+{cmd:'ammo', units, ammo:'std'|'ap'|'he'}
+{cmd:'artillery', x, y}
+
+## Replays
+Every finished battle is recorded (seed + loadout + timestamped commands) and can be watched in the page. octa.replay() returns the last one as JSON; octa.playReplay(json) plays it; octa.verifyReplay(json) re-simulates and checks the result matches.
+
+## Missions
+${MISSIONS.map(m=>`- ${m.id} ${m.type} "${m.name}": budget ${m.budget}, max ${m.max} units${m.limit?', time limit '+m.limit+'s':''}. Win: ${m.win}. Lose: ${m.lose}. ${m.brief}`).join('\n')}
+`}
+const api={version:1,missions:()=>MISSIONS.map(m=>({id:m.id,type:m.type,name:m.name,budget:m.budget,maxUnits:m.max,timeLimit:m.limit||null,win:m.win,lose:m.lose,brief:m.brief,spawn:{x:m.spawn[0]+.5,y:m.spawn[1]+.5}})),
+  parts:()=>({chassis:CHASSIS,weapons:WEAPONS,equip:EQUIP,tools:TOOLS}),rules,start,observe,map:mapInfo,text,act,step,
+  realtime:(on=true)=>{need();G.aiStep=!on;setPaused(!on);if(G.ai)$('#pauseBanner').hidden=true;return{realtime:on}},
+  quit:()=>{if(G)endToHQ();return{status:'idle'}},
+  auto:(on=true)=>{need();setAuto(!!on);return{autoAI:G.autoAI}},
+  replay:()=>G&&G.lastReplay?G.lastReplay:(loadReplays()[0]||null),
+  replays:()=>loadReplays().map((r,i)=>({index:i,mission:r.mission,ctrl:r.ctrl,difficulty:r.diff,date:new Date(r.date).toISOString(),result:r.result,commands:r.cmds.length})),
+  playReplay:(rep,opt={})=>{if(typeof rep==='number')rep=loadReplays()[rep];playReplay(rep,opt.autoplay!==false);if(opt.speed){G.speed=opt.speed;$('#spdBtn').textContent='×'+G.speed}return{ticks:G.replay.rep.ticks}},
+  verifyReplay:(rep)=>{if(typeof rep==='number')rep=loadReplays()[rep];if(typeof rep==='string')rep=JSON.parse(rep);playReplay(rep,false);seekTo(1e9);
+    const got={win:!!(G.over&&G.over.win),reason:G.over?G.over.reason:null,time:+G.time.toFixed(2)};return{recorded:rep.result,replayed:got,match:got.win===rep.result.win&&Math.abs(got.time-rep.result.time)<0.05}}};
+window.octa=api;
+
+/* ---- built-in AI commander (same idea as octa_agent_example.mjs, a bit smarter) ---- */
+const dd=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function brain(){
+  const o=observe({peek:true}),alive=o.squad.filter(u=>u.alive);if(!alive.length)return;
+  const c={x:alive.reduce((s,u)=>s+u.x,0)/alive.length,y:alive.reduce((s,u)=>s+u.y,0)/alive.length};
+  const cmds=[];let intent='';
+  const moving=alive.some(u=>u.moving);
+  const say=t=>{intent=t};
+  // escort: scout ahead first, then let the convoy roll
+  if(o.convoy){const lead=o.convoy.trucks.find(t=>t.alive),goal=o.zones.find(z=>z.kind==='goal');
+    if(lead){const ahead=dd(lead,goal)-dd(c,goal);const mineNear=o.enemyMines.some(m=>dd(m,lead)<7);const threat=o.enemies.some(e=>e.weapon&&dd(e,lead)<8);
+      const go=o.time>25&&ahead>Math.min(3,dd(lead,goal)*0.15)&&!mineNear&&!threat;if(go!==o.convoy.moving)cmds.push({cmd:'convoy',go})}}
+  // clear known enemy mines: nearest unit walks next to it in careful mode and stands still
+  {const used=new Set();for(const m of o.enemyMines){const u=alive.filter(x=>!used.has(x.id)&&x.chassis!=='support').sort((a,b)=>dd(a,m)-dd(b,m))[0];if(!u||dd(u,m)>9)continue;used.add(u.id);
+    if(u.moveMode!=='careful')cmds.push({cmd:'mode',units:[u.id],mode:'careful'});if(dd(u,m)>1.0&&!(u.dest&&dd(u.dest,m)<0.8))cmds.push({cmd:'move',units:[u.id],x:m.x+0.4,y:m.y+0.4});}
+    if(used.size){say(`地雷処理中（${o.enemyMines.length}個）`);if(!o.enemies.some(e=>e.weapon&&dd(e,c)<8))return finish(cmds.concat(),intent)}}
+  // recon: never start fights, just keep searching
+  if(o.sites){const nf=alive.filter(u=>u.stance!=='nofire');if(nf.length)cmds.push({cmd:'stance',units:nf.map(u=>u.id),stance:'nofire'})}
+  // extraction: run for the LZ, fight only what blocks the way, then hold the LZ
+  if(o.extraction){const lz=o.zones.find(z=>z.kind==='lz');const inLZ=alive.filter(u=>dd(u,lz)<=lz.r-0.3);
+    const threat=o.enemies.filter(e=>e.weapon&&alive.some(u=>dd(u,e)<=u.range+0.5)).sort((a,b)=>a.hp-b.hp)[0];
+    const dl=dd(c,lz);
+    if(threat){cmds.push({cmd:'attack',units:'all',target:threat.id});say(inLZ.length===alive.length?`LZを守りつつ ${threat.name} を集中攻撃`:`進路上の ${threat.name} を排除`)}
+    else if(dl<4||inLZ.length){const out=alive.filter(u=>!inLZ.includes(u)&&!(u.dest&&dd(u.dest,lz)<lz.r));
+      if(out.length)cmds.push({cmd:'move',units:out.map(u=>u.id),x:lz.x,y:lz.y});
+      say(o.extraction.pickupRequested?`LZで回収待ち（残り${Math.ceil(o.extraction.pickupIn)}秒）`:`LZへ進入（${inLZ.length}/${alive.length}機）`)}
+    else if(!moving){const k=Math.min(5,dl)/dl;cmds.push({cmd:'move',units:'all',x:c.x+(lz.x-c.x)*k,y:c.y+(lz.y-c.y)*k});say(`隊列を保ってLZへ前進（残り${dl.toFixed(0)}マス）`)}
+    else say('隊列を保ってLZへ前進');
+    return finish(cmds,intent)}
+  // fight: focus the most threatening enemy close to the squad (radar/objective first)
+  const near=o.sites?[]:o.enemies.filter(e=>(e.weapon||e.objective||e.type==='radar')&&dd(e,c)<9);
+  if(near.length){const score=e=>(e.type==='radar'?-60:0)+(e.objective&&near.length===1?-30:0)+e.hp*0.6+dd(e,c)*10-(e.weapon==='SN'?25:0);
+    const t=near.sort((a,b)=>score(a)-score(b))[0];
+    cmds.push({cmd:'attack',units:'all',target:t.id});say(`${t.name}（HP${t.hp}）を集中攻撃${near.length>1?`　ほか${near.length-1}機視認`:''}`);
+    // pull badly damaged units back behind the group
+    for(const u of alive)if(u.hp/u.maxHp<0.25&&alive.length>1){const e=near[0];const bx=u.x+(u.x-e.x)*0.6,by=u.y+(u.y-e.y)*0.6;cmds.push({cmd:'move',units:[u.id],x:bx,y:by});}
+    return finish(cmds,intent)}
+  // otherwise pick a goal
+  const goals=o.lastSeen.map(e=>({...e,why:`最後に${e.type}を見た地点へ`}));
+  if(o.sites){o.zones.filter(z=>z.kind==='hint').forEach((z,i)=>{if(!o.sites[i].scanned)goals.push({...(o.sites[i].x!=null?o.sites[i]:z),why:`${z.label}を捜索`})});
+    if(o.sites.every(x=>x.scanned))goals.push(...o.zones.filter(z=>z.kind==='lz').map(z=>({...z,why:'LZへ帰還'})))}
+  else if(o.hq&&o.hq.alive)goals.push({x:23.5,y:4.5,why:'司令塔へ前進'});
+  else if(o.convoy){const lead=o.convoy.trucks.find(t=>t.alive);if(lead){const g=o.zones.find(z=>z.kind==='goal');const k=o.convoy.moving?0.35:0.25;goals.push({x:lead.x+(g.x-lead.x)*k,y:lead.y+(g.y-lead.y)*k,why:'輸送隊の前方を警戒'})}}
+  const g=goals.filter(z=>dd(z,c)>1.2||z.kind==='lz').sort((a,b)=>dd(a,c)-dd(b,c))[0];
+  if(g){if(!moving||o.convoy)cmds.push({cmd:'move',units:'all',x:g.x,y:g.y});else{const idle=alive.filter(u=>!u.moving&&!u.pendingTool&&!u.hiding&&dd(u,g)>2.5);if(idle.length)cmds.push({cmd:'move',units:idle.map(u=>u.id),x:g.x,y:g.y})}say(g.why)}
+  else if(!moving){const m=mapInfo();let best=null,bd=1e9;
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(m.explored[y][x]==='0'&&'.FH='.includes(m.rows[y][x])){const d=Math.hypot(x+.5-c.x,y+.5-c.y);if(d<bd){bd=d;best={x:x+.5,y:y+.5}}}
+    if(best){cmds.push({cmd:'move',units:'all',x:best.x,y:best.y});say('未探索の区域を索敵')}}
+  else say('移動中');
+  return finish(cmds,intent);
+  function finish(cmds,intent){
+    // tools: missiles at lockable threats, chaff against incoming missiles, smoke over a hurt unit under fire, flares over search areas, decoy when cornered
+    const busy=new Set();const tl=(u,k)=>u.alive&&u.tool===k&&u.ammo>0&&!u.pendingTool&&u.toolReady&&!busy.has(u.id);
+    const cloudAt=(k,p,r=1.5)=>o.clouds.some(c=>c.kind===k&&Math.hypot(c.x-p.x,c.y-p.y)<r);
+    for(const u of alive)if(tl(u,'missile')&&u.lockable.length){const cand=o.enemies.filter(e=>u.lockable.includes(e.id)).sort((a,b)=>(b.weapon==='SN'?50:0)+(b.missiles?40:0)-(a.weapon==='SN'?50:0)-(a.missiles?40:0)+(a.hp-b.hp)*0.3)[0];
+      if(cand){cmds.push({cmd:'tool',units:[u.id],target:cand.id});busy.add(u.id);intent+=`　／ ${u.id}番がミサイルで${cand.name}を狙う`}}
+    for(const m of o.incomingMissiles){const tu=alive.find(u=>u.id===m.target);if(!tu||cloudAt('chaff',tu))continue;
+      const cu=alive.filter(u=>tl(u,'chaff')&&dd(u,tu)<=3.5).sort((a,b)=>dd(a,tu)-dd(b,tu))[0];
+      if(cu){cmds.push({cmd:'tool',units:[cu.id],x:tu.x,y:tu.y});busy.add(cu.id);intent+=`　／ ミサイル接近、${tu.id}番にチャフ`;break}}
+    const nearE=o.enemies.filter(e=>e.weapon&&dd(e,c)<7);
+    if(nearE.length)for(const hu of alive.filter(u=>u.detected&&u.hp/u.maxHp<0.45&&!cloudAt('smoke',u))){
+      const su=alive.filter(u=>tl(u,'smoke')&&dd(u,hu)<=3.5).sort((a,b)=>dd(a,hu)-dd(b,hu))[0];
+      if(su){cmds.push({cmd:'tool',units:[su.id],x:hu.x,y:hu.y});busy.add(su.id);intent+=`　／ ${hu.id}番を煙幕で隠す`;break}}
+    if(o.sites){const hints=o.zones.filter(z=>z.kind==='hint');hints.forEach((z,i)=>{if(o.sites[i].scanned||o.sites[i].x!=null||cloudAt('flare',z,3))return;
+      const fu=alive.find(u=>tl(u,'flare')&&dd(u,z)<=8&&dd(u,z)>3);if(fu){cmds.push({cmd:'tool',units:[fu.id],x:z.x,y:z.y});busy.add(fu.id);intent+=`　／ ${z.label}に照明弾`}})}
+    if(o.extraction&&nearE.length&&!o.decoys.length){const du=alive.find(u=>tl(u,'decoy'));if(du){const e=nearE.sort((a,b)=>dd(a,du)-dd(b,du))[0];const L=dd(e,du)||1;
+      cmds.push({cmd:'tool',units:[du.id],x:du.x+(e.x-du.x)/L*3.5,y:du.y+(e.y-du.y)/L*3.5});busy.add(du.id);intent+='　／ デコイで敵を引きつける'}}
+    // ammo: AP against heavies, HE against structures, standard otherwise
+    {const tgtE=o.enemies.find(e=>cmds.some(k=>k.cmd==='attack'&&k.target===e.id));
+      if(tgtE){const want=tgtE.structure?'he':tgtE.type==='heavy'?'ap':'std';
+        const sw=alive.filter(u=>u.weapon&&!u.reloading&&u.ammoType!==want&&(want==='std'||u[want==='ap'?'apRounds':'heRounds']>0)&&!busy.has(u.id));
+        if(sw.length)cmds.push({cmd:'ammo',units:sw.map(u=>u.id),ammo:want})}}
+    // careful movement where minefields are expected, fast when nothing is around and far from the goal
+    if(o.mission==='m2'||o.mission==='m4'){const want=nearE.length?'normal':'careful';const ch=alive.filter(u=>u.moveMode!==want);if(ch.length)cmds.push({cmd:'mode',units:ch.map(u=>u.id),mode:want})}
+    // artillery on a cluster of 3+ visible enemies that is well away from our own units
+    if(o.artillery.left>0&&!o.artillery.incoming.length){for(const e of o.enemies){if(e.structure)continue;const cl=o.enemies.filter(f=>!f.structure&&dd(f,e)<=1.8);
+      if(cl.length>=3&&alive.every(u=>dd(u,e)>4)){cmds.push({cmd:'artillery',x:e.x,y:e.y});intent+=`　／ 敵${cl.length}機の集団に砲撃要請`;break}}}
+    // demolition charge on a nearby structure
+    for(const u of alive)if(tl(u,'charge')){const st=o.enemies.find(e=>e.structure&&dd(e,u)<6);if(st){cmds.push({cmd:'tool',units:[u.id],target:st.id});busy.add(u.id);intent+=`　／ ${u.id}番が${st.name}に爆薬`}}
+    cmds=cmds.map(k=>(k.cmd==='move'||k.cmd==='attack')&&k.units==='all'?{...k,units:alive.filter(u=>!busy.has(u.id)&&!u.pendingTool).map(u=>u.id)}:k).filter(k=>!Array.isArray(k.units)||k.units.length);
+    // roles: repair units never lead the charge — they trail the group and tuck in behind whoever is hurt
+    const sup=alive.filter(u=>u.chassis==='support'),cmb=alive.filter(u=>u.chassis!=='support');
+    if(sup.length&&cmb.length){
+      const cc={x:cmb.reduce((a,u)=>a+u.x,0)/cmb.length,y:cmb.reduce((a,u)=>a+u.y,0)/cmb.length};const out=[];
+      for(const k of cmds){
+        if((k.cmd==='attack'||k.cmd==='move')&&(k.units==='all'||k.units.some(id=>sup.some(u=>u.id===id)))){
+          const ids=(k.units==='all'?alive.map(u=>u.id):k.units).filter(id=>!sup.some(u=>u.id===id));
+          if(ids.length)out.push({...k,units:ids});
+          if(k.cmd==='move'&&!(o.extraction&&dd(k,o.zones.find(z=>z.kind==='lz'))<1)){const dx=k.x-cc.x,dy=k.y-cc.y,L=Math.hypot(dx,dy)||1;
+            sup.forEach((u,i)=>out.push({cmd:'move',units:[u.id],x:k.x-dx/L*1.8-dy/L*(i*0.8),y:k.y-dy/L*1.8+dx/L*(i*0.8)}))}
+          else if(k.cmd==='move')sup.forEach(u=>out.push({cmd:'move',units:[u.id],x:k.x,y:k.y}));
+        }else out.push(k)}
+      cmds=out;
+      const atk=cmds.find(k=>k.cmd==='attack'),t=atk&&o.enemies.find(e=>e.id===atk.target);
+      if(t){const hurt=[...cmb].sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0];const dx=hurt.x-t.x,dy=hurt.y-t.y,L=Math.hypot(dx,dy)||1;
+        sup.forEach((u,i)=>{const p={x:hurt.x+dx/L*1.6-dy/L*(i*0.8),y:hurt.y+dy/L*1.6+dx/L*(i*0.8)};
+          if(dd(u,p)>1.0&&!(u.dest&&dd(u.dest,p)<1.0))cmds.push({cmd:'move',units:[u.id],x:p.x,y:p.y})});
+        intent+=`　／ 修理機は${hurt.pilot}機（HP${Math.round(hurt.hp/hurt.maxHp*100)}%）の後方へ`}
+    }
+    // skip commands that would repeat what units are already doing
+    const pick=k=>k.units==='all'?alive:alive.filter(u=>k.units.includes(u.id));
+    const f=cmds.filter(k=>{if(k.cmd==='tool')return true;if(k.cmd==='attack')return pick(k).some(u=>u.target!==k.target&&!u.pendingTool);
+      if(k.cmd==='move')return !pick(k).every(u=>u.dest&&Math.hypot(u.dest.x-k.x,u.dest.y-k.y)<1.0);return true});
+    if(f.length)act(f);G.aiIntentText=intent;const el=$('#aiIntent');el.innerHTML=`<b>AI</b>${intent||'待機'}`;el.hidden=false;
+  }
+}
+window.octaBrain=brain;
+
+addEventListener('message',e=>{const d=e.data;if(!d||d.octa!==1||!api[d.method])return;let result,error;
+  try{result=api[d.method](...(d.args||[]))}catch(err){error=err.message}
+  try{(e.source||parent).postMessage({octa:1,id:d.id,result,error},'*')}catch(_){}});
+})();
+renderHQ();renderReplays();requestAnimationFrame(frame);
+})();
+</script>
+
+</html>

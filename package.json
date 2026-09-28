@@ -1,0 +1,14 @@
+{
+  "name": "octa-squad",
+  "version": "0.1.0",
+  "private": true,
+  "description": "オクタ小隊戦記 — ブラウザで動くクォータビューのリアルタイム戦術ゲーム（単一HTML）",
+  "type": "module",
+  "scripts": {
+    "agent": "node tools/agent_example.mjs",
+    "serve": "npx --yes http-server -p 8080 ."
+  },
+  "devDependencies": {
+    "playwright": "^1.47.0"
+  }
+}
