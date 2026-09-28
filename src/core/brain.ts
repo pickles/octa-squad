@@ -13,6 +13,14 @@ export function brainTick(port: AgentPort): string {
   const o = port.observe({ peek: true }), alive = o.squad.filter(u => u.alive);
   if (!alive.length) return '';
   const c = { x: alive.reduce((s, u) => s + u.x, 0) / alive.length, y: alive.reduce((s, u) => s + u.y, 0) / alive.length };
+  const effSpd = (u: U) => u.speed * (u.damaged.includes('legs') ? 0.55 : 1);
+  const isScout = (u: U) => u.chassis === 'light' && u.weapon !== 'sniper';
+  const supports = alive.filter(u => u.chassis === 'support'), scouts = alive.filter(isScout);
+  let line = alive.filter(u => u.chassis !== 'support' && !isScout(u));
+  if (!line.length) line = alive.filter(u => u.chassis !== 'support');
+  if (!line.length) line = alive;
+  const anchor = [...line].sort((a, b) => effSpd(a) - effSpd(b) || b.maxHp - a.maxHp)[0];
+  void supports;
   let cmds: Act[] = []; let intent = '';
   const moving = alive.some(u => u.moving);
   const say = (t: string) => { intent = t };
@@ -20,8 +28,9 @@ export function brainTick(port: AgentPort): string {
   if (o.convoy) {
     const lead = o.convoy.trucks.find(t => t.alive), goal = o.zones.find(z => z.kind === 'goal')!;
     if (lead) {
-      const ahead = dd(lead, goal) - dd(c, goal), mineNear = o.enemyMines.some(m => dd(m, lead) < 7), threat = o.enemies.some(e => e.weapon && dd(e, lead) < 8);
-      const go = o.time > 25 && ahead > Math.min(3, dd(lead, goal) * 0.15) && !mineNear && !threat;
+      const lc = { x: line.reduce((q, u) => q + u.x, 0) / line.length, y: line.reduce((q, u) => q + u.y, 0) / line.length };
+      const ahead = dd(lead, goal) - dd(lc, goal), mineNear = o.enemyMines.some(m => dd(m, lead) < 7), threat = o.enemies.some(e => e.weapon && dd(e, lead) < 8);
+      const go = o.time > 25 && (ahead > 1.5 || dd(lead, goal) < 4) && !mineNear && !threat;
       if (go !== o.convoy.moving) cmds.push({ cmd: 'convoy', go });
     }
   }
@@ -49,12 +58,28 @@ export function brainTick(port: AgentPort): string {
     else say('隊列を保ってLZへ前進');
     return finish(cmds, intent);
   }
-  const near = o.sites ? [] : o.enemies.filter(e => (e.weapon || e.objective || e.type === 'radar') && dd(e, c) < 9);
+  // ---- doctrine: scouts find the enemy and fall back; the slowest line unit (usually the heavy) is the shield and the
+  //      anchor; everyone else fights next to it, inside the repair radius of the support units.
+  const near = o.sites ? [] : o.enemies.filter(e => (e.weapon || e.objective || e.type === 'radar') && dd(e, c) < 10);
+  const back = (from: Pt, dist: number, i = 0): Pt => { // a point behind the anchor, away from `from`
+    const dx = anchor.x - from.x, dy = anchor.y - from.y, L = Math.hypot(dx, dy) || 1, side = (i % 2 ? 1 : -1) * Math.ceil(i / 2) * 0.8;
+    return { x: anchor.x + dx / L * dist - dy / L * side, y: anchor.y + dy / L * dist + dx / L * side };
+  };
   if (near.length) {
-    const score = (e: typeof near[number]) => (e.type === 'radar' ? -60 : 0) + (e.objective && near.length === 1 ? -30 : 0) + e.hp * 0.6 + dd(e, c) * 10 - (e.weapon === 'SN' ? 25 : 0);
+    const score = (e: typeof near[number]) => (e.type === 'radar' ? -60 : 0) + (e.objective && near.length === 1 ? -30 : 0) + e.hp * 0.6 + dd(e, anchor) * 10 - (e.weapon === 'SN' ? 25 : 0);
     const t = [...near].sort((a, b) => score(a) - score(b))[0];
-    cmds.push({ cmd: 'attack', units: 'all', target: t.id }); say(`${t.name}（HP${t.hp}）を集中攻撃${near.length > 1 ? `　ほか${near.length - 1}機視認` : ''}`);
-    for (const u of alive) if (u.hp / u.maxHp < 0.25 && alive.length > 1) { const e = near[0]; cmds.push({ cmd: 'move', units: [u.id], x: u.x + (u.x - e.x) * 0.6, y: u.y + (u.y - e.y) * 0.6 }) }
+    const fighters = line.filter(u => u !== anchor && dd(u, anchor) <= 3);
+    const strays = line.filter(u => u !== anchor && dd(u, anchor) > 3);
+    // the anchor always closes on the target; units next to it join in
+    cmds.push({ cmd: 'attack', units: [anchor.id, ...fighters.map(u => u.id)], target: t.id });
+    // anyone who ran ahead (or scouts) falls back behind the anchor instead of fighting alone
+    let k = 0;
+    for (const u of [...strays, ...scouts]) {
+      const p = back(t, isScout(u) ? 2.2 : 1.4, k++);
+      if (dd(u, p) > 1.2 && !(u.dest && dd(u.dest, p) < 1.0)) cmds.push({ cmd: 'move', units: [u.id], ...p });
+    }
+    for (const u of line) if (u !== anchor && u.hp / u.maxHp < 0.35 && !strays.includes(u)) { const p = back(t, 1.8, k++); cmds.push({ cmd: 'move', units: [u.id], ...p }) }
+    say(`${anchor.pilot}機を盾に${t.name}（HP${t.hp}）を攻撃${strays.length + scouts.length ? `　／ ${strays.length + scouts.length}機は後退して合流` : ''}${near.length > 1 ? `　ほか${near.length - 1}機視認` : ''}`);
     return finish(cmds, intent);
   }
   const goals: (Pt & { why: string; kind?: string })[] = o.lastSeen.map(e => ({ x: e.x, y: e.y, why: `最後に${e.type}を見た地点へ` }));
@@ -64,17 +89,21 @@ export function brainTick(port: AgentPort): string {
   } else if (o.hq && o.hq.alive) goals.push({ x: 23.5, y: 4.5, why: '司令塔へ前進' });
   else if (o.convoy) {
     const lead = o.convoy.trucks.find(t => t.alive);
-    if (lead) { const g = o.zones.find(z => z.kind === 'goal')!; const k = o.convoy.moving ? 0.35 : 0.25; goals.push({ x: lead.x + (g.x - lead.x) * k, y: lead.y + (g.y - lead.y) * k, why: '輸送隊の前方を警戒' }) }
+    if (lead) { const g = o.zones.find(z => z.kind === 'goal')!, L = dd(lead, g) || 1, ahead = Math.min(L, Math.max(3, L * (o.convoy.moving ? 0.35 : 0.25))); goals.push({ x: lead.x + (g.x - lead.x) / L * ahead, y: lead.y + (g.y - lead.y) / L * ahead, why: '輸送隊の前方を警戒', kind: 'escort' }) }
   }
-  const g = goals.filter(z => dd(z, c) > 1.2 || z.kind === 'lz').sort((a, b) => dd(a, c) - dd(b, c))[0];
-  if (g) {
-    if (!moving || o.convoy) cmds.push({ cmd: 'move', units: 'all', x: g.x, y: g.y });
-    else { const idle = alive.filter(u => !u.moving && !u.pendingTool && !u.hiding && dd(u, g) > 2.5); if (idle.length) cmds.push({ cmd: 'move', units: idle.map(u => u.id), x: g.x, y: g.y }) }
-    say(g.why);
-  } else if (!moving) {
+  let g: (Pt & { why: string; kind?: string }) | undefined = goals.filter(z => dd(z, c) > 1.2 || z.kind === 'lz' || z.kind === 'escort').sort((a, b) => dd(a, c) - dd(b, c))[0];
+  if (!g && !moving) {
     const m = port.map(); let best: Pt | null = null, bd = 1e9;
     for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (m.explored[y][x] === '0' && '.FH='.includes(m.rows[y][x])) { const d = Math.hypot(x + .5 - c.x, y + .5 - c.y); if (d < bd) { bd = d; best = { x: x + .5, y: y + .5 } } }
-    if (best) { cmds.push({ cmd: 'move', units: 'all', ...best }); say('未探索の区域を索敵') }
+    if (best) g = { ...best, why: '未探索の区域を索敵' };
+  }
+  if (g) {
+    // the line moves as one block (group move = slowest member's speed); scouts stay a few tiles ahead of the anchor
+    const ln = line.filter(u => !u.pendingTool && !u.hiding);
+    if (ln.length && (!ln.some(u => u.moving) || o.convoy || ln.some(u => !u.moving && dd(u, g!) > 2.5))) cmds.push({ cmd: 'move', units: ln.map(u => u.id), x: g.x, y: g.y });
+    const dA = dd(anchor, g), lead = { x: anchor.x + (g.x - anchor.x) / (dA || 1) * Math.min(3.5, dA), y: anchor.y + (g.y - anchor.y) / (dA || 1) * Math.min(3.5, dA) };
+    scouts.forEach((u, i) => { const p = { x: lead.x + (i % 2 ? .8 : -.8) * Math.ceil(i / 2), y: lead.y }; if (dd(u, p) > 1.5 && !(u.dest && dd(u.dest, p) < 1.2)) cmds.push({ cmd: 'move', units: [u.id], ...p }) });
+    say(g.why);
   } else say('移動中');
   return finish(cmds, intent);
 
@@ -140,7 +169,7 @@ export function brainTick(port: AgentPort): string {
       cmds = out;
       const atk = cmds.find(k => k.cmd === 'attack'), t = atk && o.enemies.find(e => e.id === atk.target);
       if (t) {
-        const hurt = [...cmb].sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0]; const dx = hurt.x - t.x, dy = hurt.y - t.y, L = Math.hypot(dx, dy) || 1;
+        const hurt = [...cmb].filter(u => dd(u, anchor) <= 4).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0] || anchor; const dx = hurt.x - t.x, dy = hurt.y - t.y, L = Math.hypot(dx, dy) || 1;
         sup.forEach((u, i) => { const p = { x: hurt.x + dx / L * 1.6 - dy / L * (i * 0.8), y: hurt.y + dy / L * 1.6 + dx / L * (i * 0.8) }; if (dd(u, p) > 1.0 && !(u.dest && dd(u.dest, p) < 1.0)) cmds.push({ cmd: 'move', units: [u.id], ...p }) });
         intent += `　／ 修理機は${hurt.pilot}機（HP${Math.round(hurt.hp / hurt.maxHp * 100)}%）の後方へ`;
       }

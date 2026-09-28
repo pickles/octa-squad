@@ -21,7 +21,8 @@ export interface Entity {
   life: { alive: boolean; gone: boolean };
   // ---- optional components ----
   health?: { hp: number; maxHp: number; armor: number; hitT: number };
-  mover?: { speed: number; path: Pt[]; repathT: number; stT: number; stP: Pt | null };
+  /** `cap`: group-move speed limit (the slowest member's speed), 0 = none. */
+  mover?: { speed: number; path: Pt[]; repathT: number; stT: number; stP: Pt | null; cap: number };
   sensor?: { range: number; radarBonus: number; emit: number };
   weapon?: { key: WeaponKey; def: WeaponDef; cd: number; fireT: number; ammoType: AmmoType; nextAmmo: AmmoType | null; reloadT: number; ap: number; he: number };
   stealth?: { revealT: number };

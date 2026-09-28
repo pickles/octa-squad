@@ -115,7 +115,7 @@ export class Sim {
       const key = st.weapon as keyof typeof WEAPONS;
       e.weapon = { key, def: w, cd: this.rnd() * 0.6, fireT: 0, ammoType: 'std', nextAmmo: null, reloadT: 0, ap: AMMO_CAP[key].ap, he: AMMO_CAP[key].he };
     }
-    if ('speed' in st && st.speed > 0) e.mover = { speed: st.speed, path: [], repathT: 0, stT: 0, stP: null };
+    if ('speed' in st && st.speed > 0) e.mover = { speed: st.speed, path: [], repathT: 0, stT: 0, stP: null, cap: 0 };
     if ('stealth' in st && st.stealth) e.stealth = { revealT: 0 };
     if ('regen' in st && st.regen) e.regen = { rate: st.regen };
     if ('repair' in st && st.repair) e.repairer = { rate: st.repair, radius: 2.5 };
@@ -157,7 +157,7 @@ export class Sim {
 
   spawnTruck(name: string, p: Pt, path: Pt[]) {
     const e = this.unitBase('P', { hp: 210, armor: 4, sensor: 3, weapon: null, shape: 'truck' }, p, name);
-    e.mover = { speed: 0.8, path: path.map(q => ({ ...q })), repathT: 0, stT: 0, stP: null };
+    e.mover = { speed: 0.8, path: path.map(q => ({ ...q })), repathT: 0, stT: 0, stP: null, cap: 0 };
     e.truck = { hold: true };
     delete e.systems;
     return this.world.spawn(e);
@@ -184,6 +184,8 @@ export class Sim {
   inZone(e: Entity, kind: Zone['kind']) { return this.zones.some(z => z.kind === kind && Math.hypot(e.pos.x - z.x, e.pos.y - z.y) <= z.r) }
   onHill(e: Entity) { return this.map.at(e.pos.x, e.pos.y) === T.HILL }
   inForest(e: Entity) { return this.map.at(e.pos.x, e.pos.y) === T.FOREST }
+  /** Current movement speed before terrain (legs damage and move mode applied). */
+  effSpeed(e: Entity) { const mm = e.squad?.mmode; return (e.mover?.speed || 0) * (e.systems?.legs ? 0.55 : 1) * (mm === 'fast' ? 1.5 : mm === 'careful' ? 0.6 : 1) }
   rangeOf(e: Entity) { return e.weapon ? e.weapon.def.range + (this.onHill(e) ? 1 : 0) : 0 }
   effSensor(e: Entity) {
     if (!e.sensor) return 0;

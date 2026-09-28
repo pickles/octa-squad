@@ -36,7 +36,10 @@ export function execCommand(s: Sim, c: Command) {
     case 'move': {
       if (!us.length) return;
       const p = s.map.nearestPass(c.x, c.y);
+      // units ordered together move together: nobody outruns the slowest member
+      const cap = us.length > 1 ? Math.min(...us.map(u => s.effSpeed(u))) : 0;
       us.forEach((u, i) => {
+        u.mover!.cap = cap;
         const o = OFFS[i % OFFS.length]; let d = { x: p.x + o[0] * 0.75, y: p.y + o[1] * 0.75 };
         if (!s.map.pass(d.x, d.y)) d = p;
         u.mover!.path = s.map.findPath(u.pos.x, u.pos.y, d.x, d.y); u.squad!.order = 'move'; u.squad!.target = null;
@@ -47,7 +50,7 @@ export function execCommand(s: Sim, c: Command) {
     }
     case 'attack': {
       const t = s.world.get(c.t); if (!t || !t.life.alive) return;
-      for (const u of us) { if (!u.weapon) continue; u.squad!.order = 'attack'; u.squad!.target = t.id; u.mover!.repathT = 0; if (u.toolbelt) u.toolbelt.pending = null }
+      for (const u of us) { if (!u.weapon) continue; u.mover!.cap = 0; u.squad!.order = 'attack'; u.squad!.target = t.id; u.mover!.repathT = 0; if (u.toolbelt) u.toolbelt.pending = null }
       s.emit({ k: 'ping', x: t.pos.x, y: t.pos.y, red: true });
       return;
     }

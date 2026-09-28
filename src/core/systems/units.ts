@@ -165,8 +165,9 @@ export function movementSystem(s: Sim, dt: number) {
     if (u.truck?.hold) continue;
     const mv = u.mover; if (!mv.path.length) continue;
     const w = mv.path[0], dx = w.x - u.pos.x, dy = w.y - u.pos.y, d = Math.hypot(dx, dy);
-    const mm = u.squad?.mmode;
-    const step = mv.speed * (u.systems?.legs ? 0.55 : 1) * (mm === 'fast' ? 1.5 : mm === 'careful' ? 0.6 : 1) * dt / TERR[s.map.at(u.pos.x, u.pos.y)].move;
+    let spd = s.effSpeed(u);
+    if (mv.cap && u.squad?.order === 'move') spd = Math.min(spd, mv.cap);
+    const step = spd * dt / TERR[s.map.at(u.pos.x, u.pos.y)].move;
     if (d <= step) { u.pos.x = w.x; u.pos.y = w.y; mv.path.shift() } else { u.pos.x += dx / d * step; u.pos.y += dy / d * step }
     // unstick: barely moved for a second while trying to move (two units blocking head-on) -> sidestep
     mv.stT += dt;
