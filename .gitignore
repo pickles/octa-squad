@@ -2,3 +2,6 @@ node_modules/
 *.png
 octa_replay_*.json
 .DS_Store
+dist/
+dist-single/
+replay_*.json
