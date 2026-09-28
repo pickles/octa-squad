@@ -301,7 +301,7 @@ export class BattleScene extends Phaser.Scene {
     if (fill != null) { g.fillStyle(fill, alpha); if (pts) g.fillPoints(pts, true); else g.fillCircle(x, y, circR) }
     g.lineStyle(1.5, stroke, alpha); if (pts) g.strokePoints(pts, true); else g.strokeCircle(x, y, circR);
     g.lineStyle(2, stroke, alpha);
-    if (shape === 'circ') { g.lineBetween(x - r * .45, y, x + r * .45, y); g.lineBetween(x, y - r * .45, x, y + r * .45) }
+    // (support: plain circle — a cross would clash with the unit number)
     if (shape === 'hq') g.strokeRect(x - r * .5, y - r * .5, r, r);
     if (shape === 'turret') g.lineBetween(x, y, x + r * 1.1, y - r * .5);
     if (shape === 'radar') { g.beginPath(); g.arc(x, y - r * 1.2, r * .6, Math.PI * 1.1, Math.PI * 1.9); g.strokePath() }
