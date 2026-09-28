@@ -206,3 +206,5 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line2);padding
 .fixedslot{grid-template-columns:auto auto 1fr!important;align-items:center}
 .fixedslot .fx{font-size:13px}
 .fixedslot .st{grid-column:1/-1}
+
+.diffrow{display:flex;align-items:center;gap:12px;margin:0 0 12px}.diffrow .lbl2{font-size:13px;color:var(--faint);letter-spacing:.08em}.diffrow .diff{margin:0;flex:0 0 auto}.diffrow .diff button{min-width:96px;white-space:nowrap;padding:6px 14px}
