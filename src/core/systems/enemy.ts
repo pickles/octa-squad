@@ -185,7 +185,7 @@ function chooseTarget(s: Sim, u: EU): Entity | null {
     const d = dist(u.pos, p.pos); if (d > 10) continue;
     const a = ag?.find(x => x.id === p.id)?.v ?? 0;
     // closer, weaker, and whoever hurt us most
-    const sc = d - (p.ephemeral?.kind === 'decoy' ? 3 : 0) - a * 0.08 - (p.health ? (1 - p.health.hp / p.health.maxHp) * 2 : 0) - (p.repairer ? 1.2 : 0) + (p.truck ? -1 : 0);
+    const sc = d - (p.ephemeral?.kind === 'decoy' ? 3 : 0) - a * 0.08 - (p.health ? (1 - p.health.hp / p.health.maxHp) * 1.2 : 0) - (p.repairer ? 0.6 : 0) + (p.truck ? -1 : 0);
     if (sc < bs) { bs = sc; best = p }
   }
   return best;

@@ -24,6 +24,8 @@ export interface Shell { x: number; y: number; at: number; cx: number; cy: numbe
 export interface Charge { x: number; y: number; t: number; team: Team; src: number | null; done?: boolean }
 export interface Projectile {
   x: number; y: number; px: number; py: number; tx: number; ty: number; tgt: number; spd: number; dmg: number; splash: number;
+  /** sx, sy: where it was fired from (for body-blocking). */
+  sx?: number; sy?: number;
   team: Team; k: 'MG' | 'RF' | 'SN' | 'MSL'; src: number; am: 'std' | 'ap' | 'he'; acc: number; lost?: boolean; tried?: number[]; done?: boolean;
 }
 export interface Zone { kind: 'lz' | 'goal' | 'hint'; x: number; y: number; r: number; label: string }

@@ -37,7 +37,7 @@ export function fireSystem(s: Sim) {
     u.muzzle = { until: s.time + 2, by: t.id };
     if (u.stealth) u.stealth.revealT = 2.5;
     const am = w.ammoType;
-    s.projs.push({ x: u.pos.x, y: u.pos.y, px: u.pos.x, py: u.pos.y, tx: t.pos.x, ty: t.pos.y, tgt: t.id, spd: w.def.ps, dmg: w.def.dmg, splash: am === 'he' ? 1 : 0,
+    s.projs.push({ x: u.pos.x, y: u.pos.y, px: u.pos.x, py: u.pos.y, sx: u.pos.x, sy: u.pos.y, tx: t.pos.x, ty: t.pos.y, tgt: t.id, spd: w.def.ps, dmg: w.def.dmg, splash: am === 'he' ? 1 : 0,
       team: u.team, k: w.def.tag, src: u.id, am, acc: s.smokeOn(u.pos, t.pos) ? 0.35 : 1 });
     if (am !== 'std') {
       w[am]--;
@@ -100,6 +100,21 @@ function impact(s: Sim, p: Projectile) {
     return;
   }
   if (p.acc < 1 && s.rnd() > p.acc) { s.emit({ k: 'miss', x: p.tx + .3, y: p.ty - .2 }); if (p.team === 'E') s.count('smokeMiss'); return }
+  // body-blocking: a friend of the target standing in the line of fire (closer to the shooter) may take the round instead.
+  // Heavies are big: that is what makes a shield work.
+  let victim = tgt;
+  if (p.sx != null && tgt.life.alive) {
+    const ax = p.sx, ay = p.sy!, dx = tgt.pos.x - ax, dy = tgt.pos.y - ay, L2 = dx * dx + dy * dy;
+    let best: Entity | null = null, bt = 1;
+    if (L2 > 1) for (const o of s.world.alive()) {
+      if (o === tgt || o.team !== tgt.team || !o.health || o.ephemeral || o.structure) continue;
+      const t = ((o.pos.x - ax) * dx + (o.pos.y - ay) * dy) / L2; if (t < 0.1 || t > 0.92) continue;
+      const off = Math.hypot(ax + dx * t - o.pos.x, ay + dy * t - o.pos.y);
+      const size = o.shape === 'hex' ? 0.6 : 0.4;
+      if (off <= size && t < bt) { bt = t; best = o }
+    }
+    if (best && s.rnd() < (best.shape === 'hex' ? 0.6 : 0.3)) { victim = best; if (best.squad) s.count('blocked') }
+  }
   const am = p.am, ak = am === 'ap' ? 0.3 : am === 'he' ? 1.3 : 1;
   const hitOne = (t: Entity, m: number) => {
     if (!t.life.alive || !t.health) return;
@@ -111,10 +126,10 @@ function impact(s: Sim, p: Projectile) {
     if (p.team === 'P' && am === 'he' && s.inForest(t)) s.count('heForest', v);
     damage(s, t, v, s.world.get(p.src) || null);
   };
-  hitOne(tgt, 1);
+  hitOne(victim, 1);
   if (p.splash) {
     s.emit({ k: 'boom', x: p.tx, y: p.ty, r: p.splash });
-    for (const o of s.world.alive()) if (o !== tgt && o.team !== p.team && Math.hypot(o.pos.x - p.tx, o.pos.y - p.ty) <= p.splash) hitOne(o, 0.5);
+    for (const o of s.world.alive()) if (o !== victim && o.team !== p.team && Math.hypot(o.pos.x - p.tx, o.pos.y - p.ty) <= p.splash) hitOne(o, 0.5);
   } else s.emit({ k: 'hit', x: p.tx, y: p.ty });
 }
 

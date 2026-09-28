@@ -56,8 +56,8 @@ export const TRAINING: MissionDef[] = [
     brief: '被弾を誰が受ける？　突撃型の小隊が2波来る。ヘヴィを盾にし、サポートの修理範囲で戦う。',
     win: '敵の全滅', hint: 'ヘヴィを先頭に、他は1〜2マス後ろ。サポートは半径2.5の味方を毎秒3.5回復し、壊れた部位も直す。',
     medals: [
-      { name: '盾の役目', desc: '味方が受けたダメージの半分以上をヘヴィが受ける', test: s => st(s, 'taken:heavy') >= sumStat(s, 'taken:') * 0.5 },
-      { name: '野戦修理', desc: '修理で合計150以上回復する', test: s => st(s, 'repaired') >= 150 },
+      { name: '盾の役目', desc: '味方が受けたダメージの4割以上をヘヴィが受ける', test: s => st(s, 'taken:heavy') >= sumStat(s, 'taken:') * 0.4 },
+      { name: '野戦修理', desc: '第2波が来た時点で、全機のHPを8割以上に戻しておく（修理を使って）', test: s => !!s.flags.healed },
       noLoss,
     ],
     setup(s) {
@@ -69,8 +69,12 @@ export const TRAINING: MissionDef[] = [
     objective: s => `敵残存 ${s.countE()}（第${s.flags.w2 ? 2 : 1}波）`,
     check: s => {
       if (s.time > 7 && !s.flags.w2 && allDead(s)) {
-        s.flags.w2 = true; s.log('教官：第1波を撃退。第2波まで約20秒。損傷した機体をサポートの近く（2.5以内）に集めて修理しろ。', 'tip');
-        s.schedule(s.time + 20, s2 => { s2.group(['trooper', 'trooper', 'gunner'], 20, 9, { role: 'hunt' }); s2.log('教官：第2波が来た。ヘヴィを前に。', 'tip') });
+        s.flags.w2 = true; s.log('教官：第1波を撃退。第2波まで25秒。傷ついた機体をサポートの近く（2.5以内）に集めて、全機HP8割以上まで直せ。', 'tip');
+        s.schedule(s.time + 25, s2 => {
+          s2.flags.healed = st(s2, 'repaired') > 0 && s2.livingSquad().every(u => u.health!.hp >= u.health!.maxHp * 0.8);
+          s2.group(['trooper', 'trooper', 'gunner'], 20, 9, { role: 'hunt' });
+          s2.log(`教官：第2波が来た。ヘヴィを前に。${s2.flags.healed ? '（修理は万全だ）' : ''}`, 'tip');
+        });
       }
       return s.flags.w2 && allDead(s) && s.events.every(e => e.done) ? { win: true, reason: '2波とも撃退した' } : undefined;
     },
