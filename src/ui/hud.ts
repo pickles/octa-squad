@@ -105,8 +105,8 @@ export class Hud {
   update() {
     const s = this.s; if (!s) return; const sim = s.sim;
     // log
-    for (const l of sim.logs.slice(this.logCursor)) if (l.kind === 'tip') { this.tipAt = performance.now(); $('#tip').textContent = l.text; $('#tip').hidden = false }
-    if (this.tipAt && performance.now() - this.tipAt > 16000) { this.tipAt = 0; $('#tip').hidden = true }
+    for (const l of sim.logs.slice(this.logCursor)) if (l.kind === 'tip') { this.tipAt = sim.time + 0.001; $('#tip').textContent = l.text; $('#tip').hidden = false }
+    if (this.tipAt && sim.time - this.tipAt > 14) { this.tipAt = 0; $('#tip').hidden = true }
     for (const l of sim.logs.slice(this.logCursor)) if (l.kind !== 'tip') { this.logShown.push({ text: l.text, kind: LOGCLS[l.kind], at: performance.now() }); if (this.logShown.length > 5) this.logShown.shift() }
     this.logCursor = sim.logs.length;
     const now = performance.now(); if (this.logShown.length && now - this.logShown[0].at > 9000) this.logShown.shift();
@@ -229,7 +229,7 @@ export class Hud {
     const s = this.s!, c = document.createElement('canvas'); c.width = 240; c.height = 120;
     const g = c.getContext('2d')!, sx = c.width / WPX, sy = c.height / HPX;
     for (let d = 0; d < 2 * N - 1; d++) for (let x = 0; x < N; x++) {
-      const y = d - x; if (y < 0 || y >= N) continue;
+      const y = d - x; if (y < 0 || y >= N || !s.sim.map.inside(x, y)) continue;
       const t = s.sim.map.grid[y * N + x], hgt = tileH(t);
       g.fillStyle = css(shade(TCOL[t], 1)); g.beginPath();
       for (const [a, b] of [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]]) { const [px, py] = w2p(a, b); g.lineTo(px * sx, (py - hgt) * sy) }
@@ -261,6 +261,7 @@ export class Hud {
     const res = $('#result');
     res.innerHTML = `<div class="rpanel">${s.replay ? '<div class="rpchip">REPLAY</div>' : ''}${r.win ? `<div class="rank">${rank}</div>` : ''}<h2 class="${r.win ? 'win' : 'lose'}">${r.win ? 'MISSION COMPLETE' : 'MISSION FAILED'}</h2>
      <p>${r.reason}</p><dl><dt>作戦</dt><dd>${m.code} ${m.name}</dd><dt>経過時間</dt><dd>${fmtT(sim.time)}</dd><dt>撃破</dt><dd>${sim.kills}</dd><dt>損失</dt><dd>${sim.lost} / ${total}</dd>${r.win ? `<dt>スコア</dt><dd>${score}</dd>` : ''}</dl>
+     ${r.win && m.medals ? `<div class="rmedals">${m.medals.map((md, i) => `<div class="${r.medals?.[i] ? 'got' : ''}"><i>${r.medals?.[i] ? '●' : '○'}</i> <b>${md.name}</b>　<small>${md.desc}</small></div>`).join('')}</div>` : ''}
      <div class="rbtns">${s.replay ? '<button class="btn" id="rpAgain">最初から再生</button><button class="btn" id="rHQ">リプレイ終了</button>' : '<button class="btn" id="rWatch">リプレイを見る</button><button class="btn" id="rRetry">同じ編成で再出撃</button><button class="btn" id="rHQ">編成に戻る</button>'}</div></div>`;
     res.hidden = false;
     res.querySelector<HTMLElement>('#rHQ')!.onclick = () => this.cb.toHQ();

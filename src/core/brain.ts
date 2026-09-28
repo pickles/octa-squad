@@ -86,7 +86,8 @@ export function brainTick(port: AgentPort): string {
   if (o.sites) {
     o.zones.filter(z => z.kind === 'hint').forEach((z, i) => { const st = o.sites![i]; if (!st.scanned) goals.push({ ...(st.x != null ? { x: st.x, y: st.y! } : z), why: `${z.label}を捜索` }) });
     if (o.sites.every(x => x.scanned)) goals.push(...o.zones.filter(z => z.kind === 'lz').map(z => ({ ...z, why: 'LZへ帰還' })));
-  } else if (o.hq && o.hq.alive) goals.push({ x: 23.5, y: 4.5, why: '司令塔へ前進' });
+  } else if (o.hq && o.hq.alive) { const h = o.enemies.find(e => e.objective); goals.push({ x: h ? h.x : 23.5, y: h ? h.y : 4.5, why: '目標へ前進' }) }
+  else if (!o.convoy && o.zones.some(z => z.kind === 'goal')) { const z = o.zones.find(q => q.kind === 'goal')!; goals.push({ x: z.x, y: z.y, why: `${z.label}へ前進`, kind: 'lz' }) }
   else if (o.convoy) {
     const lead = o.convoy.trucks.find(t => t.alive);
     if (lead) { const g = o.zones.find(z => z.kind === 'goal')!, L = dd(lead, g) || 1, ahead = Math.min(L, Math.max(3, L * (o.convoy.moving ? 0.35 : 0.25))); goals.push({ x: lead.x + (g.x - lead.x) / L * ahead, y: lead.y + (g.y - lead.y) / L * ahead, why: '輸送隊の前方を警戒', kind: 'escort' }) }

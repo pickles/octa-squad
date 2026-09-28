@@ -48,7 +48,7 @@ export function statusSystem(s: Sim, dt: number) {
   for (const r of s.world.alive('repairer')) {
     for (const a of s.world.alive('health')) {
       if (a.team !== r.team || a === r || a.structure || a.ephemeral || dist(a.pos, r.pos) > r.repairer.radius || a.health.hp >= a.health.maxHp) continue;
-      a.health.hp = Math.min(a.health.maxHp, a.health.hp + r.repairer.rate * dt);
+      const before = a.health.hp; a.health.hp = Math.min(a.health.maxHp, a.health.hp + r.repairer.rate * dt); if (a.squad) s.count('repaired', a.health.hp - before);
       if ((s.tickN + a.id) % 18 === 0) s.emit({ k: 'heal', x: a.pos.x, y: a.pos.y });
     }
   }

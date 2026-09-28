@@ -194,3 +194,15 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line2);padding
 }
 
 #tip{position:absolute;right:10px;bottom:8px;max-width:min(420px,45%);background:rgba(12,30,24,.9);border:1px solid #6fc3a0;color:#dff5ea;padding:6px 10px;font-size:12.5px;line-height:1.5;pointer-events:none}
+.mpart{font-size:11.5px;letter-spacing:.12em;color:var(--faint);margin:8px 0 0}
+.t-教練{color:#6fc3a0}
+.mcard .ck{color:#6fc3a0;font-weight:700}
+.mcard .cd i{font-style:normal;color:var(--faint);margin-left:1px}.mcard .cd i.on{color:#e2b84a}
+.medals{margin-top:10px;border-top:1px solid var(--line);padding-top:8px;display:grid;gap:3px;font-size:13px}
+.medals i,.rmedals i{font-style:normal;color:var(--faint)}.medals .got i,.rmedals .got i{color:#e2b84a}
+.medals small,.rmedals small{color:var(--faint)}
+.rmedals{display:grid;gap:4px;text-align:left;margin:10px 0;font-size:13px}
+.fixed{color:#6fc3a0;margin:0 0 8px}
+.fixedslot{grid-template-columns:auto auto 1fr!important;align-items:center}
+.fixedslot .fx{font-size:13px}
+.fixedslot .st{grid-column:1/-1}

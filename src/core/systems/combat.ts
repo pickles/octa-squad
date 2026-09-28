@@ -63,7 +63,7 @@ export function projectileSystem(s: Sim, dt: number) {
   for (const p of s.projs) {
     const t = s.world.get(p.tgt)!;
     if (p.k === 'MSL' && !p.lost && (s.inCloud('chaff', p) || (t.life.alive && s.inCloud('chaff', t.pos)))) {
-      p.lost = true; const hx = p.tx - p.x, hy = p.ty - p.y, hl = Math.hypot(hx, hy) || 1; p.tx = p.x + hx / hl * 2.5; p.ty = p.y + hy / hl * 2.5;
+      p.lost = true; if (p.team === 'E') s.count('chaffMissile'); const hx = p.tx - p.x, hy = p.ty - p.y, hl = Math.hypot(hx, hy) || 1; p.tx = p.x + hx / hl * 2.5; p.ty = p.y + hy / hl * 2.5;
       if (t.team === 'P' || p.team === 'P') s.log('ミサイルがチャフで誘導を失った', p.team === 'P' ? 'warning' : 'info');
     }
     if (t.life.alive && !p.lost) { p.tx = t.pos.x; p.ty = t.pos.y }
@@ -92,10 +92,14 @@ function impact(s: Sim, p: Projectile) {
   const tgt = s.world.get(p.tgt)!;
   if (p.k === 'MSL') {
     if (p.lost) s.emit({ k: 'boom', x: p.tx, y: p.ty, r: .5 });
-    else blast(s, p.tx, p.ty, p.team, p.dmg, p.splash, tgt.life.alive ? tgt : null, p.src);
+    else {
+      if (p.team === 'E' && tgt.ephemeral?.kind === 'decoy') s.count('decoyMissile');
+      if (p.team === 'E' && tgt.squad) s.count('mslOnUs');
+      s.cause = 'missile'; blast(s, p.tx, p.ty, p.team, p.dmg, p.splash, tgt.life.alive ? tgt : null, p.src); s.cause = 'bullet';
+    }
     return;
   }
-  if (p.acc < 1 && s.rnd() > p.acc) { s.emit({ k: 'miss', x: p.tx + .3, y: p.ty - .2 }); return }
+  if (p.acc < 1 && s.rnd() > p.acc) { s.emit({ k: 'miss', x: p.tx + .3, y: p.ty - .2 }); if (p.team === 'E') s.count('smokeMiss'); return }
   const am = p.am, ak = am === 'ap' ? 0.3 : am === 'he' ? 1.3 : 1;
   const hitOne = (t: Entity, m: number) => {
     if (!t.life.alive || !t.health) return;
@@ -103,6 +107,8 @@ function impact(s: Sim, p: Projectile) {
     const raw = p.dmg * (am === 'ap' ? 0.9 : 1) * (am === 'he' && t.structure ? 1.6 : 1);
     let v = (p.team === 'E' ? s.diffMul().dmg : 1) * m * bulletDmg(raw, t.health.armor * ak);
     if (s.inForest(t) && !t.structure && am !== 'he') v *= 0.75;
+    if (p.team === 'P' && am === 'ap' && t.health.armor >= 5) s.count('apHeavy', v);
+    if (p.team === 'P' && am === 'he' && s.inForest(t)) s.count('heForest', v);
     damage(s, t, v, s.world.get(p.src) || null);
   };
   hitOne(tgt, 1);
@@ -128,6 +134,7 @@ export function blast(s: Sim, x: number, y: number, team: 'P' | 'E', dmg: number
 
 /** Artillery shell: hits everyone, friend or foe. */
 export function artyHit(s: Sim, x: number, y: number) {
+  s.cause = 'arty';
   s.emit({ k: 'boom', x, y, r: 1.2 });
   for (const o of s.world.alive()) {
     if (!o.health) continue;
@@ -147,6 +154,7 @@ export function callArty(s: Sim, x: number, y: number) {
 export function damage(s: Sim, t: Entity, d: number, src: Entity | null) {
   const h = t.health; if (!h || !t.life.alive) return;
   h.hp -= d; h.hitT = 0.15;
+  if (t.squad) s.count('taken:' + t.squad.cfg.chassis, d);
   const sy = t.systems;
   if (h.hp > 0 && sy && d >= 8 && s.rnd() < 0.10 + 0.25 * (1 - h.hp / h.maxHp)) {
     const ks = (['fcs', 'legs', 'sensor'] as SubsystemKey[]).filter(k => !sy[k]);
@@ -167,7 +175,11 @@ export function damage(s: Sim, t: Entity, d: number, src: Entity | null) {
   if (h.hp <= 0) {
     t.life.alive = false; h.hp = 0;
     s.emit({ k: 'boom', x: t.pos.x, y: t.pos.y, r: t.structure ? 1.6 : 1 });
-    if (t.team === 'E') { s.kills++; if (t.structure) s.log(`${t.name}を破壊`, 'info') }
+    if (t.team === 'E') {
+      s.kills++; s.count('kill:' + s.cause);
+      if (src?.weapon && s.cause === 'bullet') s.count('kill:w:' + src.weapon.key + ':' + (s.etype(t) ?? ''));
+      if (t.structure) { s.count('kill:struct:' + s.cause); s.log(`${t.name}を破壊`, 'info') }
+    }
     else if (t.truck) s.log(`${t.name}が撃破された`, 'warning');
     else if (t.ephemeral?.kind === 'decoy') s.log('デコイが破壊された', 'info');
     else if (t.squad) { s.lost++; s.log(`${String(t.squad.no).padStart(2, '0')} ${t.squad.pilot}機、大破`, 'warning') }

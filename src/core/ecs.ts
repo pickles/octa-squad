@@ -20,6 +20,8 @@ export interface EGroup {
   contact: Pt | null; contactT: number; seenN: number; seenT: number;
   rally: Pt | null; fallback: Pt | null; flankSide: number;
   lastHurt: number; lastFire: number; calledT: number; heardFrom: number | null;
+  /** Waits hidden until you come close (or it gets hit). */
+  ambush?: boolean;
 }
 
 export interface ToolPending { x: number; y: number; t: number | null }
@@ -48,6 +50,8 @@ export interface Entity {
   systems?: { fcs: boolean; legs: boolean; sensor: boolean; fixP: number };
   enemyAI?: { etype: EType; state: AIState; home: Pt; patrol: Pt[] | null; pi: number; lostT: number; lastKnown: Pt | null; alertLogged: boolean; target: number | null;
     gid: number; goal: Pt | null; goalAt: Pt | null; part: 'fix' | 'flank' | null; cd?: number;
+    /** Lying in ambush: seen at 0.35× range until it fires or its team starts moving. */
+    hidden?: boolean;
     /** Damage taken per attacker (decays over ~8s). The biggest one is who this unit goes after. `pos` = where it was last seen. */
     aggro?: { id: number; v: number; pos: Pt | null }[] };
   structure?: { kind: EType; objective: boolean; label: string; scan: number; scanned: boolean; alerted: boolean };

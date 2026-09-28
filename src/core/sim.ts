@@ -1,7 +1,7 @@
 // The simulation: owns the ECS world, map and battlefield state, and advances it in fixed ticks.
 // Engine-independent — runs the same in the browser (Phaser renders it) and in Node (AI, tests).
 
-import { AMMO_CAP, CHASSIS, DIFFS, ETYPES, PILOTS, TOOLS, WEAPONS, loadoutStats, migrateLoadout } from './data';
+import { AMMO_CAP, CHASSIS, DEFAULT_LOADOUT, DIFFS, ETYPES, PILOTS, TOOLS, WEAPONS, loadoutStats, migrateLoadout } from './data';
 import type { Difficulty, EType, Loadout, Shape, ToolKey, UnitStats } from './data';
 import { World } from './ecs';
 import type { EGroup, Entity, GroupRole, Pt, Team, With } from './ecs';
@@ -15,9 +15,9 @@ import { runSystems } from './systems';
 
 export const TICK = 1 / 30;
 /** Bump whenever a change alters simulation results; replays recorded with another version will not reproduce. */
-export const SIM_VERSION = 4;
+export const SIM_VERSION = 5;
 
-export interface GroupOpts { patrol?: [number, number][]; hunt?: boolean; role?: GroupRole; leash?: number }
+export interface GroupOpts { patrol?: [number, number][]; hunt?: boolean; role?: GroupRole; leash?: number; ambush?: boolean }
 export interface Cloud { k: 'chaff' | 'smoke' | 'flare' | 'jam'; x: number; y: number; r: number; t: number; dur: number; team: Team }
 export interface Mine { x: number; y: number; team: Team; arm: number; revealed: boolean; disarm: number; src: number | null; done?: boolean }
 export interface Shell { x: number; y: number; at: number; cx: number; cy: number; done?: boolean }
@@ -31,7 +31,7 @@ export type FxKind = 'flash' | 'hit' | 'boom' | 'miss' | 'puff' | 'heal' | 'ping
 export interface Fx { k: FxKind; x: number; y: number; r?: number; team?: Team; red?: boolean }
 export type LogKind = 'warning' | 'info' | 'note' | 'ai' | 'tip';
 export interface LogEntry { t: number; text: string; kind: LogKind }
-export interface Outcome { win: boolean; reason: string }
+export interface Outcome { win: boolean; reason: string; /** sub-goals achieved (same order as MissionDef.medals) */ medals?: boolean[] }
 export interface TimedEvent { t: number; fn: (s: Sim) => void; done?: boolean }
 
 export interface SimOptions {
@@ -74,6 +74,15 @@ export class Sim {
   convoyGo = false; arrived = 0; extracted = 0; pickup = 0; need = 0;
   hq: Entity | null = null; radar: Entity | null = null; sites: Entity[] = [];
   egroups: EGroup[] = []; radioLogT = -99;
+  /** Counters for sub-goals (see MissionDef.medals), e.g. 'kill:mine', 'decoyMissile', 'smokeMiss'. */
+  stat: Record<string, number> = {};
+  /** Free-form mission script state. */
+  flags: Record<string, number | boolean> = {};
+  /** What is dealing damage right now (set by the caller of damage()). */
+  cause = 'bullet';
+  /** Units that were ever detected by the enemy. */
+  everDetected = new Set<number>();
+  count(k: string, n = 1) { this.stat[k] = (this.stat[k] || 0) + n }
   /** Advisor tips already shown this battle. */
   tips = new Set<string>();
   huntGoal: Pt | null = null; intel: Pt | null = null; intelT = -99;
@@ -90,8 +99,14 @@ export class Sim {
     this.diff = o.difficulty || 'easy';
     this.seed = o.seed != null ? (o.seed >>> 0) : (Math.random() * 4294967296) >>> 0;
     this.rnd = rng(this.seed);
-    this.slots = (o.slots || []).map(migrateLoadout);
-    this.deploy = [...(o.deploy || this.slots.map(() => true))];
+    if (m.squad) {
+      // training: fixed squad in the first slots, the rest stay home
+      this.slots = [...m.squad, ...DEFAULT_LOADOUT.slice(m.squad.length)].slice(0, 8).map(x => ({ ...x }));
+      this.deploy = this.slots.map((_, i) => i < m.squad!.length);
+    } else {
+      this.slots = (o.slots || []).map(migrateLoadout);
+      this.deploy = [...(o.deploy || this.slots.map(() => true))];
+    }
     this.replayCmds = o.replay || null;
     this.map = generateMap(m);
     this.arty = m.arty;
@@ -153,7 +168,7 @@ export class Sim {
       const gid = extra.gid ?? this.newGroup(p.x, p.y, extra).id;
       const g = this.egroups[gid];
       const state = g.role === 'hunt' ? 'hunt' : g.role === 'patrol' ? 'patrol' : 'guard';
-      e.enemyAI = { etype: type, state, home: { ...p }, patrol: g.patrol, pi: 0, lostT: 0, lastKnown: null, alertLogged: false, target: null, gid, goal: null, goalAt: null, part: null };
+      e.enemyAI = { etype: type, state, home: { ...p }, patrol: g.patrol, pi: 0, lostT: 0, lastKnown: null, alertLogged: false, target: null, gid, goal: null, goalAt: null, part: null, hidden: !!g.ambush };
     }
     e.intel = { lastSeen: null };
     return this.world.spawn(e);
@@ -163,7 +178,7 @@ export class Sim {
     const patrol = o.patrol ? o.patrol.map(([a, b]) => ({ x: a + .5, y: b + .5 })) : null;
     const role: GroupRole = o.role ?? (o.hunt ? 'hunt' : patrol ? 'patrol' : 'garrison');
     const g: EGroup = { id: this.egroups.length, role, post: { x: x + .5, y: y + .5 }, leash: o.leash ?? (role === 'overwatch' ? 1.5 : role === 'garrison' ? 6 : 99), patrol, pi: 0,
-      state: role === 'hunt' ? 'search' : 'idle', t: 0, contact: null, contactT: -99, seenN: 0, seenT: -99, rally: null, fallback: null, flankSide: 0, lastHurt: -99, lastFire: -99, calledT: -99, heardFrom: null };
+      state: role === 'hunt' ? 'search' : 'idle', t: 0, contact: null, contactT: -99, seenN: 0, seenT: -99, rally: null, fallback: null, flankSide: 0, lastHurt: -99, lastFire: -99, calledT: -99, heardFrom: null, ambush: !!o.ambush };
     this.egroups.push(g);
     return g;
   }
@@ -240,9 +255,11 @@ export class Sim {
   }
   /** Distance at which enemy `e` detects our unit `p` (-1 = cannot). */
   detRange(e: Entity, p: Entity) {
-    const cp = this.inCloud('chaff', p.pos), isRadar = this.etype(e) === 'radar';
-    if (isRadar && (cp || this.inCloud('chaff', e.pos) || this.inCloud('jam', e.pos))) return -1;
+    const isRadar = this.etype(e) === 'radar';
+    if (isRadar && this.inCloud('jam', e.pos)) return -1;
     let m = this.detMul(p);
+    // scouts sweep for sensors: a probe's low profile doesn't fool them
+    if (p.ephemeral?.kind === 'probe' && this.etype(e) === 'scout') m = Math.max(m, 1);
     if (!isRadar && this.smokeOn(e.pos, p.pos)) m *= 0.4;
     return this.effSensor(e) * m + (this.emitting(p) ? p.sensor!.emit : 0) + (p.squad?.mmode === 'fast' ? 1.5 : 0);
   }
@@ -266,7 +283,7 @@ export class Sim {
     if (d <= this.effSensor(u)) return true;
     // radar-guided lock beyond own sight: the tower's radar only tracks things that move (decoys are built to show up)
     if (!this.moving(t) && t.ephemeral?.kind !== 'decoy') return false;
-    return this.world.alive('structure').some(a => a.structure.kind === 'radar' && !this.inCloud('chaff', a.pos) && !this.inCloud('jam', a.pos) && dist(a.pos, t.pos) <= this.effSensor(a));
+    return this.world.alive('structure').some(a => a.structure.kind === 'radar' && !this.inCloud('jam', a.pos) && dist(a.pos, t.pos) <= this.effSensor(a));
   }
   /** Currently moving (radar towers can guide missiles onto moving targets only). */
   moving(e: Entity) { return !!e.mover && e.mover.path.length > 0 && !e.truck?.hold }
@@ -309,6 +326,7 @@ export class Sim {
 
   finish(r: Outcome) {
     if (this.over) return;
+    if (r.win && this.m.medals) r = { ...r, medals: this.m.medals.map(md => { try { return !!md.test(this) } catch { return false } }) };
     this.over = r;
   }
 

@@ -31,3 +31,14 @@ export function isReplay(r: unknown): r is Replay {
   const x = r as Replay;
   return !!x && x.v === 3 && MISSIONS.some(m => m.id === x.mission) && Array.isArray(x.cmds) && Array.isArray(x.slots) && x.slots.length === 8;
 }
+
+/** Per-mission progress: cleared, and every sub-goal ever achieved. */
+export interface Progress { clear: boolean; medals: boolean[] }
+const PKEY = 'octa-progress';
+export const PROGRESS: Record<string, Progress> = (() => { try { return JSON.parse(localStorage.getItem(PKEY) || '{}') } catch { return {} } })();
+export function recordResult(id: string, win: boolean, medals?: boolean[]) {
+  if (!win) return;
+  const p = PROGRESS[id] ??= { clear: false, medals: [] };
+  p.clear = true; (medals || []).forEach((b, i) => { p.medals[i] = !!(p.medals[i] || b) });
+  try { localStorage.setItem(PKEY, JSON.stringify(PROGRESS)) } catch { /* ignore */ }
+}

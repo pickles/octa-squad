@@ -9,7 +9,7 @@ import { BattleScene } from './game/BattleScene';
 import type { SceneHooks } from './game/BattleScene';
 import { Hangar } from './ui/hangar';
 import { Hud } from './ui/hud';
-import { SAVE, currentMission, deployOf, saveReplay } from './ui/store';
+import { SAVE, currentMission, deployOf, saveReplay, recordResult } from './ui/store';
 import { installOctaApi } from './api/octa';
 
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
@@ -61,7 +61,7 @@ class App {
 
   private enter(session: BattleSession) {
     this.session = session;
-    session.onOver = s => { if (!s.replay && s.lastReplay) saveReplay(s.lastReplay); this.hud.showResult() };
+    session.onOver = s => { if (!s.replay && s.lastReplay) saveReplay(s.lastReplay); if (!s.replay && s.sim.over) recordResult(s.sim.m.id, s.sim.over.win, s.sim.over.medals); this.hud.showResult() };
     session.onNotice = t => this.hud.notice(t);
     $('#hq').hidden = true; $('#battle').hidden = false;
     this.hud.bind(session);

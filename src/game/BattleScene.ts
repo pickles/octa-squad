@@ -166,7 +166,7 @@ export class BattleScene extends Phaser.Scene {
     const J = Array.from({ length: N * N }, () => (R() - .5) * 10);
     const quad = (pts: [number, number][], col: number) => { g.fillStyle(col, 1); g.fillPoints(pts.map(([x, y]) => new Phaser.Math.Vector2(x, y)), true) };
     for (let d = 0; d < 2 * N - 1; d++) for (let x = 0; x < N; x++) {
-      const y = d - x; if (y < 0 || y >= N) continue;
+      const y = d - x; if (y < 0 || y >= N || !map.inside(x, y)) continue;
       const t = map.grid[y * N + x], h = tileH(t), col = TCOL[t], j = J[y * N + x];
       const p0 = w2p(x, y), p1 = w2p(x + 1, y), p2 = w2p(x + 1, y + 1), p3 = w2p(x, y + 1);
       if (h) { quad([p3, p2, [p2[0], p2[1] - h], [p3[0], p3[1] - h]], shade(col, .62, j)); quad([p2, p1, [p1[0], p1[1] - h], [p2[0], p2[1] - h]], shade(col, .78, j)) }
@@ -186,14 +186,15 @@ export class BattleScene extends Phaser.Scene {
         g.fillStyle(0x1d3524, 1); g.fillTriangle(px + sz, py, px, py - hg, px, py + 2);
       }
     }
-    const c0 = w2p(0, 0), c1 = w2p(N, 0), c2 = w2p(N, N), c3 = w2p(0, N);
+    const b = map.bounds || [0, 0, N - 1, N - 1];
+    const c0 = w2p(b[0], b[1]), c1 = w2p(b[2] + 1, b[1]), c2 = w2p(b[2] + 1, b[3] + 1), c3 = w2p(b[0], b[3] + 1);
     g.lineStyle(1.5, COL.blue, .25); g.strokePoints([c0, c1, c2, c3].map(([a, b]) => new Phaser.Math.Vector2(a, b)), true);
   }
 
   private drawFog() {
     const g = this.fog, sim = this.s.sim; g.clear();
     for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
-      const i = y * N + x; if (sim.vis[i]) continue;
+      const i = y * N + x; if (sim.vis[i] || !sim.map.inside(x, y)) continue;
       const h = tileH(sim.map.grid[i]);
       const a = w2p(x, y), b = w2p(x + 1, y), c = w2p(x + 1, y + 1), d = w2p(x, y + 1);
       g.fillStyle(0x080c10, sim.explored[i] ? .38 : .64);

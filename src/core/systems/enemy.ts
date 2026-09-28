@@ -39,11 +39,12 @@ export function reportContact(s: Sim, src: Entity, p: Pt) {
 }
 
 function radarUp(s: Sim) {
-  return s.world.alive('structure').find(a => a.structure.kind === 'radar' && !s.inCloud('chaff', a.pos) && !s.inCloud('jam', a.pos));
+  return s.world.alive('structure').find(a => a.structure.kind === 'radar' && !s.inCloud('jam', a.pos));
 }
 
 /** Radio call: other teams in reach decide by their role whether to come. */
 function callSupport(s: Sim, from: Pt, pos: Pt, caller: EGroup | null, viaRadar = false, reach = COMM) {
+  if (s.inCloud('jam', from)) return; // jammed: the call doesn't get out
   const radar = radarUp(s);
   let n = 0;
   for (const h of s.egroups) {
@@ -51,6 +52,7 @@ function callSupport(s: Sim, from: Pt, pos: Pt, caller: EGroup | null, viaRadar 
     const m = s.world.alive('enemyAI').filter(u => u.enemyAI.gid === h.id);
     if (!m.length) continue;
     const hc = centroid(m);
+    if (s.inCloud('jam', hc)) continue; // jammed: can't hear
     const relay = !!radar && dist(radar.pos, hc) <= RADAR_COMM && (viaRadar || dist(radar.pos, from) <= RADAR_COMM);
     if (dist(hc, from) > reach && !relay) continue;
     const d = dist(hc, pos);
@@ -60,6 +62,7 @@ function callSupport(s: Sim, from: Pt, pos: Pt, caller: EGroup | null, viaRadar 
     if (come && (h.state === 'idle' || h.state === 'return' || h.state === 'search')) { startEngage(s, h, m, hc); h.heardFrom = caller?.id ?? -1; n++ }
     else if (!come && h.state === 'idle' && h.role !== 'overwatch') { h.state = 'hold'; h.t = 0 }
   }
+  if (n) s.count('radioCalls', n);
   if (n && s.time - s.radioLogT > 12) { s.radioLogT = s.time; s.log(`敵の通信が活発化：${n}隊が移動を開始`, 'warning') }
 }
 
@@ -131,6 +134,10 @@ function command(s: Sim, g: EGroup, m: EU[]) {
 
   if (g.role === 'overwatch') { g.state = f ? 'hold' : 'idle'; if (f && s.time - g.calledT > 8) { g.calledT = s.time; callSupport(s, gc, g.contact!, g) } return }
 
+  if (g.ambush && f && (g.state === 'idle' || g.state === 'hold')) {
+    // ambushers stay put and hidden until you walk in close or shoot them
+    if (dist(gc, g.contact!) <= 4.5 || s.time - g.lastHurt < 1) { g.ambush = false; startEngage(s, g, m, gc) } else { g.state = 'hold'; return }
+  }
   if (f && (g.state === 'idle' || g.state === 'return' || g.state === 'search')) {
     const leashed = g.role === 'garrison' && dist(g.post, g.contact!) > g.leash + 3;
     if (leashed) { g.state = 'hold'; g.t = 0 } else startEngage(s, g, m, gc);
@@ -178,7 +185,7 @@ function chooseTarget(s: Sim, u: EU): Entity | null {
     const d = dist(u.pos, p.pos); if (d > 10) continue;
     const a = ag?.find(x => x.id === p.id)?.v ?? 0;
     // closer, weaker, and whoever hurt us most
-    const sc = d - a * 0.08 - (p.health ? (1 - p.health.hp / p.health.maxHp) * 2 : 0) - (p.repairer ? 1.2 : 0) + (p.truck ? -1 : 0);
+    const sc = d - (p.ephemeral?.kind === 'decoy' ? 3 : 0) - a * 0.08 - (p.health ? (1 - p.health.hp / p.health.maxHp) * 2 : 0) - (p.repairer ? 1.2 : 0) + (p.truck ? -1 : 0);
     if (sc < bs) { bs = sc; best = p }
   }
   return best;
@@ -205,6 +212,7 @@ function unitStep(s: Sim, u: EU, g: EGroup, m: EU[], i: number, dt: number) {
     for (const a of ai.aggro) { a.v *= k; const e = s.world.get(a.id); if (!e || !e.life.alive) a.v = 0 }
     ai.aggro = ai.aggro.filter(a => a.v > 4);
   }
+  if (ai.hidden && !g.ambush) ai.hidden = false;
   const tgt = chooseTarget(s, u);
   ai.target = tgt?.id ?? null;
   const c = g.contact, r = s.rangeOf(u);
@@ -251,7 +259,7 @@ function unitStep(s: Sim, u: EU, g: EGroup, m: EU[], i: number, dt: number) {
       }
       break;
     case 'hold':
-      goal = tgt && dist(u.pos, tgt.pos) > r && dist(u.pos, tgt.pos) < r + 1.5 && g.role !== 'overwatch' ? tgt.pos : (g.role === 'overwatch' && dist(u.pos, ai.home) > 1 ? ai.home : null);
+      goal = tgt && !g.ambush && dist(u.pos, tgt.pos) > r && dist(u.pos, tgt.pos) < r + 1.5 && g.role !== 'overwatch' ? tgt.pos : (g.role === 'overwatch' && dist(u.pos, ai.home) > 1 ? ai.home : null);
       ai.state = 'hold';
       break;
     case 'search':

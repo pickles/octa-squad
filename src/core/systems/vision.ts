@@ -20,9 +20,17 @@ export function visionSystem(s: Sim) {
   s.seenE.clear();
   for (const e of s.enemies()) {
     const f = s.inForest(e) && !e.structure ? 0.7 : 1;
-    for (const p of ours) { const ff = !s.hasRadar(p) && s.smokeOn(p.pos, e.pos) ? f * 0.4 : f; if (dist(e.pos, p.pos) <= s.effSensor(p) * ff) { s.seenE.add(e.id); break } }
+    const amb = e.enemyAI?.hidden && !(e.weapon && e.weapon.fireT > 0) ? 0.35 : 1; // ambushers lying in wait
+    for (const p of ours) {
+      const ff = (!s.hasRadar(p) && s.smokeOn(p.pos, e.pos) ? f * 0.4 : f) * amb;
+      if (dist(e.pos, p.pos) <= s.effSensor(p) * ff) {
+        s.seenE.add(e.id);
+        if (p.ephemeral?.kind === 'probe' && !s.flags['probe:' + e.id]) { s.flags['probe:' + e.id] = true; s.count('probeSpot') }
+        break;
+      }
+    }
     if (!s.seenE.has(e.id) && e.muzzle) { const v = s.world.get(e.muzzle.by); if (v && v.team === 'P' && s.muzzleSeen(e, v)) s.seenE.add(e.id) }
-    if (!s.seenE.has(e.id) && !s.inCloud('smoke', e.pos)) for (const c of lights) if (Math.hypot(e.pos.x - c.x, e.pos.y - c.y) <= c.r) { s.seenE.add(e.id); break }
+    if (!s.seenE.has(e.id) && !s.inCloud('smoke', e.pos)) for (const c of lights) if (Math.hypot(e.pos.x - c.x, e.pos.y - c.y) <= c.r) { s.seenE.add(e.id); if (!s.flags['flare:' + e.id]) { s.flags['flare:' + e.id] = true; s.count('flareSpot') } break }
     if (s.seenE.has(e.id) && e.intel) e.intel.lastSeen = { ...e.pos };
   }
 
@@ -38,10 +46,14 @@ export function visionSystem(s: Sim) {
       if (p.exposure && s.seenE.has(e.id) && d - r < p.exposure.margin) { p.exposure.margin = d - r; p.exposure.warnBy = e.id }
       if (d <= r) {
         if (!s.detP.has(p.id) && e.enemyAI && !e.enemyAI.alertLogged) { e.enemyAI.alertLogged = true; s.log(`敵に発見された（${e.name}）`, 'warning') }
-        s.detP.add(p.id);
+        s.detP.add(p.id); if (p.squad) s.everDetected.add(p.id);
         reportContact(s, e, p.pos);
         if (e.enemyAI) e.enemyAI.lastKnown = { ...p.pos };
       }
     }
   }
+  // training counters
+  for (const p of s.world.alive('squad')) if (p.squad.hidden && !s.detP.has(p.id))
+    for (const e of foes) if (e.enemyAI && dist(e.pos, p.pos) < 4 && !s.flags['hid:' + e.id]) { s.flags['hid:' + e.id] = true; s.count('hidePass') }
+  if (s.world.alive('structure').some(a => a.structure.kind === 'radar' && s.inCloud('jam', a.pos))) s.count('towerJam', 0.15);
 }

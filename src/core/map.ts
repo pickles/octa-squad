@@ -17,10 +17,16 @@ export const TERR: { name: string; move: number; pass: boolean; fx: string }[] =
 export interface MapSpec {
   seed: number; spawn: [number, number]; keys: [number, number][]; road?: [number, number][];
   terr: { forest: number; hills: number; water: number; rocks: number };
+  /** Hand-placed terrain discs after the random blobs: [kind, x, y, radius]. */
+  paint?: [kind: 'plain' | 'forest' | 'hill' | 'rock' | 'water', x: number, y: number, r: number][];
+  /** Playable rectangle [x0, y0, x1, y1] (inclusive tiles); everything outside becomes rock. For small training maps. */
+  bounds?: [number, number, number, number];
 }
 
 export class GameMap {
-  constructor(public grid: Uint8Array) {}
+  constructor(public grid: Uint8Array, public bounds?: [number, number, number, number]) {}
+  /** False for tiles outside a training map's playable rectangle (not drawn). */
+  inside(x: number, y: number) { const b = this.bounds; return !b || (x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3]) }
   at(x: number, y: number): Terrain {
     const X = Math.floor(x), Y = Math.floor(y);
     if (X < 0 || Y < 0 || X >= N || Y >= N) return T.ROCK;
@@ -96,6 +102,9 @@ export function generateMap(m: MapSpec): GameMap {
     }
   };
   blob(T.FOREST, m.terr.forest, 1.6, 3.6); blob(T.HILL, m.terr.hills, 1.2, 2.6); blob(T.WATER, m.terr.water, 1.2, 2.6); blob(T.ROCK, m.terr.rocks, 0.6, 1.4);
+  const PK = { plain: T.PLAIN, forest: T.FOREST, hill: T.HILL, rock: T.ROCK, water: T.WATER } as const;
+  for (const [k, cx, cy, r] of m.paint || []) for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (Math.hypot(x + .5 - cx, y + .5 - cy) < r) g[y * N + x] = PK[k];
+  if (m.bounds) { const [x0, y0, x1, y1] = m.bounds; for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (x < x0 || x > x1 || y < y0 || y > y1) g[y * N + x] = T.ROCK }
   const clear = (cx: number, cy: number, r: number) => {
     for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { const i = y * N + x; if (Math.hypot(x + .5 - cx, y + .5 - cy) < r && (g[i] === T.ROCK || g[i] === T.WATER || r > 2.5)) g[i] = T.PLAIN }
   };
@@ -111,6 +120,7 @@ export function generateMap(m: MapSpec): GameMap {
       }
     }
   }
+  if (m.bounds) { const [x0, y0, x1, y1] = m.bounds; for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (x < x0 || x > x1 || y < y0 || y > y1) g[y * N + x] = T.ROCK }
   const reach = () => {
     const seen = new Uint8Array(N * N), s0 = Math.floor(m.spawn[1]) * N + Math.floor(m.spawn[0]), q = [s0]; seen[s0] = 1;
     while (q.length) {
@@ -127,5 +137,5 @@ export function generateMap(m: MapSpec): GameMap {
     seen = reach();
   }
   for (let i = 0; i < N * N; i++) if (!seen[i] && TERR[g[i]].pass) g[i] = T.ROCK;
-  return new GameMap(g);
+  return new GameMap(g, m.bounds);
 }

@@ -44,14 +44,14 @@ export const EQUIP: Record<EquipKey, EquipDef> = {
 export const TOOLS: Record<ToolKey, ToolDef> = {
   none:    { name: 'なし', tag: '', ammo: 0, cost: 0, desc: 'ツールなし' },
   missile: { name: 'ミサイル', tag: 'MSL', ammo: 4, range: 9, dmg: 45, splash: 1.2, cd: 3, cost: 120, target: 'enemy', desc: '射程9・威力45＋周囲に半分。ロックオンには目標が自分の視界内か、レーダー装備の味方の視界内にいる必要がある。チャフの中では誘導を失う。4発' },
-  chaff:   { name: 'チャフ', tag: 'CHF', ammo: 2, range: 3.5, radius: 2.5, dur: 12, cd: 1, cost: 60, target: 'point', desc: '半径2.5に12秒。中ではミサイルの誘導が切れ、レーダーが効かない（レーダー塔にも探知されない）。2回' },
+  chaff:   { name: 'チャフ', tag: 'CHF', ammo: 2, range: 3.5, radius: 2.5, dur: 12, cd: 1, cost: 60, target: 'point', desc: '【守り】半径2.5に12秒。中を通るミサイルは誘導が切れ、中の機体はロックされない。代わりに中では味方のレーダーも効かない。2回' },
   smoke:   { name: '煙幕', tag: 'SMK', ammo: 2, range: 3.5, radius: 2.2, dur: 15, cd: 1, cost: 50, target: 'point', desc: '半径2.2に15秒。煙の中・煙越しの射撃は命中率35%。煙の中や煙の向こうの機体は目では見つかりにくい（×0.4）が、レーダーには映る。発砲炎も隠す。2回' },
   flare:   { name: '照明弾', tag: 'FLR', ammo: 2, range: 8, radius: 4, dur: 10, cd: 1, cost: 50, target: 'point', desc: '射程8、半径4を10秒照らして中の敵を視認できる。2回' },
   decoy:   { name: 'デコイ', tag: 'DCY', ammo: 1, range: 4, dur: 25, cd: 1, cost: 70, target: 'point', desc: '電波を出す囮を置く（HP60・25秒）。敵は本物と区別できず、優先して狙う。1回' },
   charge:  { name: '爆薬', tag: 'EXP', ammo: 2, range: 1.2, dmg: 260, cd: 1, cost: 70, target: 'struct', desc: '敵の建造物に隣接して仕掛ける（5秒後に爆発）。建造物に260、周囲の機体に100。2個' },
-  jammer:  { name: '電障弾', tag: 'ECM', ammo: 2, range: 6, radius: 3, dur: 12, cd: 1, cost: 70, target: 'point', desc: '射程6、半径3に12秒。中の敵は視界が4割に落ち、レーダー塔も働かない。2回' },
-  probe:   { name: 'プローブ', tag: 'PRB', ammo: 2, range: 5, dur: 60, cd: 1, cost: 50, target: 'point', desc: '小型センサーを置く（視界5・60秒・HP25）。見つかりにくいが撃たれると壊れる。2個' },
-  mine:    { name: '地雷', tag: 'MIN', ammo: 3, range: 1.5, dmg: 60, splash: 1.2, cd: 1, cost: 60, target: 'point', desc: '足元近くに設置（1.5秒後に作動）。敵が踏むと威力60＋周囲に半分。敵からは見えない。3個' },
+  jammer:  { name: '電障弾', tag: 'ECM', ammo: 2, range: 6, radius: 3, dur: 12, cd: 1, cost: 70, target: 'point', desc: '【攻め】射程6、半径3に12秒。中の敵は視界が4割に落ち、無線で助けを呼べず、レーダー塔も止まる。2回' },
+  probe:   { name: 'プローブ', tag: 'PRB', ammo: 2, range: 5, dur: 60, cd: 1, cost: 50, target: 'point', desc: '小型センサーを置く（視界5・60秒・HP25）。見つかりにくいが、敵の偵察型には普通に見つかって壊される。2個' },
+  mine:    { name: '地雷', tag: 'MIN', ammo: 3, range: 1.5, dmg: 60, splash: 1.2, cd: 1, cost: 60, target: 'point', desc: '足元近くに設置（1.5秒後に作動）。敵が踏むと威力60＋周囲に半分、踏んだ機体は脚部が壊れて遅くなる。敵からは見えない。3個' },
 };
 
 export const AMMO: Record<AmmoType, { name: string; tag: string; desc: string }> = {
@@ -109,7 +109,7 @@ export const ETYPES: Record<EType, ETypeDef> = {
   gunner:  { name: '機銃型', loadout: { chassis: 'assault', weapon: 'mg', equip: 'none', tool: 'none' } },
   heavy:   { name: '重装型', loadout: { chassis: 'heavy', weapon: 'rifle', equip: 'none', tool: 'missile' } },
   sniper:  { name: '狙撃型', loadout: { chassis: 'light', weapon: 'sniper', equip: 'none', tool: 'none' } },
-  launcher:{ name: '誘導弾型', loadout: { chassis: 'assault', weapon: 'mg', equip: 'radar', tool: 'missile' } },
+  launcher:{ name: '誘導弾型', loadout: { chassis: 'assault', weapon: 'mg', equip: 'none', tool: 'missile' } },
   mortar:  { name: '迫撃砲型', loadout: { chassis: 'assault', weapon: 'mg', equip: 'none', tool: 'none' } },
   turret:  { name: '砲台',       structure: { hp: 160, armor: 4, sensor: 6, weapon: 'rifle', shape: 'turret' } },
   radar:   { name: 'レーダー塔', structure: { hp: 110, armor: 2, sensor: 9, weapon: null, shape: 'radar' } },

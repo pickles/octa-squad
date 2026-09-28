@@ -1,7 +1,7 @@
 // Operations room / hangar screen (DOM).
 import { CHASSIS, DIFFS, EQUIP, MISSIONS, PILOTS, TOOLS, WEAPONS, loadoutStats } from '../core';
 import type { Difficulty, Loadout, MissionId, Replay } from '../core';
-import { SAVE, currentMission, deleteReplay, deployOf, isReplay, loadReplays, persist } from './store';
+import { PROGRESS, SAVE, currentMission, deleteReplay, deployOf, isReplay, loadReplays, persist } from './store';
 
 const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector(s) as T;
 
@@ -46,7 +46,7 @@ export function guideHTML() {
   <li><b>攻め方</b>：集結してからまとめて来る。機関銃型・重装型が正面で足止めし、突撃型・偵察型が横へ回り込む。煙の中には入ってこない。</li>
   <li><b>引き際</b>：射程外から一方的に撃たれている時や大きく損耗した時は、丘・森へ下がって待ち構える。偵察型は下がりながら地雷を置く（見ていれば位置がわかる）。</li>
   <li><b>誘導弾型</b>：電波を出している機体（レーダーON・デコイ）を射程9から狙う。レーダー塔があれば<b>動いている</b>機体も狙う。<kbd>Z</kbd> でレーダーを切れる。</li>
-  <li><b>迫撃砲型</b>：3機以上が固まっている所に撃ち込む。発射音から4秒で着弾するので散開する。</li></ul>
+  <li><b>迫撃砲型</b>：3機以上が固まっている所に撃ち込む。発射音から4秒で着弾するので散開する。</li><li><b>伏兵</b>：森などに伏せて待つ部隊は、撃つか4.5マスまで近づかれるまで0.35倍の距離でしか見えない。照明弾で暴ける。</li><li><b>偵察型</b>はプローブを普通に見つけて壊す。</li></ul>
   <h3>武器と装甲の相性</h3><ul><li>弾1発のダメージ ＝ 威力 − 装甲（最低でも威力の15%）。<b>機関銃</b>（1発6）は軽い機体（装甲1〜3）には強いが、装甲5以上にはほぼ通らない。<b>ライフル</b>（14）はどれにもそこそこ。<b>狙撃砲</b>（40）と<b>徹甲弾</b>は重装甲に有効。</li><li>ミサイル・地雷・砲撃などの爆発は装甲の影響が小さい。</li></ul>
   <h3>迷ったらこの形</h3><ul><li><b>盾</b>：ヘヴィ＋ライフル＋増加装甲</li><li><b>主力</b>：アサルト＋ライフル</li><li><b>回復</b>：サポート＋ライフル＋チャフ</li><li><b>偵察</b>：ライト＋ライフル＋レーダー（索敵任務はステルス）</li><li><b>火力</b>：ヘヴィ＋ライフル＋ミサイル（レーダー機とセットで）</li></ul>`;
 }
@@ -89,13 +89,31 @@ export class Hangar {
 
   render() {
     const m = currentMission();
-    $('#mlist').innerHTML = MISSIONS.map(x => `<button class="mcard${x.id === m.id ? ' on' : ''}" data-m="${x.id}"><span class="mtype t-${x.type}">${x.type}</span><span class="nm">${x.name}</span><span class="cd">${x.code}</span></button>`).join('');
+    const PARTS: Record<number, string> = { 1: '第1部　機体と武器', 2: '第2部　見る・隠れる', 3: '第3部　道具で崩す', 4: '第4部　作戦' };
+    $('#mlist').innerHTML = [1, 2, 3, 4].map(p => {
+      const ms = MISSIONS.filter(x => (x.part ?? 4) === p); if (!ms.length) return '';
+      return `<div class="mpart">${PARTS[p]}</div>` + ms.map(x => {
+        const pr = PROGRESS[x.id], md = x.medals ? x.medals.map((_, i) => pr?.medals[i] ? '<i class="on">●</i>' : '<i>○</i>').join('') : '';
+        return `<button class="mcard${x.id === m.id ? ' on' : ''}${pr?.clear ? ' clear' : ''}" data-m="${x.id}"><span class="mtype t-${x.type}">${x.part && x.part < 4 ? x.code : x.type}</span><span class="nm">${x.name}${pr?.clear ? ' <b class="ck">✓</b>' : ''}</span><span class="cd">${md || x.code}</span></button>`;
+      }).join('');
+    }).join('');
     $('#diff').innerHTML = Object.entries(DIFFS).map(([k, d]) => `<button data-d="${k}" class="${SAVE.diff === k ? 'on' : ''}">${d.name}</button>`).join('');
     $('#brief').innerHTML = `<h3>${m.code}　${m.name}</h3><p>${m.brief}</p>
      <dl><dt>勝利条件</dt><dd>${m.win}</dd><dt>敗北条件</dt><dd>${m.lose}</dd>
      <dt>出撃枠</dt><dd class="num">${m.max} 機</dd><dt>予算</dt><dd class="num">${m.budget}</dd>
      <dt>制限時間</dt><dd class="num">${m.limit ? Math.floor(m.limit / 60) + ' 分' : 'なし'}</dd><dt>砲撃支援</dt><dd class="num">${m.arty} 回</dd></dl>
-     <div class="hint">助言：${m.hint}</div>`;
+     <div class="hint">助言：${m.hint}</div>${m.medals ? `<div class="medals"><b>サブ目標</b>${m.medals.map((md, i) => `<div class="${PROGRESS[m.id]?.medals[i] ? 'got' : ''}"><i>${PROGRESS[m.id]?.medals[i] ? '●' : '○'}</i> ${md.name}　<small>${md.desc}</small></div>`).join('')}</div>` : ''}`;
+    if (m.squad) {
+      $('#slots').innerHTML = `<p class="fixed">この章は編成固定です（${m.squad.length}機）。</p>` + m.squad.map((s, i) => {
+        const st = loadoutStats(s), w = WEAPONS[s.weapon];
+        return `<div class="slot on fixedslot"><span class="no">0${i + 1}</span><div class="pilot">${shapeSVG(st.shape, '#5fb0e0')}<div><b>${PILOTS[i][0]}</b><small>${roleOf(s)}</small></div></div>
+        <div class="fx">${CHASSIS[s.chassis].name}／${w.name}／${EQUIP[s.equip].name}／${TOOLS[s.tool].name}${s.tool !== 'none' ? '×' + TOOLS[s.tool].ammo : ''}</div>
+        <div class="st"><span>HP <b>${st.hp}</b></span><span>装甲 <b>${st.armor}</b></span><span>速度 <b>${st.speed}</b></span><span>視界 <b>${st.sensor}</b></span><span>射程 <b>${w.range}</b></span></div></div>`;
+      }).join('');
+      $('#budget').innerHTML = ''; const el = $('#deployMsg'); el.textContent = `${m.squad.length} 機で出撃`; el.className = '';
+      ($('#goBtn') as HTMLButtonElement).disabled = false; ($('#aiGoBtn') as HTMLButtonElement).disabled = false;
+      this.renderReplays(); return;
+    }
     const dep = deployOf(m);
     $('#slots').innerHTML = SAVE.slots.map((s, i) => {
       const st = loadoutStats(s), w = WEAPONS[s.weapon];

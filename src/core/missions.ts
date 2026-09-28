@@ -3,12 +3,22 @@ import type { Sim, Outcome } from './sim';
 import type { MapSpec } from './map';
 import { rng } from './rng';
 
-export type MissionId = 'm1' | 'm2' | 'm3' | 'm4' | 'm5';
-export type MissionType = '殲滅' | '強襲' | '索敵' | '護衛' | '離脱';
+import type { Loadout } from './data';
+import { TRAINING } from './training';
+
+export type MissionId = string;
+export type MissionType = '殲滅' | '強襲' | '索敵' | '護衛' | '離脱' | '教練';
+/** A sub-goal shown on the result screen. Evaluated once when the mission ends (wins only). */
+export interface Medal { name: string; desc: string; test(s: Sim): boolean }
 
 export interface MissionDef extends MapSpec {
   id: MissionId; type: MissionType; code: string; name: string;
   budget: number; max: number; limit: number; arty: number;
+  /** 1–3: training chapters, 4: operations. */
+  part?: number;
+  /** Fixed squad (training): replaces the hangar loadout. */
+  squad?: Loadout[];
+  medals?: Medal[];
   emines?: [number, number][];
   brief: string; win: string; lose: string; hint: string;
   setup(s: Sim): void;
@@ -19,7 +29,7 @@ export interface MissionDef extends MapSpec {
 
 const ROAD4: [number, number][] = [[0.5, 20.5], [7.5, 18.5], [13.5, 12.5], [20.5, 10.5], [27.5, 6.5]];
 
-export const MISSIONS: MissionDef[] = [
+const OPS: MissionDef[] = [
   {
     id: 'm1', type: '殲滅', code: 'OP-01', name: '灰原掃討戦', budget: 2600, max: 8, limit: 0, seed: 11, arty: 1,
     terr: { forest: 7, hills: 5, water: 1, rocks: 6 }, spawn: [4, 23], keys: [[15, 12], [22, 6], [20, 18], [9, 8]],
@@ -137,3 +147,6 @@ export const MISSIONS: MissionDef[] = [
     },
   },
 ];
+
+OPS.forEach(m => { m.part ??= 4 });
+export const MISSIONS: MissionDef[] = [...TRAINING, ...OPS];
