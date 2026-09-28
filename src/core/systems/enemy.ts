@@ -283,8 +283,19 @@ function unitStep(s: Sim, u: EU, g: EGroup, m: EU[], i: number, dt: number) {
   if (tb && tb.tool === 'missile' && tb.ammo > 0 && tb.cd <= 0 && g.state !== 'idle') {
     let best: Entity | null = null, bd = 1e9;
     for (const p of s.world.alive()) if (p.team === 'P' && s.canLock(u, p)) { const d = dist(u.pos, p.pos) + (p.ephemeral?.kind === 'decoy' ? -3 : 0); if (d < bd) { bd = d; best = p } }
-    if (best) { launchMissile(s, u, best); tb.cd = ai.etype === 'launcher' ? 6 : 9 }
-  }
+    // locking on takes time: 1.5s on something it sees, 3s when homing on radar emissions only.
+    // A radar that is only switched on briefly can't be hit; a warning tells the target it is being locked.
+    if (!best) ai.lock = undefined;
+    else {
+      if (ai.lock?.id !== best.id) {
+        ai.lock = { id: best.id, t: 0 };
+        if (best.squad) s.log(`ロックオン警報：${best.squad.pilot}機が${u.name}に狙われている`, 'warning');
+      }
+      ai.lock.t += dt;
+      const sees = s.detP.has(best.id) && dist(u.pos, best.pos) <= s.effSensor(u);
+      if (ai.lock.t >= (sees || best.ephemeral ? 1.5 : 3)) { launchMissile(s, u, best); tb.cd = ai.etype === 'launcher' ? 6 : 9; ai.lock = undefined }
+    }
+  } else if (ai.lock) ai.lock = undefined;
   // mortars: shell any tight cluster of ours they know about
   if (ai.etype === 'mortar') {
     ai.cd = (ai.cd ?? 4) - dt;

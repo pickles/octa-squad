@@ -15,7 +15,7 @@ import { runSystems } from './systems';
 
 export const TICK = 1 / 30;
 /** Bump whenever a change alters simulation results; replays recorded with another version will not reproduce. */
-export const SIM_VERSION = 5;
+export const SIM_VERSION = 6;
 
 export interface GroupOpts { patrol?: [number, number][]; hunt?: boolean; role?: GroupRole; leash?: number; ambush?: boolean }
 export interface Cloud { k: 'chaff' | 'smoke' | 'flare' | 'jam'; x: number; y: number; r: number; t: number; dur: number; team: Team }

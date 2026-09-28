@@ -52,6 +52,8 @@ export interface Entity {
     gid: number; goal: Pt | null; goalAt: Pt | null; part: 'fix' | 'flank' | null; cd?: number;
     /** Lying in ambush: seen at 0.35× range until it fires or its team starts moving. */
     hidden?: boolean;
+    /** Missile lock in progress (target id, seconds held). */
+    lock?: { id: number; t: number };
     /** Damage taken per attacker (decays over ~8s). The biggest one is who this unit goes after. `pos` = where it was last seen. */
     aggro?: { id: number; v: number; pos: Pt | null }[] };
   structure?: { kind: EType; objective: boolean; label: string; scan: number; scanned: boolean; alerted: boolean };
