@@ -32,10 +32,11 @@ export function fireSystem(s: Sim) {
     }
     if (!t) continue;
     w.cd = w.def.cd * (0.9 + s.rnd() * 0.2) * (u.systems?.fcs ? 1.6 : 1); w.fireT = 1.5;
+    u.muzzle = { until: s.time + 2, by: t.id };
     if (u.stealth) u.stealth.revealT = 2.5;
     const am = w.ammoType;
     s.projs.push({ x: u.pos.x, y: u.pos.y, px: u.pos.x, py: u.pos.y, tx: t.pos.x, ty: t.pos.y, tgt: t.id, spd: w.def.ps, dmg: w.def.dmg, splash: am === 'he' ? 1 : 0,
-      team: u.team, k: w.def.tag, src: u.id, am, acc: (s.inCloud('smoke', u.pos) || s.inCloud('smoke', t.pos)) ? 0.35 : 1 });
+      team: u.team, k: w.def.tag, src: u.id, am, acc: s.smokeOn(u.pos, t.pos) ? 0.35 : 1 });
     if (am !== 'std') {
       w[am]--;
       if (w[am] <= 0) { w.nextAmmo = 'std'; w.reloadT = 2.5; if (sq) s.log(`${String(sq.no).padStart(2, '0')} ${sq.pilot}機：${AMMO[am].name}切れ、通常弾へ`) }
@@ -49,6 +50,7 @@ export function launchMissile(s: Sim, u: Entity, t: Entity) {
   const T = TOOLS.missile, tb = u.toolbelt!;
   tb.ammo--; tb.cd = T.cd!;
   if (u.weapon) u.weapon.fireT = 1.5;
+  u.muzzle = { until: s.time + 2, by: t.id };
   if (u.stealth) u.stealth.revealT = 2.5;
   s.projs.push({ x: u.pos.x, y: u.pos.y, px: u.pos.x, py: u.pos.y, tx: t.pos.x, ty: t.pos.y, tgt: t.id, spd: 7, dmg: T.dmg!, splash: T.splash!, team: u.team, k: 'MSL', src: u.id, am: 'std', acc: 1 });
   s.emit({ k: 'flash', x: u.pos.x, y: u.pos.y, team: u.team });

@@ -45,7 +45,7 @@ export const TOOLS: Record<ToolKey, ToolDef> = {
   none:    { name: 'なし', tag: '', ammo: 0, cost: 0, desc: 'ツールなし' },
   missile: { name: 'ミサイル', tag: 'MSL', ammo: 4, range: 9, dmg: 45, splash: 1.2, cd: 3, cost: 120, target: 'enemy', desc: '射程9・威力45＋周囲に半分。ロックオンには目標が自分の視界内か、レーダー装備の味方の視界内にいる必要がある。チャフの中では誘導を失う。4発' },
   chaff:   { name: 'チャフ', tag: 'CHF', ammo: 2, range: 3.5, radius: 2.5, dur: 12, cd: 1, cost: 60, target: 'point', desc: '半径2.5に12秒。中ではミサイルの誘導が切れ、レーダーが効かない（レーダー塔にも探知されない）。2回' },
-  smoke:   { name: '煙幕', tag: 'SMK', ammo: 2, range: 3.5, radius: 2.2, dur: 15, cd: 1, cost: 50, target: 'point', desc: '半径2.2に15秒。撃つ側か撃たれる側が煙の中だと命中率35%。中の機体は目では見つかりにくい（×0.4）が、レーダーには映る。2回' },
+  smoke:   { name: '煙幕', tag: 'SMK', ammo: 2, range: 3.5, radius: 2.2, dur: 15, cd: 1, cost: 50, target: 'point', desc: '半径2.2に15秒。煙の中・煙越しの射撃は命中率35%。煙の中や煙の向こうの機体は目では見つかりにくい（×0.4）が、レーダーには映る。発砲炎も隠す。2回' },
   flare:   { name: '照明弾', tag: 'FLR', ammo: 2, range: 8, radius: 4, dur: 10, cd: 1, cost: 50, target: 'point', desc: '射程8、半径4を10秒照らして中の敵を視認できる。2回' },
   decoy:   { name: 'デコイ', tag: 'DCY', ammo: 1, range: 4, dur: 25, cd: 1, cost: 70, target: 'point', desc: '電波を出す囮を置く（HP60・25秒）。敵は本物と区別できず、優先して狙う。1回' },
   charge:  { name: '爆薬', tag: 'EXP', ammo: 2, range: 1.2, dmg: 260, cd: 1, cost: 70, target: 'struct', desc: '敵の建造物に隣接して仕掛ける（5秒後に爆発）。建造物に260、周囲の機体に100。2個' },

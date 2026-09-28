@@ -20,6 +20,14 @@ npm run build:single   # dist-single/index.html（全部入りの1ファイル�
 npm run agent -- m2 normal 5   # Node だけで内蔵AIに1戦させる（ブラウザ不要・1戦0.5秒程度）
 ```
 
+### バランス調整
+
+```sh
+npx tsx tools/bench.ts normal 6          # 内蔵AI×初期編成で各ミッション6戦ずつ、勝率を出す
+npm run analyze -- replay.json [--log]   # リプレイの命令を「現在のルール」で再実行し、機体ごとに
+                                         # 射撃数・発見されずに撃てた割合・最大射程・与/被ダメ・煙越しの被弾を表示
+```
+
 ## ディレクトリ構成
 
 ```

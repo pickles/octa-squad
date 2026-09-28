@@ -14,6 +14,8 @@ import { execCommand, describeCommand } from './commands';
 import { runSystems } from './systems';
 
 export const TICK = 1 / 30;
+/** Bump whenever a change alters simulation results; replays recorded with another version will not reproduce. */
+export const SIM_VERSION = 2;
 
 export interface Cloud { k: 'chaff' | 'smoke' | 'flare' | 'jam'; x: number; y: number; r: number; t: number; dur: number; team: Team }
 export interface Mine { x: number; y: number; team: Team; arm: number; revealed: boolean; disarm: number; src: number | null; done?: boolean }
@@ -42,7 +44,7 @@ export interface SimOptions {
 }
 
 export interface Replay {
-  v: 3; mission: MissionId; diff: Difficulty; seed: number; slots: Loadout[]; deploy: boolean[];
+  v: 3; sv?: number; mission: MissionId; diff: Difficulty; seed: number; slots: Loadout[]; deploy: boolean[];
   ctrl: 'human' | 'ai' | 'mixed'; date: number; ticks: number;
   result: { win: boolean; reason: string; time: number; kills: number; lost: number };
   cmds: RecordedCommand[];
@@ -181,6 +183,16 @@ export class Sim {
   countP() { return this.livingSquad().length }
   etype(e: Entity): EType | null { return e.enemyAI?.etype ?? e.structure?.kind ?? null }
   inCloud(k: Cloud['k'], p: Pt) { for (const c of this.clouds) if (c.k === k && Math.hypot(p.x - c.x, p.y - c.y) <= c.r) return true; return false }
+  /** True if a smoke cloud covers either point or lies across the line between them (blocks optical sight). */
+  smokeOn(a: Pt, b: Pt) {
+    for (const c of this.clouds) {
+      if (c.k !== 'smoke') continue;
+      const dx = b.x - a.x, dy = b.y - a.y, L = dx * dx + dy * dy;
+      const t = L ? Math.max(0, Math.min(1, ((c.x - a.x) * dx + (c.y - a.y) * dy) / L)) : 0;
+      if (Math.hypot(a.x + dx * t - c.x, a.y + dy * t - c.y) <= c.r) return true;
+    }
+    return false;
+  }
   inZone(e: Entity, kind: Zone['kind']) { return this.zones.some(z => z.kind === kind && Math.hypot(e.pos.x - z.x, e.pos.y - z.y) <= z.r) }
   onHill(e: Entity) { return this.map.at(e.pos.x, e.pos.y) === T.HILL }
   inForest(e: Entity) { return this.map.at(e.pos.x, e.pos.y) === T.FOREST }
@@ -211,8 +223,13 @@ export class Sim {
     const cp = this.inCloud('chaff', p.pos), isRadar = this.etype(e) === 'radar';
     if (isRadar && (cp || this.inCloud('chaff', e.pos) || this.inCloud('jam', e.pos))) return -1;
     let m = this.detMul(p);
-    if (!isRadar && this.inCloud('smoke', p.pos)) m *= 0.4;
+    if (!isRadar && this.smokeOn(e.pos, p.pos)) m *= 0.4;
     return this.effSensor(e) * m + (p.sensor?.emit && !cp ? p.sensor.emit : 0) + (p.squad?.mmode === 'fast' ? 1.5 : 0);
+  }
+  /** True if `shooter` fired at `victim` within the last 2s (muzzle flash), unless smoke hides the flash. Any distance. */
+  muzzleSeen(shooter: Entity, victim: Entity) {
+    const m = shooter.muzzle;
+    return !!m && m.by === victim.id && m.until > this.time && !!victim.sensor && victim.life.alive && !this.smokeOn(shooter.pos, victim.pos);
   }
   canSee(viewer: Entity, t: Entity) { return viewer.team === 'P' ? this.seenE.has(t.id) : this.detP.has(t.id) }
   canLock(u: Entity, t: Entity | undefined): boolean {
@@ -273,7 +290,7 @@ export class Sim {
   toReplay(): Replay {
     const srcs = new Set(this.rec.map(x => x[1].src || 'human'));
     return {
-      v: 3, mission: this.m.id, diff: this.diff, seed: this.seed, slots: this.slots, deploy: this.deploy,
+      v: 3, sv: SIM_VERSION, mission: this.m.id, diff: this.diff, seed: this.seed, slots: this.slots, deploy: this.deploy,
       ctrl: srcs.size > 1 ? 'mixed' : srcs.size ? ([...srcs][0] as 'human' | 'ai') : 'human', date: Date.now(), ticks: this.tickN,
       result: { win: !!this.over?.win, reason: this.over?.reason || '', time: +this.time.toFixed(2), kills: this.kills, lost: this.lost },
       cmds: this.rec,
@@ -292,7 +309,7 @@ export function verifyReplay(r: Replay) {
   const limit = r.ticks + 5;
   while (!s.over && s.tickN < limit) s.step();
   const got = { win: !!s.over?.win, reason: s.over?.reason || '', time: +s.time.toFixed(2) };
-  return { recorded: r.result, replayed: got, match: got.win === r.result.win && Math.abs(got.time - r.result.time) < 0.05 };
+  return { recorded: r.result, replayed: got, match: got.win === r.result.win && Math.abs(got.time - r.result.time) < 0.05, simVersion: { recorded: r.sv ?? 1, current: SIM_VERSION } };
 }
 
 export { CHASSIS, TOOLS };

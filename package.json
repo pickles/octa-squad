@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "agent": "tsx tools/agent-headless.ts"
+    "agent": "tsx tools/agent-headless.ts",
+    "analyze": "tsx tools/analyze-replay.ts"
   },
   "dependencies": {
     "phaser": "3.90.0"

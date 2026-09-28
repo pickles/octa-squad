@@ -37,6 +37,8 @@ export interface Entity {
   truck?: { hold: boolean };
   /** Decoys and probes: placed objects with a lifetime. */
   ephemeral?: { kind: 'decoy' | 'probe'; ttl: number };
+  /** Muzzle flash: after firing, the unit that was shot at can see the shooter within its own weapon range + 1 until `until`. */
+  muzzle?: { until: number; by: number };
   /** What the player knows about an enemy. */
   intel?: { lastSeen: Pt | null };
   /** How close a squad member is to being detected. */

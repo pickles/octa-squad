@@ -19,9 +19,10 @@ export function visionSystem(s: Sim) {
   // what we can see of the enemy
   s.seenE.clear();
   for (const e of s.enemies()) {
-    const f = s.inForest(e) && !e.structure ? 0.7 : 1, sm = s.inCloud('smoke', e.pos);
-    for (const p of ours) { const ff = sm && !s.hasRadar(p) ? f * 0.4 : f; if (dist(e.pos, p.pos) <= s.effSensor(p) * ff) { s.seenE.add(e.id); break } }
-    if (!sm && !s.seenE.has(e.id)) for (const c of lights) if (Math.hypot(e.pos.x - c.x, e.pos.y - c.y) <= c.r) { s.seenE.add(e.id); break }
+    const f = s.inForest(e) && !e.structure ? 0.7 : 1;
+    for (const p of ours) { const ff = !s.hasRadar(p) && s.smokeOn(p.pos, e.pos) ? f * 0.4 : f; if (dist(e.pos, p.pos) <= s.effSensor(p) * ff) { s.seenE.add(e.id); break } }
+    if (!s.seenE.has(e.id) && e.muzzle) { const v = s.world.get(e.muzzle.by); if (v && v.team === 'P' && s.muzzleSeen(e, v)) s.seenE.add(e.id) }
+    if (!s.seenE.has(e.id) && !s.inCloud('smoke', e.pos)) for (const c of lights) if (Math.hypot(e.pos.x - c.x, e.pos.y - c.y) <= c.r) { s.seenE.add(e.id); break }
     if (s.seenE.has(e.id) && e.intel) e.intel.lastSeen = { ...e.pos };
   }
 
@@ -32,7 +33,8 @@ export function visionSystem(s: Sim) {
   for (const p of s.world.alive().filter(x => x.team === 'P')) {
     if (p.exposure) { p.exposure.margin = 99; p.exposure.warnBy = null }
     for (const e of foes) {
-      const r = s.detRange(e, p), d = dist(e.pos, p.pos);
+      let r = s.detRange(e, p); const d = dist(e.pos, p.pos);
+      if (s.muzzleSeen(p, e)) r = Infinity;
       if (p.exposure && s.seenE.has(e.id) && d - r < p.exposure.margin) { p.exposure.margin = d - r; p.exposure.warnBy = e.id }
       if (d <= r) {
         s.detP.add(p.id);

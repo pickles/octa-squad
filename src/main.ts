@@ -2,7 +2,7 @@
 // wires keyboard input, and exposes window.octa for programmatic / AI control.
 import Phaser from 'phaser';
 import './ui/style.css';
-import { Sim, verifyReplay } from './core';
+import { SIM_VERSION, Sim, verifyReplay } from './core';
 import type { Difficulty, Loadout, Replay } from './core';
 import { BattleSession } from './game/controller';
 import { BattleScene } from './game/BattleScene';
@@ -101,6 +101,7 @@ class App {
     const prev = this.session;
     if (prev?.replay === rep) { session.speed = prev.speed; session.sel = prev.sel }
     this.enter(session);
+    if ((rep.sv ?? 1) !== SIM_VERSION) sim.log(`このリプレイは別バージョンの計算（v${rep.sv ?? 1}、現在v${SIM_VERSION}）で記録されています。記録と違う展開になることがあります`, 'warning');
     sim.log(`リプレイ：${sim.m.code} ${sim.m.name}（${rep.ctrl === 'ai' ? 'AI' : rep.ctrl === 'human' ? 'プレイヤー' : 'AI＋プレイヤー'}の操作）`, 'info');
     session.paused = !autoplay;
     return session;

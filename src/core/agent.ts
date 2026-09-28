@@ -248,12 +248,13 @@ Difficulty scales enemy damage and hp: ${Object.entries(DIFFS).map(([k, v]) => `
 
 ## Combat & detection
 - Damage = dmg × max(0.3, 1 − 0.07×armor) × (0.75 if the target stands in forest).
-- You only see enemies within some unit's sensor radius (0.7× for enemies in forest, 0.4× in smoke unless the viewer has working radar). You can only shoot what you see.
+- You only see enemies within some unit's sensor radius (0.7× for enemies in forest, 0.4× when smoke is on or across the line of sight, unless the viewer has working radar). You can only shoot what you see.
 - Hills: +1 sensor and +1 range. Enemies detect you at enemySensor × mult + radarEmission (+1.5 when moving fast); mult: stealth 0.5 (unless it fired in the last 2.5s), forest 0.7, hidden 0.35, careful 0.85, smoke 0.4.
+- Muzzle flash: a unit that fires is visible, for 2s, to the unit it shot at, at any distance (both sides), unless smoke lies between them. Out-ranged victims cannot shoot back but will know where you are and close in.
 - A detecting enemy alerts others within 5.5 (radar tower: 13). Alerted enemies chase ~10 tiles and give up ~9s after losing sight.
 - Stances: hold = fire at anything in range but don't chase; free = chase visible enemies when idle; nofire = only fire at an explicit attack target.
 - missile: needs a LOCK (target visible, not in chaff, inside the launcher's own sensor or a radar ally's sensor). Loses guidance in chaff. Enemy heavies carry missiles guided by their own sensor or the radar tower.
-- chaff: missiles lose lock; radar stops working inside. smoke: 35% hit chance when shooter or target is inside. flare: reveals radius 4. decoy: enemies prefer it. mine: invisible, 60 dmg. charge: plant on a structure, 260 after 5s. jammer: enemy sensor x0.4 and radar tower off. probe: static sensor 5 for 60s.
+- chaff: missiles lose lock; radar stops working inside. smoke: 35% hit chance when the shot passes through or starts/ends in smoke; also blocks sight (x0.4) across it. flare: reveals radius 4. decoy: enemies prefer it. mine: invisible, 60 dmg. charge: plant on a structure, 260 after 5s. jammer: enemy sensor x0.4 and radar tower off. probe: static sensor 5 for 60s.
 - Move mode: normal | fast (x1.5 speed, x0.7 sensor, louder) | careful (x0.6 speed, +1.5 sensor, finds enemy mines within 2.5 and disarms them standing still within 1.2). m2 and m4 have hidden minefields.
 - hide: stop; after 2s hidden (detection x0.35) and no auto-fire.
 - Ammo: std | ap (armor effect x0.3) | he (splash 1, x1.6 vs structures, ignores forest). Switching takes 2.5s.
