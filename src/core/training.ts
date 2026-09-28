@@ -7,7 +7,7 @@ import type { Loadout, ChassisKey, WeaponKey, EquipKey, ToolKey } from './data';
 
 const L = (chassis: ChassisKey, weapon: WeaponKey, equip: EquipKey = 'none', tool: ToolKey = 'none'): Loadout => ({ chassis, weapon, equip, tool });
 /** Instructor line: shown in the advisor box. */
-const say = (s: Sim, t: number, text: string) => s.schedule(t, s2 => s2.log('教官：' + text, 'tip'));
+const say = (s: Sim, t: number, text: string) => { if (t <= 1) s.log('教官：' + text, 'tip'); else s.schedule(t, s2 => s2.log('教官：' + text, 'tip')) }; // opening lines show while still paused
 const allDead = (s: Sim) => s.countE() === 0;
 const inGoal = (s: Sim) => s.livingSquad().filter(u => s.inZone(u, 'goal')).length;
 const noLoss: Medal = { name: '全機生還', desc: '1機も失わずに勝つ', test: s => s.lost === 0 };

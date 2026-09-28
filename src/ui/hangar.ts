@@ -56,7 +56,7 @@ export class Hangar {
     $('#guideBody').innerHTML = guideHTML();
     try { if (localStorage.getItem('octa-guide') === '0') ($('#guide') as HTMLDetailsElement).open = false } catch { /* ignore */ }
     $('#guide').addEventListener('toggle', () => { try { localStorage.setItem('octa-guide', ($('#guide') as HTMLDetailsElement).open ? '1' : '0') } catch { /* ignore */ } });
-    $('#mlist').addEventListener('click', e => { const b = (e.target as HTMLElement).closest<HTMLElement>('[data-m]'); if (!b) return; SAVE.mission = b.dataset.m as MissionId; persist(); this.render() });
+    $('#mlist').addEventListener('click', e => { const b = (e.target as HTMLElement).closest<HTMLElement>('[data-m]'); if (!b) return; SAVE.mission = b.dataset.m as MissionId; persist(); this.render(); $('#brief').scrollIntoView({ block: 'nearest', behavior: 'smooth' }) });
     $('#diff').addEventListener('click', e => { const b = (e.target as HTMLElement).closest<HTMLElement>('[data-d]'); if (!b) return; SAVE.diff = b.dataset.d as Difficulty; persist(); this.render() });
     $('#slots').addEventListener('change', e => {
       const t = e.target as HTMLInputElement | HTMLSelectElement, row = t.closest<HTMLElement>('.slot'); if (!row) return;
@@ -100,7 +100,7 @@ export class Hangar {
     $('#diff').innerHTML = Object.entries(DIFFS).map(([k, d]) => `<button data-d="${k}" class="${SAVE.diff === k ? 'on' : ''}">${d.name}</button>`).join('');
     $('#brief').innerHTML = `<h3>${m.code}　${m.name}</h3><p>${m.brief}</p>
      <dl><dt>勝利条件</dt><dd>${m.win}</dd><dt>敗北条件</dt><dd>${m.lose}</dd>
-     <dt>出撃枠</dt><dd class="num">${m.max} 機</dd><dt>予算</dt><dd class="num">${m.budget}</dd>
+     ${m.squad ? `<dt>編成</dt><dd>固定（${m.squad.length} 機）</dd>` : `<dt>出撃枠</dt><dd class="num">${m.max} 機</dd><dt>予算</dt><dd class="num">${m.budget}</dd>`}
      <dt>制限時間</dt><dd class="num">${m.limit ? Math.floor(m.limit / 60) + ' 分' : 'なし'}</dd><dt>砲撃支援</dt><dd class="num">${m.arty} 回</dd></dl>
      <div class="hint">助言：${m.hint}</div>${m.medals ? `<div class="medals"><b>サブ目標</b>${m.medals.map((md, i) => `<div class="${PROGRESS[m.id]?.medals[i] ? 'got' : ''}"><i>${PROGRESS[m.id]?.medals[i] ? '●' : '○'}</i> ${md.name}　<small>${md.desc}</small></div>`).join('')}</div>` : ''}`;
     if (m.squad) {
