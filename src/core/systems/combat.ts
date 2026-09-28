@@ -6,6 +6,8 @@ import type { SubsystemKey } from '../data';
 import { dist } from '../rng';
 
 const armorMul = (armor: number, k = 1) => Math.max(0.3, 1 - armor * 0.07 * k);
+/** Damage of one bullet after armour: raw − armour, but never below 15% of raw. */
+export const bulletDmg = (raw: number, armor: number) => Math.max(raw * 0.15, raw - armor);
 
 export function fireSystem(s: Sim) {
   for (const u of s.world.alive('weapon')) {
@@ -42,7 +44,7 @@ export function fireSystem(s: Sim) {
       if (w[am] <= 0) { w.nextAmmo = 'std'; w.reloadT = 2.5; if (sq) s.log(`${String(sq.no).padStart(2, '0')} ${sq.pilot}機：${AMMO[am].name}切れ、通常弾へ`) }
     }
     s.emit({ k: 'flash', x: u.pos.x, y: u.pos.y, team: u.team });
-    if (u.team === 'P' && t.enemyAI && (t.enemyAI.state === 'guard' || t.enemyAI.state === 'patrol')) t.enemyAI.state = 'engage';
+    if (u.enemyAI) s.egroups[u.enemyAI.gid].lastFire = s.time;
   }
 }
 
@@ -55,7 +57,6 @@ export function launchMissile(s: Sim, u: Entity, t: Entity) {
   s.projs.push({ x: u.pos.x, y: u.pos.y, px: u.pos.x, py: u.pos.y, tx: t.pos.x, ty: t.pos.y, tgt: t.id, spd: 7, dmg: T.dmg!, splash: T.splash!, team: u.team, k: 'MSL', src: u.id, am: 'std', acc: 1 });
   s.emit({ k: 'flash', x: u.pos.x, y: u.pos.y, team: u.team });
   if (u.team === 'E' && (t.squad || t.truck)) s.log(`ミサイル接近！（→ ${t.squad ? t.squad.pilot + '機' : t.name}）`, 'warning');
-  if (u.team === 'P' && t.enemyAI && (t.enemyAI.state === 'guard' || t.enemyAI.state === 'patrol')) t.enemyAI.state = 'engage';
 }
 
 export function projectileSystem(s: Sim, dt: number) {
@@ -98,7 +99,9 @@ function impact(s: Sim, p: Projectile) {
   const am = p.am, ak = am === 'ap' ? 0.3 : am === 'he' ? 1.3 : 1;
   const hitOne = (t: Entity, m: number) => {
     if (!t.life.alive || !t.health) return;
-    let v = (p.team === 'E' ? s.diffMul().dmg : 1) * p.dmg * m * armorMul(t.health.armor, ak) * (am === 'ap' ? 0.9 : 1) * (am === 'he' && t.structure ? 1.6 : 1);
+    // bullets: armour is subtracted per hit, so light rounds (MG) barely scratch heavy armour, big rounds (sniper, AP) punch through
+    const raw = p.dmg * (am === 'ap' ? 0.9 : 1) * (am === 'he' && t.structure ? 1.6 : 1);
+    let v = (p.team === 'E' ? s.diffMul().dmg : 1) * m * bulletDmg(raw, t.health.armor * ak);
     if (s.inForest(t) && !t.structure && am !== 'he') v *= 0.75;
     damage(s, t, v, s.world.get(p.src) || null);
   };
@@ -153,13 +156,13 @@ export function damage(s: Sim, t: Entity, d: number, src: Entity | null) {
     }
   }
   const ai = t.enemyAI;
-  if (ai && src && src.life.alive && (ai.state === 'guard' || ai.state === 'patrol' || ai.state === 'return')) { ai.state = 'engage'; ai.lastKnown = { ...src.pos }; ai.lostT = 0 }
+  if (ai) s.egroups[ai.gid].lastHurt = s.time;
   // remember the attacker. It knows roughly where the shot came from only if it saw the muzzle flash.
   if (ai && src && src.life.alive && src.team !== t.team && !src.ephemeral) {
     const knows = s.detP.has(src.id) || s.muzzleSeen(src, t);
     const ag = (ai.aggro ??= []); let a = ag.find(x => x.id === src.id);
     if (!a) { a = { id: src.id, v: 0, pos: null }; ag.push(a) }
-    a.v += d; if (knows) a.pos = { ...src.pos };
+    a.v += d; if (knows) { a.pos = { ...src.pos }; const g = s.egroups[ai.gid]; g.contact = { ...src.pos }; g.contactT = s.time }
   }
   if (h.hp <= 0) {
     t.life.alive = false; h.hp = 0;

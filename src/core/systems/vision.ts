@@ -1,8 +1,8 @@
 // Fog of war and detection, both directions.
 import type { Sim } from '../sim';
-import type { Entity } from '../ecs';
 import { N } from '../map';
 import { dist } from '../rng';
+import { reportContact } from './enemy';
 
 export function visionSystem(s: Sim) {
   s.vis.fill(0);
@@ -37,24 +37,11 @@ export function visionSystem(s: Sim) {
       if (s.muzzleSeen(p, e)) r = Infinity;
       if (p.exposure && s.seenE.has(e.id) && d - r < p.exposure.margin) { p.exposure.margin = d - r; p.exposure.warnBy = e.id }
       if (d <= r) {
+        if (!s.detP.has(p.id) && e.enemyAI && !e.enemyAI.alertLogged) { e.enemyAI.alertLogged = true; s.log(`敵に発見された（${e.name}）`, 'warning') }
         s.detP.add(p.id);
-        const ai = e.enemyAI;
-        if (ai ? (ai.state === 'guard' || ai.state === 'patrol' || ai.state === 'return') : true) alertFrom(s, e, p);
-        if (ai) { ai.lastKnown = { ...p.pos }; ai.lostT = 0 }
+        reportContact(s, e, p.pos);
+        if (e.enemyAI) e.enemyAI.lastKnown = { ...p.pos };
       }
     }
   }
-}
-
-/** An enemy (or radar tower) that spots us wakes up its neighbours. */
-export function alertFrom(s: Sim, src: Entity, p: Entity) {
-  const isRadar = s.etype(src) === 'radar';
-  const rad = isRadar ? 13 : 5.5; let n = 0;
-  for (const e of s.world.alive('enemyAI')) {
-    const ai = e.enemyAI;
-    if (dist(e.pos, src.pos) <= rad && (ai.state === 'guard' || ai.state === 'patrol' || ai.state === 'return')) { ai.state = 'engage'; ai.lastKnown = { ...p.pos }; ai.lostT = 0; n++ }
-  }
-  if (src.enemyAI && src.enemyAI.state !== 'engage') src.enemyAI.state = 'engage';
-  if (isRadar && src.structure && !src.structure.alerted) { src.structure.alerted = true; s.log('レーダー塔に探知された！守備隊が集結中', 'warning') }
-  else if (n && src.enemyAI && !src.enemyAI.alertLogged) { src.enemyAI.alertLogged = true; s.log(`敵に発見された（${src.name}）`, 'warning') }
 }

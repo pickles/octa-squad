@@ -4,7 +4,7 @@
 import { AMMO_CAP, CHASSIS, DIFFS, ETYPES, PILOTS, TOOLS, WEAPONS, loadoutStats, migrateLoadout } from './data';
 import type { Difficulty, EType, Loadout, Shape, ToolKey, UnitStats } from './data';
 import { World } from './ecs';
-import type { Entity, Pt, Team, With } from './ecs';
+import type { EGroup, Entity, GroupRole, Pt, Team, With } from './ecs';
 import { GameMap, N, T, generateMap } from './map';
 import { dist, rng } from './rng';
 import { MISSIONS } from './missions';
@@ -15,8 +15,9 @@ import { runSystems } from './systems';
 
 export const TICK = 1 / 30;
 /** Bump whenever a change alters simulation results; replays recorded with another version will not reproduce. */
-export const SIM_VERSION = 3;
+export const SIM_VERSION = 4;
 
+export interface GroupOpts { patrol?: [number, number][]; hunt?: boolean; role?: GroupRole; leash?: number }
 export interface Cloud { k: 'chaff' | 'smoke' | 'flare' | 'jam'; x: number; y: number; r: number; t: number; dur: number; team: Team }
 export interface Mine { x: number; y: number; team: Team; arm: number; revealed: boolean; disarm: number; src: number | null; done?: boolean }
 export interface Shell { x: number; y: number; at: number; cx: number; cy: number; done?: boolean }
@@ -28,7 +29,7 @@ export interface Projectile {
 export interface Zone { kind: 'lz' | 'goal' | 'hint'; x: number; y: number; r: number; label: string }
 export type FxKind = 'flash' | 'hit' | 'boom' | 'miss' | 'puff' | 'heal' | 'ping' | 'smoke';
 export interface Fx { k: FxKind; x: number; y: number; r?: number; team?: Team; red?: boolean }
-export type LogKind = 'warning' | 'info' | 'note' | 'ai';
+export type LogKind = 'warning' | 'info' | 'note' | 'ai' | 'tip';
 export interface LogEntry { t: number; text: string; kind: LogKind }
 export interface Outcome { win: boolean; reason: string }
 export interface TimedEvent { t: number; fn: (s: Sim) => void; done?: boolean }
@@ -72,6 +73,9 @@ export class Sim {
   // mission state
   convoyGo = false; arrived = 0; extracted = 0; pickup = 0; need = 0;
   hq: Entity | null = null; radar: Entity | null = null; sites: Entity[] = [];
+  egroups: EGroup[] = []; radioLogT = -99;
+  /** Advisor tips already shown this battle. */
+  tips = new Set<string>();
   huntGoal: Pt | null = null; intel: Pt | null = null; intelT = -99;
   // commands
   rec: RecordedCommand[] = [];
@@ -121,7 +125,7 @@ export class Sim {
     if ('stealth' in st && st.stealth) e.stealth = { revealT: 0 };
     if ('regen' in st && st.regen) e.regen = { rate: st.regen };
     if ('repair' in st && st.repair) e.repairer = { rate: st.repair, radius: 2.5 };
-    if ('tool' in st && st.tool !== 'none') e.toolbelt = { tool: st.tool, ammo: TOOLS[st.tool].ammo, cd: 0, pending: null };
+    if ('tool' in st && st.tool !== 'none') e.toolbelt = { tool: st.tool, ammo: team === 'E' && st.tool === 'mine' ? 2 : TOOLS[st.tool].ammo, cd: 0, pending: null };
     return e;
   }
 
@@ -133,7 +137,7 @@ export class Sim {
     return this.world.spawn(e);
   }
 
-  spawnEnemy(type: EType, x: number, y: number, extra: { patrol?: [number, number][]; hunt?: boolean; objective?: boolean; label?: string } = {}) {
+  spawnEnemy(type: EType, x: number, y: number, extra: GroupOpts & { objective?: boolean; label?: string; gid?: number } = {}) {
     const d = ETYPES[type];
     const p = this.map.nearestPass(x, y);
     const hpMul = DIFFS[this.diff].hp;
@@ -146,15 +150,29 @@ export class Sim {
     } else {
       const st = loadoutStats(d.loadout!);
       e = this.unitBase('E', { ...st, hp: Math.round(st.hp * hpMul) }, p, d.name);
-      const patrol = extra.patrol ? extra.patrol.map(([a, b]) => ({ x: a + .5, y: b + .5 })) : null;
-      e.enemyAI = { etype: type, state: extra.hunt ? 'hunt' : patrol ? 'patrol' : 'guard', home: { ...p }, patrol, pi: 0, lostT: 0, lastKnown: null, alertLogged: false, target: null };
+      const gid = extra.gid ?? this.newGroup(p.x, p.y, extra).id;
+      const g = this.egroups[gid];
+      const state = g.role === 'hunt' ? 'hunt' : g.role === 'patrol' ? 'patrol' : 'guard';
+      e.enemyAI = { etype: type, state, home: { ...p }, patrol: g.patrol, pi: 0, lostT: 0, lastKnown: null, alertLogged: false, target: null, gid, goal: null, goalAt: null, part: null };
     }
     e.intel = { lastSeen: null };
     return this.world.spawn(e);
   }
 
-  group(types: EType[], cx: number, cy: number, extra: { patrol?: [number, number][]; hunt?: boolean } = {}) {
-    types.forEach((t, i) => this.spawnEnemy(t, cx + .5 + OFFS[i][0], cy + .5 + OFFS[i][1], extra));
+  newGroup(x: number, y: number, o: GroupOpts = {}): EGroup {
+    const patrol = o.patrol ? o.patrol.map(([a, b]) => ({ x: a + .5, y: b + .5 })) : null;
+    const role: GroupRole = o.role ?? (o.hunt ? 'hunt' : patrol ? 'patrol' : 'garrison');
+    const g: EGroup = { id: this.egroups.length, role, post: { x: x + .5, y: y + .5 }, leash: o.leash ?? (role === 'overwatch' ? 1.5 : role === 'garrison' ? 6 : 99), patrol, pi: 0,
+      state: role === 'hunt' ? 'search' : 'idle', t: 0, contact: null, contactT: -99, seenN: 0, seenT: -99, rally: null, fallback: null, flankSide: 0, lastHurt: -99, lastFire: -99, calledT: -99, heardFrom: null };
+    this.egroups.push(g);
+    return g;
+  }
+
+  /** A fire team. `role` decides who answers radio calls: garrison (only near its post), patrol (≤12), reserve (anywhere), overwatch (never moves). */
+  group(types: EType[], cx: number, cy: number, extra: GroupOpts = {}) {
+    const g = this.newGroup(cx, cy, extra);
+    types.forEach((t, i) => this.spawnEnemy(t, cx + .5 + OFFS[i][0], cy + .5 + OFFS[i][1], { gid: g.id }));
+    return g;
   }
 
   spawnTruck(name: string, p: Pt, path: Pt[]) {
@@ -201,14 +219,16 @@ export class Sim {
   rangeOf(e: Entity) { return e.weapon ? e.weapon.def.range + (this.onHill(e) ? 1 : 0) : 0 }
   effSensor(e: Entity) {
     if (!e.sensor) return 0;
-    let s = e.sensor.range - (e.sensor.radarBonus && this.inCloud('chaff', e.pos) ? e.sensor.radarBonus : 0);
+    let s = e.sensor.range - (e.sensor.radarBonus && (e.sensor.off || this.inCloud('chaff', e.pos)) ? e.sensor.radarBonus : 0);
     if (e.systems?.sensor) s *= 0.6;
     const mm = e.squad?.mmode;
     if (mm === 'fast') s *= 0.7; else if (mm === 'careful') s += 1.5;
     if (e.team === 'E' && this.inCloud('jam', e.pos)) s *= 0.4;
     return s + (this.onHill(e) ? 1 : 0);
   }
-  hasRadar(e: Entity) { return !!e.sensor && e.sensor.radarBonus > 0 && !this.inCloud('chaff', e.pos) }
+  hasRadar(e: Entity) { return !!e.sensor && e.sensor.radarBonus > 0 && !e.sensor.off && !this.inCloud('chaff', e.pos) }
+  /** Radiating (radar on, or a decoy): enemy missiles can home on it from anywhere in range. */
+  emitting(e: Entity) { return !!e.sensor && e.sensor.emit > 0 && !e.sensor.off && !this.inCloud('chaff', e.pos) }
   /** Multiplier on how far away enemies notice this unit. */
   detMul(p: Entity) {
     let f = 1;
@@ -224,7 +244,7 @@ export class Sim {
     if (isRadar && (cp || this.inCloud('chaff', e.pos) || this.inCloud('jam', e.pos))) return -1;
     let m = this.detMul(p);
     if (!isRadar && this.smokeOn(e.pos, p.pos)) m *= 0.4;
-    return this.effSensor(e) * m + (p.sensor?.emit && !cp ? p.sensor.emit : 0) + (p.squad?.mmode === 'fast' ? 1.5 : 0);
+    return this.effSensor(e) * m + (this.emitting(p) ? p.sensor!.emit : 0) + (p.squad?.mmode === 'fast' ? 1.5 : 0);
   }
   /** True if `shooter` fired at `victim` within the last 2s (muzzle flash), unless smoke hides the flash. Any distance. */
   muzzleSeen(shooter: Entity, victim: Entity) {
@@ -241,10 +261,15 @@ export class Sim {
       if (d <= this.effSensor(u)) return true;
       return this.world.alive().some(a => a.team === 'P' && this.hasRadar(a) && dist(a.pos, t.pos) <= this.effSensor(a));
     }
+    if (this.emitting(t)) return true; // anti-radiation homing
     if (!this.detP.has(t.id)) return false;
     if (d <= this.effSensor(u)) return true;
-    return this.world.alive('structure').some(a => a.structure.kind === 'radar' && !this.inCloud('chaff', a.pos) && dist(a.pos, t.pos) <= this.effSensor(a));
+    // radar-guided lock beyond own sight: the tower's radar only tracks things that move (decoys are built to show up)
+    if (!this.moving(t) && t.ephemeral?.kind !== 'decoy') return false;
+    return this.world.alive('structure').some(a => a.structure.kind === 'radar' && !this.inCloud('chaff', a.pos) && !this.inCloud('jam', a.pos) && dist(a.pos, t.pos) <= this.effSensor(a));
   }
+  /** Currently moving (radar towers can guide missiles onto moving targets only). */
+  moving(e: Entity) { return !!e.mover && e.mover.path.length > 0 && !e.truck?.hold }
   targetOf(e: Entity): Entity | undefined { return this.world.get(e.squad ? e.squad.target : e.enemyAI ? e.enemyAI.target : null) }
   diffMul() { return DIFFS[this.diff] }
 

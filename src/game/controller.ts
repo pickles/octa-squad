@@ -93,6 +93,10 @@ export class BattleSession {
     const o = Object.keys(MMODES) as (keyof typeof MMODES)[];
     this.sim.issue({ k: 'mode', u: us.map(u => u.id), s: o[(o.indexOf(us[0].squad.mmode) + 1) % o.length] });
   }
+  toggleRadar() {
+    const us = this.selUnits().filter(u => u.sensor && u.sensor.radarBonus > 0); if (!us.length || this.replay) return;
+    this.sim.issue({ k: 'radar', u: us.map(u => u.id), on: !!us[0].sensor!.off });
+  }
   hide() { const us = this.selUnits(); if (us.length && !this.replay) this.sim.issue({ k: 'hide', u: us.map(u => u.id) }) }
   cycleAmmo() {
     const us = this.selUnits().filter(u => u.weapon); if (!us.length || this.replay) return;

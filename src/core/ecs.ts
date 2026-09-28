@@ -7,7 +7,20 @@ import type { AmmoType, EType, Loadout, MoveMode, Shape, Stance, ToolKey, Weapon
 export interface Pt { x: number; y: number }
 export type Team = 'P' | 'E';
 export type Order = 'idle' | 'move' | 'attack' | 'tool' | 'hide';
-export type AIState = 'guard' | 'patrol' | 'engage' | 'hunt' | 'return';
+export type AIState = 'guard' | 'patrol' | 'engage' | 'hunt' | 'return' | 'rally' | 'flank' | 'withdraw' | 'hold' | 'support' | 'search';
+
+/** Enemy group roles: who answers a call for help, and how far they may leave their post. */
+export type GroupRole = 'garrison' | 'patrol' | 'reserve' | 'overwatch' | 'hunt';
+export type GroupState = 'idle' | 'rally' | 'attack' | 'withdraw' | 'hold' | 'search' | 'return';
+/** An enemy fire team. Units share what they know and act as one (see systems/enemy.ts). */
+export interface EGroup {
+  id: number; role: GroupRole; post: Pt; leash: number; patrol: Pt[] | null; pi: number;
+  state: GroupState; t: number;
+  /** Group knowledge of our position (from sight, muzzle flashes, radio calls). */
+  contact: Pt | null; contactT: number; seenN: number; seenT: number;
+  rally: Pt | null; fallback: Pt | null; flankSide: number;
+  lastHurt: number; lastFire: number; calledT: number; heardFrom: number | null;
+}
 
 export interface ToolPending { x: number; y: number; t: number | null }
 
@@ -23,7 +36,8 @@ export interface Entity {
   health?: { hp: number; maxHp: number; armor: number; hitT: number };
   /** `cap`: group-move speed limit (the slowest member's speed), 0 = none. */
   mover?: { speed: number; path: Pt[]; repathT: number; stT: number; stP: Pt | null; cap: number };
-  sensor?: { range: number; radarBonus: number; emit: number };
+  /** `off`: radar switched off (no range bonus, no emission). */
+  sensor?: { range: number; radarBonus: number; emit: number; off?: boolean };
   weapon?: { key: WeaponKey; def: WeaponDef; cd: number; fireT: number; ammoType: AmmoType; nextAmmo: AmmoType | null; reloadT: number; ap: number; he: number };
   stealth?: { revealT: number };
   regen?: { rate: number };
@@ -33,6 +47,7 @@ export interface Entity {
   squad?: { no: number; pilot: string; cfg: Loadout; stance: Stance; order: Order; target: number | null; mmode: MoveMode; hidden: boolean; hideT: number };
   systems?: { fcs: boolean; legs: boolean; sensor: boolean; fixP: number };
   enemyAI?: { etype: EType; state: AIState; home: Pt; patrol: Pt[] | null; pi: number; lostT: number; lastKnown: Pt | null; alertLogged: boolean; target: number | null;
+    gid: number; goal: Pt | null; goalAt: Pt | null; part: 'fix' | 'flank' | null; cd?: number;
     /** Damage taken per attacker (decays over ~8s). The biggest one is who this unit goes after. `pos` = where it was last seen. */
     aggro?: { id: number; v: number; pos: Pt | null }[] };
   structure?: { kind: EType; objective: boolean; label: string; scan: number; scanned: boolean; alerted: boolean };

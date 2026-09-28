@@ -7,8 +7,8 @@ import { HPX, TCOL, WPX, css, shade, tileH, w2p } from '../game/iso';
 
 const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector(s) as T;
 const fmtT = (sec: number) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
-const ESTATE: Record<string, string> = { guard: '待機警戒', patrol: '巡回中', engage: '交戦中', hunt: '追跡中', return: '帰投中' };
-const LOGCLS: Record<string, string> = { warning: 'e', info: 'g', ai: 'ai', note: '' };
+const ESTATE: Record<string, string> = { guard: '待機警戒', patrol: '巡回中', engage: '交戦中', hunt: '追跡中', return: '帰投中', rally: '集結中', flank: '回り込み', withdraw: '後退中', hold: '陣地で待ち伏せ', search: '捜索中', support: '支援に移動' };
+const LOGCLS: Record<string, string> = { warning: 'e', info: 'g', ai: 'ai', note: '', tip: 'tip' };
 
 export interface HudCallbacks {
   toHQ(): void;
@@ -24,6 +24,7 @@ export interface HudCallbacks {
 export class Hud {
   s: BattleSession | null = null;
   private logShown: { text: string; kind: string; at: number }[] = [];
+  private tipAt = 0;
   private logCursor = 0;
   private hover: { x: number; y: number } | null = null;
   private hoverUnit: Entity | null = null;
@@ -43,7 +44,7 @@ export class Hud {
       const b = (e.target as HTMLElement).closest<HTMLElement>('[data-cmd]'); const s = this.s; if (!b || !s || s.sim.over) return;
       const map: Record<string, () => void> = {
         all: () => s.selectAll(), stop: () => s.stop(), stance: () => s.cycleStance(), det: () => { s.showDet = !s.showDet }, center: () => this.centerSel(),
-        convoy: () => s.toggleConvoy(), tool: () => s.startTargeting(), mode: () => s.cycleMode(), hide: () => s.hide(), ammo: () => s.cycleAmmo(),
+        convoy: () => s.toggleConvoy(), tool: () => s.startTargeting(), mode: () => s.cycleMode(), hide: () => s.hide(), radar: () => s.toggleRadar(), ammo: () => s.cycleAmmo(),
         arty: () => s.startArty(), ai: () => s.setAuto(!s.autoAI),
       };
       map[b.dataset.cmd!]?.(); this.update();
@@ -70,7 +71,7 @@ export class Hud {
 
   /** Attach to a new battle session. */
   bind(s: BattleSession) {
-    this.s = s; this.logShown = []; this.logCursor = 0; this.hover = null; this.hoverUnit = null;
+    this.s = s; this.logShown = []; this.logCursor = 0; this.tipAt = 0; $('#tip').hidden = true; this.hover = null; this.hoverUnit = null;
     const m = s.sim.m;
     $('#bType').textContent = m.type; $('#bType').className = 'mtype t-' + m.type; $('#bName').textContent = m.name;
     $('#convoyBtn').hidden = !m.road;
@@ -104,7 +105,9 @@ export class Hud {
   update() {
     const s = this.s; if (!s) return; const sim = s.sim;
     // log
-    for (const l of sim.logs.slice(this.logCursor)) { this.logShown.push({ text: l.text, kind: LOGCLS[l.kind], at: performance.now() }); if (this.logShown.length > 5) this.logShown.shift() }
+    for (const l of sim.logs.slice(this.logCursor)) if (l.kind === 'tip') { this.tipAt = performance.now(); $('#tip').textContent = l.text; $('#tip').hidden = false }
+    if (this.tipAt && performance.now() - this.tipAt > 16000) { this.tipAt = 0; $('#tip').hidden = true }
+    for (const l of sim.logs.slice(this.logCursor)) if (l.kind !== 'tip') { this.logShown.push({ text: l.text, kind: LOGCLS[l.kind], at: performance.now() }); if (this.logShown.length > 5) this.logShown.shift() }
     this.logCursor = sim.logs.length;
     const now = performance.now(); if (this.logShown.length && now - this.logShown[0].at > 9000) this.logShown.shift();
     this.renderLog();
@@ -153,6 +156,8 @@ export class Hud {
     ab.textContent = artyOn ? '砲撃：視界内の地点をクリック（Esc取消）' : `砲撃支援 ×${sim.arty} B`; ab.disabled = !sim.arty && !artyOn; ab.classList.toggle('on', artyOn);
     $('#modeBtn').textContent = '移動: ' + MMODES[u0?.squad.mmode || 'normal'].name + ' M'; $('#modeBtn').classList.toggle('on', !!u0 && u0.squad.mmode !== 'normal');
     $('#hideBtn').classList.toggle('on', !!u0 && u0.squad.order === 'hide');
+    const rs = us.filter(u => u.sensor && u.sensor.radarBonus > 0), rb = $<HTMLButtonElement>('#radarBtn');
+    rb.disabled = !rs.length; rb.textContent = rs.length ? `レーダー: ${rs[0].sensor!.off ? 'OFF' : 'ON'} Z` : 'レーダー Z'; rb.classList.toggle('on', !!rs.length && !!rs[0].sensor!.off);
     const w = u0?.weapon;
     $('#ammoBtn').textContent = '弾種: ' + (w ? (w.nextAmmo ? AMMO[w.nextAmmo].tag + 'に装填中' : AMMO[w.ammoType].tag + (w.ammoType !== 'std' ? '×' + w[w.ammoType] : '')) : '通常') + ' R';
     $('#ammoBtn').classList.toggle('on', !!w && w.ammoType !== 'std');

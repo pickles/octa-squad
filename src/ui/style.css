@@ -148,7 +148,7 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line2);padding
 #boxsel{position:absolute;border:1px solid rgba(95,176,224,.9);background:rgba(95,176,224,.08);pointer-events:none}
 #log{position:absolute;left:10px;bottom:8px;display:grid;gap:2px;pointer-events:none;font-size:12.5px;max-width:70%}
 #log div{background:rgba(10,15,19,.78);padding:1px 8px;border-left:2px solid var(--blue)}
-#log div.e{border-color:var(--red)}#log div.g{border-color:var(--gold)}
+#log div.tip{border-color:#6fc3a0;color:#cfeee0}#log div.e{border-color:var(--red)}#log div.g{border-color:var(--gold)}
 #insp{position:absolute;top:8px;right:8px;width:236px;max-width:calc(100% - 16px);background:rgba(12,18,23,.9);border:1px solid var(--line2);padding:8px 10px;font-size:12px;line-height:1.5;pointer-events:none;color:#c4c6b8}
 #insp h4{margin:0 0 3px;font-size:13px;color:var(--text);display:flex;justify-content:space-between;gap:8px}
 #insp h4 small{font-family:var(--mono);color:var(--faint);font-weight:400}
@@ -192,3 +192,5 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line2);padding
   .cmdbar .hint{display:none}
   .tb-obj{order:5;flex-basis:100%}
 }
+
+#tip{position:absolute;right:10px;bottom:8px;max-width:min(420px,45%);background:rgba(12,30,24,.9);border:1px solid #6fc3a0;color:#dff5ea;padding:6px 10px;font-size:12.5px;line-height:1.5;pointer-events:none}

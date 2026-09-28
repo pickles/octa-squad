@@ -18,6 +18,7 @@ export type Action =
   | { cmd: 'move'; units?: number[] | 'all'; x: number; y: number }
   | { cmd: 'attack'; units?: number[] | 'all'; target: string }
   | { cmd: 'stop' | 'hide'; units?: number[] | 'all' }
+  | { cmd: 'radar'; units?: number[] | 'all'; on: boolean }
   | { cmd: 'stance'; units?: number[] | 'all'; stance: Stance }
   | { cmd: 'mode'; units?: number[] | 'all'; mode: MoveMode }
   | { cmd: 'ammo'; units?: number[] | 'all'; ammo: AmmoType }
@@ -42,7 +43,7 @@ export class AgentPort {
       cooldown: r2(Math.max(0, w?.cd || 0)), terrain: TNAME[this.s.map.at(u.pos.x, u.pos.y)], detected: this.s.detP.has(u.id),
       detectionMultiplier: r2(this.s.detMul(u)), radarEmission: u.sensor?.emit || 0, stealthBroken: !!(u.stealth && u.stealth.revealT > 0),
       nearestEnemyAlertMargin: u.exposure && u.exposure.margin < 99 ? r2(u.exposure.margin) : null,
-      moveMode: sq.mmode, hidden: sq.hidden, hiding: sq.order === 'hide', ammoType: w?.ammoType || 'std', apRounds: w?.ap || 0, heRounds: w?.he || 0, reloading: !!w && w.reloadT > 0,
+      moveMode: sq.mmode, hidden: sq.hidden, radar: u.sensor && u.sensor.radarBonus > 0 ? (u.sensor.off ? 'off' : 'on') : undefined, hiding: sq.order === 'hide', ammoType: w?.ammoType || 'std', apRounds: w?.ap || 0, heRounds: w?.he || 0, reloading: !!w && w.reloadT > 0,
       damaged: (['fcs', 'legs', 'sensor'] as SubsystemKey[]).filter(k => u.systems?.[k]),
       tool: tb?.tool || 'none', ammo: tb?.ammo || 0, toolRange: tb ? TOOLS[tb.tool].range || 0 : 0, toolReady: !tb || tb.cd <= 0, pendingTool: !!tb?.pending,
       inCloud: this.s.clouds.filter(c => Math.hypot(u.pos.x - c.x, u.pos.y - c.y) <= c.r).map(c => c.k),
@@ -168,6 +169,7 @@ export class AgentPort {
           }
           case 'stop': s.issue({ k: 'stop', u: ids }, 'ai'); break;
           case 'hide': s.issue({ k: 'hide', u: ids }, 'ai'); break;
+          case 'radar': s.issue({ k: 'radar', u: ids, on: !!c.on }, 'ai'); break;
           case 'stance': if (!(c.stance in STANCES)) throw new Error("stance must be 'hold' | 'free' | 'nofire'"); s.issue({ k: 'stance', u: ids, s: c.stance }, 'ai'); break;
           case 'mode': if (!(c.mode in MMODES)) throw new Error("mode must be 'normal'|'fast'|'careful'"); s.issue({ k: 'mode', u: ids, s: c.mode }, 'ai'); break;
           case 'ammo': if (!(c.ammo in AMMO)) throw new Error("ammo must be 'std'|'ap'|'he'"); s.issue({ k: 'ammo', u: ids, s: c.ammo }, 'ai'); break;
@@ -247,24 +249,27 @@ Tools (limited uses): ${Object.entries(TOOLS).filter(([k]) => k !== 'none').map(
 Difficulty scales enemy damage and hp: ${Object.entries(DIFFS).map(([k, v]) => `${k} dmg x${v.dmg} hp x${v.hp}`).join(', ')}.
 
 ## Combat & detection
-- Damage = dmg × max(0.3, 1 − 0.07×armor) × (0.75 if the target stands in forest).
+- Bullet damage = max(15% of dmg, dmg − armor) × (0.75 if the target stands in forest). So MG (6 per hit) barely hurts armor 5+, while sniper/AP punch through. Explosions (missile, mine, artillery) use dmg × max(0.3, 1 − 0.07×armor).
 - You only see enemies within some unit's sensor radius (0.7× for enemies in forest, 0.4× when smoke is on or across the line of sight, unless the viewer has working radar). You can only shoot what you see.
 - Hills: +1 sensor and +1 range. Enemies detect you at enemySensor × mult + radarEmission (+1.5 when moving fast); mult: stealth 0.5 (unless it fired in the last 2.5s), forest 0.7, hidden 0.35, careful 0.85, smoke 0.4.
 - Muzzle flash: a unit that fires is visible, for 2s, to the unit it shot at, at any distance (both sides), unless smoke lies between them. Out-ranged victims cannot shoot back but will know where you are and close in.
 - Enemy aggro: an enemy that takes damage goes after whoever has hurt it most recently (decays over ~8s), even past closer targets; if it lost sight it heads to where it last saw the attacker.
-- A detecting enemy alerts others within 5.5 (radar tower: 13). Alerted enemies chase ~10 tiles and give up ~9s after losing sight.
+- Enemies fight as fire teams with a role. A team that spots/hears you radios others within 9 tiles (or anywhere inside a working radar tower's 13-tile coverage). garrison teams only answer calls near their post and never leave it far; patrol teams answer within 12; reserve teams answer any call; overwatch teams (launchers, snipers, mortars) never move.
+- Engaging teams gather first, then attack together: MG/heavy/sniper types pin you from the front while troopers/scouts swing around the flank. They avoid walking into smoke. When out-ranged (taking hits without being able to fire back) or badly hurt, they fall back to nearby hill/forest cover and wait; scouts drop mines while falling back (you see the mine if you see the scout).
+- launcher (誘導弾型): fires missiles at anything it can lock; it can home on any unit that radiates (radar ON, or a decoy) within range 9, and via a radar tower on units that are MOVING. mortar (迫撃砲型): shells any tight cluster of 3+ of your units it knows about; 4 shells land 4s after the warning.
 - Stances: hold = fire at anything in range but don't chase; free = chase visible enemies when idle; nofire = only fire at an explicit attack target.
-- missile: needs a LOCK (target visible, not in chaff, inside the launcher's own sensor or a radar ally's sensor). Loses guidance in chaff. Enemy heavies carry missiles guided by their own sensor or the radar tower.
+- missile: needs a LOCK (target visible, not in chaff, inside the launcher's own sensor or a radar ally's sensor). Loses guidance in chaff. Enemy heavies and launchers carry missiles.
+- radar: units with radar equipment can switch it off ({cmd:'radar', on:false}): no sensor bonus, but no emission (not homed on, not detected farther).
 - chaff: missiles lose lock; radar stops working inside. smoke: 35% hit chance when the shot passes through or starts/ends in smoke; also blocks sight (x0.4) across it. flare: reveals radius 4. decoy: enemies prefer it. mine: invisible, 60 dmg. charge: plant on a structure, 260 after 5s. jammer: enemy sensor x0.4 and radar tower off. probe: static sensor 5 for 60s.
 - Move mode: normal | fast (x1.5 speed, x0.7 sensor, louder) | careful (x0.6 speed, +1.5 sensor, finds enemy mines within 2.5 and disarms them standing still within 1.2). m2 and m4 have hidden minefields.
 - hide: stop; after 2s hidden (detection x0.35) and no auto-fire.
-- Ammo: std | ap (armor effect x0.3) | he (splash 1, x1.6 vs structures, ignores forest). Switching takes 2.5s.
+- Ammo: std | ap (armor counts x0.3, dmg x0.9) | he (armor counts x1.3, splash 1, x1.6 vs structures, ignores forest). Switching takes 2.5s.
 - Subsystem damage (fcs: slower fire, legs: slower, sensor: x0.6). A support unit within 2.5 repairs one every 6s.
 - MG units shoot down enemy missiles passing within 2.2 (35%).
 - Artillery: limited per mission; target must be visible; 5 shells land 8s later within 1.8 and hit EVERYONE.
 
 ## Actions
-{cmd:'move', units:[ids]|'all', x, y} | {cmd:'attack', units, target:'e<ID>'} | {cmd:'stop'|'hide', units}
+{cmd:'move', units:[ids]|'all', x, y} | {cmd:'attack', units, target:'e<ID>'} | {cmd:'stop'|'hide', units} | {cmd:'radar', units, on:true|false}
 {cmd:'stance', units, stance} | {cmd:'mode', units, mode} | {cmd:'ammo', units, ammo}
 {cmd:'tool', units, target:'e<ID>'} (missile/charge) | {cmd:'tool', units, x, y} (other tools)
 {cmd:'convoy', go} | {cmd:'artillery', x, y} | {cmd:'abort'}

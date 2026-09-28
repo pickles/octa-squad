@@ -14,6 +14,7 @@ export type Command = (
   | { k: 'stance'; u: number[]; s: Stance }
   | { k: 'mode'; u: number[]; s: MoveMode }
   | { k: 'hide'; u: number[] }
+  | { k: 'radar'; u: number[]; on: boolean }
   | { k: 'ammo'; u: number[]; s: AmmoType }
   | { k: 'tool'; u: number[]; tool: ToolKey; x: number; y: number; t?: number | null }
   | { k: 'convoy'; go: boolean }
@@ -25,7 +26,7 @@ export type RecordedCommand = [tick: number, cmd: Command];
 export const r3 = (v: number) => Math.round(v * 1000) / 1000;
 
 export function execCommand(s: Sim, c: Command) {
-  if (s.replaying || (c.src === 'ai' && c.k !== 'stance' && c.k !== 'mode')) s.log(describeCommand(s, c), c.src === 'ai' ? 'ai' : 'note');
+  if (s.replaying || (c.src === 'ai' && c.k !== 'stance' && c.k !== 'mode' && c.k !== 'radar')) s.log(describeCommand(s, c), c.src === 'ai' ? 'ai' : 'note');
   switch (c.k) {
     case 'arty': if (s.arty > 0) callArty(s, c.x, c.y); return;
     case 'abort': s.finish({ win: false, reason: '作戦を放棄して撤退した' }); return;
@@ -58,6 +59,7 @@ export function execCommand(s: Sim, c: Command) {
     case 'stance': for (const u of us) u.squad!.stance = c.s; return;
     case 'mode': for (const u of us) u.squad!.mmode = c.s; return;
     case 'hide': for (const u of us) { u.mover!.path = []; u.squad!.order = 'hide'; u.squad!.target = null; u.squad!.hideT = 0; if (u.toolbelt) u.toolbelt.pending = null } return;
+    case 'radar': for (const u of us) if (u.sensor && u.sensor.radarBonus > 0) u.sensor.off = !c.on; return;
     case 'ammo':
       for (const u of us) {
         const w = u.weapon; if (!w) continue;
@@ -85,6 +87,7 @@ export function describeCommand(s: Sim, c: Command): string {
     case 'stance': return `${who}${nos} 姿勢：${STANCES[c.s]}`;
     case 'mode': return `${who}${nos} 移動モード：${MMODES[c.s].name}`;
     case 'hide': return `${who}${nos} 隠蔽`;
+    case 'radar': return `${who}${nos} レーダー${c.on ? 'ON' : 'OFF'}`;
     case 'ammo': return `${who}${nos} 弾種：${AMMO[c.s].name}`;
     case 'tool': { const t = c.t != null ? s.world.get(c.t) : undefined; return `${who}${nos} ${TOOLS[c.tool].name}${t ? ' → ' + t.name : ` (${c.x.toFixed(1)}, ${c.y.toFixed(1)})`}` }
     case 'convoy': return `${who}輸送隊 ${c.go ? '前進' : '停止'}`;

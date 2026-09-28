@@ -1,7 +1,9 @@
 // The system pipeline. Order matters and is fixed so that the simulation is deterministic.
 import type { Sim } from '../sim';
 import { visionSystem } from './vision';
-import { statusSystem, squadSystem, enemySystem, movementSystem, separationSystem } from './units';
+import { statusSystem, squadSystem, movementSystem, separationSystem } from './units';
+import { enemySystem } from './enemy';
+import { advisorSystem } from './advisor';
 import { fireSystem, projectileSystem } from './combat';
 import { fieldSystem } from './fields';
 
@@ -31,6 +33,7 @@ export const runSystems = {
     fireSystem(s);
     separationSystem(s);
     fieldSystem(s, dt);
+    advisorSystem(s);
     projectileSystem(s, dt);
     missionSystem(s, dt);
   },

@@ -174,6 +174,21 @@ export function brainTick(port: AgentPort): string {
         intent += `　／ 修理機は${hurt.pilot}機（HP${Math.round(hurt.hp / hurt.maxHp * 100)}%）の後方へ`;
       }
     }
+    { // radar emission control: radiate only while nothing is around (launchers home on emitters)
+      const danger = nearE.length > 0 || o.enemies.some(e => e.type === 'launcher') || o.incomingMissiles.length > 0;
+      const off = alive.filter(u => u.radar === 'on' && danger), on = alive.filter(u => u.radar === 'off' && !danger);
+      if (off.length) { cmds.push({ cmd: 'radar', units: off.map(u => u.id), on: false }); intent += '　／ レーダーOFF' }
+      if (on.length) cmds.push({ cmd: 'radar', units: on.map(u => u.id), on: true });
+    }
+    { // incoming shells (enemy mortar): scatter out of the impact area
+      const dodge = new Set<number>(); let k = 0;
+      for (const sh of o.artillery.incoming) for (const u of alive) {
+        if (dodge.has(u.id) || dd(u, sh) > 2.4) continue; dodge.add(u.id);
+        const dx = u.x - sh.x, dy = u.y - sh.y, L = Math.hypot(dx, dy) || 1, a = Math.atan2(dy, dx) + (k++ % 3 - 1) * 0.7;
+        void L; cmds.push({ cmd: 'move', units: [u.id], x: Math.max(0.5, Math.min(N - .5, sh.x + Math.cos(a) * 3.2)), y: Math.max(0.5, Math.min(N - .5, sh.y + Math.sin(a) * 3.2)) });
+      }
+      if (dodge.size) intent += `　／ 砲撃を回避（${dodge.size}機散開）`; // later orders override earlier ones for the same unit
+    }
     const pick = (k: Act) => k.units === 'all' || !k.units ? alive : alive.filter(u => (k.units as number[]).includes(u.id));
     const f = cmds.filter(k => {
       if (k.cmd === 'tool') return true;

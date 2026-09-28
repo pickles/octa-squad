@@ -148,6 +148,7 @@ class App {
       else if (k === 't' || k === 'T') s.startTargeting();
       else if (k === 'm' || k === 'M') s.cycleMode();
       else if (k === 'h' || k === 'H') s.hide();
+      else if (k === 'z' || k === 'Z') s.toggleRadar();
       else if (k === 'r' || k === 'R') s.cycleAmmo();
       else if (k === 'b' || k === 'B') s.startArty();
       else if ((k === 'g' || k === 'G') && !s.replay) s.setAuto(!s.autoAI);

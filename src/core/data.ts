@@ -27,14 +27,14 @@ export const CHASSIS: Record<ChassisKey, ChassisDef> = {
 };
 
 export const WEAPONS: Record<WeaponKey, WeaponDef> = {
-  mg:     { name: 'マシンガン', tag: 'MG', range: 3.2, dmg: 6,  cd: 0.35, ps: 16, cost: 60,  desc: '射程は短いが連射で火力最大。敵ミサイルを迎撃できる' },
-  rifle:  { name: 'ライフル',   tag: 'RF', range: 4.8, dmg: 14, cd: 1.1,  ps: 20, cost: 90,  desc: '中距離で安定。どの機体にも合う標準武装' },
-  sniper: { name: '狙撃砲',     tag: 'SN', range: 8.5, dmg: 40, cd: 3.4,  ps: 36, cost: 150, min: 2, desc: '最長射程・一撃が重い。自分の視界より遠くは味方が見ていないと撃てない。2マス以内は撃てない' },
+  mg:     { name: 'マシンガン', tag: 'MG', range: 3.2, dmg: 6,  cd: 0.35, ps: 16, cost: 60,  desc: '射程は短いが連射。軽い機体（装甲1〜3）には最強だが、重装甲にはほぼ通らない。敵ミサイルを迎撃できる' },
+  rifle:  { name: 'ライフル',   tag: 'RF', range: 4.8, dmg: 14, cd: 1.1,  ps: 20, cost: 90,  desc: '中距離で安定。どの装甲にもそこそこ通る標準武装。徹甲弾で重装型にも' },
+  sniper: { name: '狙撃砲',     tag: 'SN', range: 8.5, dmg: 40, cd: 3.4,  ps: 36, cost: 150, min: 2, desc: '最長射程・一撃が重く重装甲も貫く。自分の視界より遠くは味方が見ていないと撃てない。2マス以内は撃てない' },
 };
 
 export const EQUIP: Record<EquipKey, EquipDef> = {
   none:    { name: 'なし', cost: 0, desc: '追加装備なし。予算を節約できる' },
-  radar:   { name: 'レーダー', sensor: 2.5, emit: 2.5, cost: 60, desc: '視界 +2.5。ただし電波を出すので、敵からも2.5遠くで見つかる。後方から狙撃砲の観測をするのに向く' },
+  radar:   { name: 'レーダー', sensor: 2.5, emit: 2.5, cost: 60, desc: '視界 +2.5。ただし電波を出すので、敵からも2.5遠くで見つかり、誘導弾型に狙われる。戦闘中にZでON/OFFできる' },
   plate:   { name: '増加装甲', hp: 50, armor: 2, speed: -0.25, cost: 70, desc: 'HP +50・装甲 +2、ただし少し遅くなる。前衛向け' },
   booster: { name: 'ブースター', speed: 0.6, cost: 50, desc: '速度 +0.6。離脱・護衛や、マシンガン機が距離を詰めるのに' },
   stealth: { name: 'ステルス', stealth: true, cost: 90, desc: '敵に見つかる距離が半分になる（森ならさらに7割）。撃つと2.5秒間は効果が切れる' },
@@ -101,14 +101,16 @@ export function loadoutStats(c: Loadout): UnitStats {
   };
 }
 
-export type EType = 'scout' | 'trooper' | 'gunner' | 'heavy' | 'sniper' | 'turret' | 'radar' | 'hq' | 'site';
+export type EType = 'scout' | 'trooper' | 'gunner' | 'heavy' | 'sniper' | 'launcher' | 'mortar' | 'turret' | 'radar' | 'hq' | 'site';
 export interface ETypeDef { name: string; loadout?: Loadout; structure?: { hp: number; armor: number; sensor: number; weapon: WeaponKey | null; shape: Shape } }
 export const ETYPES: Record<EType, ETypeDef> = {
-  scout:   { name: '偵察型', loadout: { chassis: 'light', weapon: 'mg', equip: 'none', tool: 'none' } },
+  scout:   { name: '偵察型', loadout: { chassis: 'light', weapon: 'mg', equip: 'none', tool: 'mine' } },
   trooper: { name: '突撃型', loadout: { chassis: 'assault', weapon: 'rifle', equip: 'none', tool: 'none' } },
   gunner:  { name: '機銃型', loadout: { chassis: 'assault', weapon: 'mg', equip: 'none', tool: 'none' } },
   heavy:   { name: '重装型', loadout: { chassis: 'heavy', weapon: 'rifle', equip: 'none', tool: 'missile' } },
   sniper:  { name: '狙撃型', loadout: { chassis: 'light', weapon: 'sniper', equip: 'none', tool: 'none' } },
+  launcher:{ name: '誘導弾型', loadout: { chassis: 'assault', weapon: 'mg', equip: 'radar', tool: 'missile' } },
+  mortar:  { name: '迫撃砲型', loadout: { chassis: 'assault', weapon: 'mg', equip: 'none', tool: 'none' } },
   turret:  { name: '砲台',       structure: { hp: 160, armor: 4, sensor: 6, weapon: 'rifle', shape: 'turret' } },
   radar:   { name: 'レーダー塔', structure: { hp: 110, armor: 2, sensor: 9, weapon: null, shape: 'radar' } },
   hq:      { name: '司令塔',     structure: { hp: 560, armor: 5, sensor: 5, weapon: 'mg', shape: 'hq' } },

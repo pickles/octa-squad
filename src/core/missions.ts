@@ -21,20 +21,24 @@ const ROAD4: [number, number][] = [[0.5, 20.5], [7.5, 18.5], [13.5, 12.5], [20.5
 
 export const MISSIONS: MissionDef[] = [
   {
-    id: 'm1', type: '殲滅', code: 'OP-01', name: '灰原掃討戦', budget: 2000, max: 8, limit: 0, seed: 11, arty: 1,
+    id: 'm1', type: '殲滅', code: 'OP-01', name: '灰原掃討戦', budget: 2600, max: 8, limit: 0, seed: 11, arty: 1,
     terr: { forest: 7, hills: 5, water: 1, rocks: 6 }, spawn: [4, 23], keys: [[15, 12], [22, 6], [20, 18], [9, 8]],
-    brief: '平原に展開した敵機動部隊4群を撃滅する。敵は各個に布陣しており、一群ずつ叩けば数的優位を保てる。',
+    brief: '平原に展開した敵部隊を撃滅する。守備隊は持ち場を離れないが、予備隊と巡回隊は無線で呼ばれれば駆けつける。北東の丘には誘導弾型（電波を出す機体を狙う）、中央には迫撃砲（密集を狙う）がいる。',
     win: '敵部隊の全滅', lose: '全機喪失',
-    hint: '重装機を前に、ミサイルと狙撃で後方から削ると損害が少ない。',
+    hint: '固まって動くと迫撃砲、レーダーを点けたままだと誘導弾に狙われる。予備隊を先に釣り出すか、迫撃砲を先に潰すと楽になる。',
     setup(s) {
-      s.group(['trooper', 'trooper', 'gunner'], 15, 12); s.group(['heavy', 'trooper', 'sniper'], 22, 6);
-      s.group(['scout', 'scout', 'gunner'], 20, 18, { patrol: [[20, 18], [12, 21]] }); s.group(['trooper', 'sniper'], 9, 8);
+      s.group(['trooper', 'trooper', 'gunner'], 15, 12, { role: 'garrison', leash: 6 });
+      s.group(['launcher', 'heavy'], 22, 6, { role: 'overwatch' });
+      s.group(['scout', 'scout', 'gunner'], 20, 18, { patrol: [[20, 18], [12, 21]] });
+      s.group(['mortar'], 19, 9, { role: 'overwatch' });
+      s.group(['trooper', 'scout'], 17, 8, { role: 'reserve' });
+      s.group(['trooper', 'sniper'], 9, 8, { role: 'garrison', leash: 5 });
     },
     objective: s => `敵残存 ${s.countE()} 機`,
     check: s => s.countE() === 0 ? { win: true, reason: '敵部隊を全滅させた' } : undefined,
   },
   {
-    id: 'm2', type: '強襲', code: 'OP-02', name: '第七レーダー基地', budget: 1900, max: 6, limit: 420, seed: 27, arty: 2,
+    id: 'm2', type: '強襲', code: 'OP-02', name: '第七レーダー基地', budget: 2400, max: 7, limit: 420, seed: 27, arty: 2,
     emines: [[13.5, 14.5], [14.5, 13.5], [15.5, 12.5], [16.5, 13.5], [12.5, 15.5], [17.5, 11.5], [18.5, 10.5], [19.5, 11.5]],
     terr: { forest: 8, hills: 4, water: 1, rocks: 7 }, spawn: [3, 24], keys: [[23, 5], [16, 11], [21, 7], [15, 15], [12, 8]],
     brief: '敵前線基地の司令塔を制限時間内に破壊する。基地の手前には地雷原がある（警戒移動で発見・処理できる）。レーダー塔は探知範囲が広く、見つかると守備隊が一斉に集まってくる。',
@@ -44,14 +48,16 @@ export const MISSIONS: MissionDef[] = [
       s.hq = s.spawnEnemy('hq', 23.5, 4.5, { objective: true });
       s.spawnEnemy('turret', 20.5, 5.5); s.spawnEnemy('turret', 23.5, 8.5); s.spawnEnemy('turret', 19.5, 8.5);
       s.radar = s.spawnEnemy('radar', 16.5, 11.5);
-      s.group(['trooper', 'trooper'], 21, 7); s.spawnEnemy('heavy', 24.5, 7.5);
-      s.group(['gunner', 'gunner'], 15, 15, { patrol: [[15, 15], [12, 8]] }); s.spawnEnemy('sniper', 19.5, 3.5);
+      s.group(['trooper', 'trooper'], 21, 7, { role: 'garrison', leash: 5 }); s.group(['heavy'], 24, 7, { role: 'garrison', leash: 4 });
+      s.group(['gunner', 'gunner'], 15, 15, { patrol: [[15, 15], [12, 8]] });
+      s.group(['sniper'], 19, 3, { role: 'overwatch' }); s.group(['launcher'], 18, 9, { role: 'overwatch' }); s.group(['mortar'], 22, 3, { role: 'overwatch' });
+      s.group(['trooper', 'scout'], 20, 11, { role: 'reserve' });
     },
     objective: s => `司令塔 耐久 ${Math.max(0, Math.ceil(s.hq!.health!.hp / s.hq!.health!.maxHp * 100))}%　／　レーダー塔 ${s.radar!.life.alive ? '稼働中' : '破壊'}`,
     check: s => !s.hq!.life.alive ? { win: true, reason: '司令塔を破壊した' } : undefined,
   },
   {
-    id: 'm3', type: '索敵', code: 'OP-03', name: '霧の森林帯', budget: 1250, max: 4, limit: 360, seed: 43, arty: 0,
+    id: 'm3', type: '索敵', code: 'OP-03', name: '霧の森林帯', budget: 1400, max: 4, limit: 360, seed: 43, arty: 0,
     terr: { forest: 13, hills: 3, water: 1, rocks: 5 }, spawn: [4, 23], keys: [[7, 6], [20, 4], [23, 17], [14, 13]],
     brief: '森林地帯に潜む敵野営地4か所の位置を特定し、出撃地点に帰還する。敵を倒す必要はない。推定区域は実際の位置から少しずれている。',
     win: '4か所を2秒間視界に収め、1機以上がLZへ帰還', lose: '全機喪失／時間切れ',
@@ -62,7 +68,7 @@ export const MISSIONS: MissionDef[] = [
       const R = rng(99);
       S.forEach(([x, y, g], i) => {
         s.sites.push(s.spawnEnemy('site', x, y, { label: 'ABCD'[i] }));
-        s.group(g, x + 1.2, y + 1.2);
+        s.group(g, x + 1.2, y + 1.2, { role: 'garrison', leash: 4 });
         s.addZone({ kind: 'hint', x: x + (R() - .5) * 3, y: y + (R() - .5) * 3, r: 3.3, label: '推定区域 ' + 'ABCD'[i] });
       });
       s.addZone({ kind: 'lz', x: 4, y: 23, r: 2.3, label: 'LZ' });
@@ -71,7 +77,7 @@ export const MISSIONS: MissionDef[] = [
     check: s => s.sites.every(x => x.structure!.scanned) && s.livingSquad().some(u => s.inZone(u, 'lz')) ? { win: true, reason: '偵察情報を持ち帰った' } : undefined,
   },
   {
-    id: 'm4', type: '護衛', code: 'OP-04', name: '補給路ルート12', budget: 1800, max: 6, limit: 0, seed: 58, arty: 1,
+    id: 'm4', type: '護衛', code: 'OP-04', name: '補給路ルート12', budget: 2300, max: 7, limit: 0, seed: 58, arty: 1,
     emines: [[9.3, 17], [10.6, 15.6], [16, 11.8], [18.2, 11.1], [23.1, 9.1]],
     terr: { forest: 9, hills: 4, water: 1, rocks: 6 }, spawn: [3, 23], keys: ROAD4.concat([[10, 14], [17, 14], [19, 6], [25, 10], [14, 1.5]]), road: ROAD4,
     brief: '輸送車3両を道路沿いに東端まで送り届ける。道路には地雷が埋設されている（警戒移動の機体で先に処理する）。道路脇の森に待ち伏せがあり、途中で増援も来る。輸送隊は命令で停止・前進できる。',
@@ -80,7 +86,7 @@ export const MISSIONS: MissionDef[] = [
     setup(s) {
       const pts = ROAD4.slice(1).map(([x, y]) => ({ x, y }));
       ([[2.6, 20.2], [1.6, 20.4], [0.6, 20.6]] as const).forEach(([x, y], i) => s.spawnTruck('輸送車' + (i + 1), { x, y }, pts));
-      s.group(['gunner', 'gunner'], 10, 14); s.group(['trooper', 'heavy'], 17, 14); s.group(['sniper', 'trooper'], 19, 6); s.group(['gunner', 'trooper', 'scout'], 25, 10);
+      s.group(['gunner', 'gunner'], 10, 14, { role: 'garrison', leash: 6 }); s.group(['trooper', 'heavy'], 17, 14, { role: 'garrison', leash: 6 }); s.group(['sniper', 'launcher'], 19, 6, { role: 'overwatch' }); s.group(['gunner', 'trooper', 'scout'], 25, 10, { role: 'reserve' });
       s.addZone({ kind: 'goal', x: 27, y: 6.5, r: 1.6, label: '到達点' });
       s.schedule(80, s2 => { s2.group(['trooper', 'trooper', 'gunner'], 14, 1.5, { hunt: true }); s2.log('増援：北から敵3機', 'warning') });
     },
@@ -92,14 +98,14 @@ export const MISSIONS: MissionDef[] = [
     },
   },
   {
-    id: 'm5', type: '離脱', code: 'OP-05', name: '包囲網突破', budget: 1700, max: 6, limit: 0, seed: 71, arty: 2,
+    id: 'm5', type: '離脱', code: 'OP-05', name: '包囲網突破', budget: 2200, max: 7, limit: 0, seed: 71, arty: 2,
     terr: { forest: 8, hills: 5, water: 2, rocks: 6 }, spawn: [6, 21], keys: [[24, 4], [4, 10], [18, 20], [18, 14], [15, 10], [22, 8], [26, 1], [27, 9]],
     brief: '敵の包囲下に取り残された。北東のLZに入ると回収機を要請でき、到着まで45秒かかる。到着の瞬間にLZ内にいた機体だけが回収される。敵は回収地点を知っており、最後はLZに押し寄せてくる。',
     win: '回収機到着時、LZ内に出撃数の6割以上（6機なら4機）', lose: '必要数を回収できない',
     hint: 'おとりで引き離しても、敵は見失うと最後に報告された位置かLZへ向かう。LZで45秒守り切れる火力と、到着を早めすぎない判断が要る。',
     setup(s) {
       s.group(['gunner', 'trooper'], 4, 10); s.group(['scout', 'trooper'], 18, 20, { patrol: [[18, 20], [18, 14]] });
-      s.group(['sniper', 'trooper'], 15, 10); s.group(['gunner', 'gunner', 'heavy'], 22, 8);
+      s.group(['sniper', 'trooper'], 15, 10); s.group(['gunner', 'gunner', 'heavy'], 22, 8, { role: 'reserve' });
       s.addZone({ kind: 'lz', x: 24, y: 4, r: 2.2, label: 'LZ' });
       s.need = Math.max(2, Math.ceil(s.squad.length * 0.6)); s.huntGoal = { x: 24, y: 4 };
       const P: [number, number][] = [[1, 27], [12, 27], [1, 10], [1, 18], [20, 27]];
