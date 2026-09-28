@@ -11,8 +11,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "agent": "tsx tools/agent-headless.ts",
-    "agent:browser": "node tools/agent-browser.mjs"
+    "agent": "tsx tools/agent-headless.ts"
   },
   "dependencies": {
     "phaser": "3.90.0"

@@ -1,116 +1,115 @@
 # オクタ小隊戦記（OCTA SQUAD）
 
-工画堂スタジオ『ブルーフロウ』やパワードールに影響を受けた、ブラウザで動くクォータビューのリアルタイム戦術ゲーム。
+工画堂スタジオ『ブルーフロウ』やパワードールに影響を受けた、クォータビューのリアルタイム戦術ゲーム。
 最大8機の小隊を作戦ごとに編成し、索敵・隠蔽・弾種・ツールを使い分けて任務を達成する。
 
-- 依存なしの単一HTML（`index.html`）。Google Fonts 以外の外部読み込みはなし
-- 一時停止中も命令できるリアルタイム戦闘
-- プログラム／LLM から操作できる `window.octa` API
-- 固定ステップ（30 tick/秒）＋シード付き乱数による完全再現リプレイ
+- **描画・入力**：Phaser 3（WebGL / Canvas）
+- **ゲームロジック**：エンジンに依存しない TypeScript の ECS コア（`src/core`）。ブラウザでも Node でも同じコードが動く
+- **決定論的シミュレーション**：固定 30 tick/秒 ＋ シード付き乱数。命令だけを記録したリプレイで完全に再現できる
+- **AI 用インターフェース**：ブラウザでは `window.octa`、Node では `AgentPort` を直接使う
 
-## 遊び方
-
-`index.html` をブラウザで開くだけ。ローカルサーバーで開く場合：
-
-```
-npm run serve   # http://localhost:8080
-```
-
-編成画面で作戦・難易度を選び、8機の「機体／武装／装備／ツール」を予算内で組んで出撃する。
-「AIに任せて観戦」で内蔵AIの指揮を見られる。
-
-### 操作
-
-| 操作 | 内容 |
-|---|---|
-| 左クリック / ドラッグ | 味方を選択 / 範囲選択（`Shift` で追加） |
-| 選択中に地面・敵をクリック | 移動 / 攻撃目標指定（右クリックでも可） |
-| `WASD` / 矢印 / 右ドラッグ | スクロール |
-| `1`〜`8` / `E` | 機体選択 / 全機選択 |
-| `Space` / `F` | 一時停止 / 倍速 |
-| `X` | 停止 |
-| `Q` | 交戦姿勢（待機射撃 → 自由交戦 → 射撃禁止） |
-| `M` | 移動モード（通常 → 高速 → 警戒） |
-| `H` | 隠蔽 |
-| `R` | 弾種（通常 → 徹甲 → 榴弾） |
-| `T` | ツール使用（もう一度押すと種類切替、`Esc` で取消） |
-| `B` | 砲撃支援 |
-| `V` | 警戒圏（敵に見つかる距離）の表示切替 |
-| `C` | 選択機へカメラ移動 |
-| `G` | AI指揮の ON/OFF |
-
-### 作戦
-
-| ID | 種別 | 名前 | 概要 |
-|---|---|---|---|
-| m1 | 殲滅 | 灰原掃討戦 | 敵部隊4群の全滅 |
-| m2 | 強襲 | 第七レーダー基地 | 7分以内に司令塔を破壊。レーダー塔と地雷原あり |
-| m3 | 索敵 | 霧の森林帯 | 野営地4か所を特定してLZへ帰還 |
-| m4 | 護衛 | 補給路ルート12 | 輸送車2両以上を東端へ。道路に地雷 |
-| m5 | 離脱 | 包囲網突破 | LZで回収機を要請し、到着まで45秒守る |
-
-### 主なシステム
-
-- **機体**：ライト／アサルト／ヘヴィ／サポート（修理）
-- **武装**：マシンガン（ミサイル迎撃可）／ライフル／狙撃砲
-- **装備**：レーダー（視界＋、ただし電波で見つかりやすい）／増加装甲／ブースター／ステルス／自己修復
-- **ツール**（弾数制限）：ミサイル（ロックオンに視界かレーダー観測が必要、チャフに弱い）／チャフ／煙幕／照明弾／デコイ／地雷／爆薬／電障弾／プローブ
-- **索敵**：霧、森林（見つかりにくい・被弾減）、丘陵（視界・射程＋1）、警戒圏の可視化、発見時の敵の連鎖警報
-- **行動**：移動モード（高速／警戒＝地雷の発見・処理）、隠蔽、弾種切替（徹甲／榴弾）、砲撃支援（味方も巻き込む）
-- **損傷**：火器管制／脚部／センサーの部位損傷、修理機で復旧
-
-数値や計算式はゲーム内の「装備ガイド」と `octa.rules()` にまとまっている。
-
-## AI から操作する（`window.octa`）
-
-AIモードでは時間は `step()` を呼んだ分だけ進むので、ターン制のように扱える。
-観測は霧を守る（見えていない敵は返らない）。
-
-```js
-octa.rules()                          // ルール・数値・コマンド仕様（LLMのシステムプロンプト向け Markdown）
-octa.start({mission:'m1', difficulty:'normal', seed:1,
-  loadout:[{slot:1, chassis:'heavy', weapon:'rifle', equip:'plate', tool:'missile'}, ...]})
-octa.observe()                        // 状況 JSON
-octa.text()                           // ASCII マップ付きの文章版（LLM 向け）
-octa.map()                            // 地形と探索済み／視界内マスク
-octa.act([{cmd:'move', units:[1,2], x:12, y:9},
-          {cmd:'attack', units:'all', target:'e17'},
-          {cmd:'tool', units:[1], target:'e17'},        // ミサイル
-          {cmd:'tool', units:[4], x:10, y:12},          // チャフ・煙幕など
-          {cmd:'mode', units:[2], mode:'careful'},
-          {cmd:'ammo', units:[1], ammo:'ap'},
-          {cmd:'artillery', x:20, y:8}])
-octa.step(1.0)                        // 1秒進めて observe() を返す
-octa.auto(true)                       // 内蔵AIに指揮させる
-octa.replay() / octa.playReplay(json) / octa.verifyReplay(json)
-```
-
-別ページに埋め込んだ場合は `postMessage({octa:1, id, method, args})` でも呼べる（同じ `id` で返信）。
-
-### サンプルエージェント
+## 開発
 
 ```
 npm install
-npx playwright install chromium
-npm run agent -- m1 easy
+npm run dev            # http://localhost:5173
+npm test               # vitest（決定性・マップ到達性・AI API）
+npm run typecheck
+npm run build          # dist/（通常のビルド）
+npm run build:single   # dist-single/index.html（全部入りの1ファイル。claude.ai の Artifact 用）
+npm run agent -- m2 normal 5   # Node だけで内蔵AIに1戦させる（ブラウザ不要・1戦0.5秒程度）
 ```
 
-`tools/agent_example.mjs` の `decide()` を自分の方針や LLM 呼び出しに差し替える。
-終了時にリプレイ JSON（`octa_replay_<mission>.json`）を書き出し、再現性を検証する。
+## ディレクトリ構成
 
-## リプレイ
+```
+src/
+  core/                  エンジン非依存（DOM も Phaser も使わない）
+    ecs.ts               World と Entity（オブジェクト型 ECS）、コンポーネント定義
+    data.ts              機体・武装・装備・ツール・弾種・敵タイプ
+    map.ts               地形、マップ生成、A* 経路探索
+    missions.ts          5作戦の配置・勝敗条件
+    sim.ts               Sim：ワールドと戦場状態を持ち、step() で1tick進める
+    systems/             vision / units(status, squad, enemy, movement) / combat / fields / index(実行順)
+    commands.ts          命令の型・実行・記録（リプレイの単位）
+    agent.ts             AgentPort：霧を守った観測・テキスト化・命令の検証、rules
+    brain.ts             内蔵AI指揮官（AgentPort だけを使う参照実装）
+  game/
+    controller.ts        BattleSession：選択・照準・一時停止・倍速・AI交代など UI 側の状態
+    BattleScene.ts       Phaser シーン：アイソメ描画、霧、エフェクト、マウス入力
+    iso.ts               座標変換（タイル ⇔ ワールドピクセル）
+  ui/                    DOM：格納庫、HUD、保存（localStorage）、CSS
+  api/octa.ts            window.octa
+  main.ts                画面切替・キー入力・Phaser 起動
+tools/agent-headless.ts  Node で AI に戦わせるサンプル（decide() を差し替える）
+tests/core.test.ts
+legacy/                  移植前の単一 HTML 版
+```
 
-戦闘終了時に自動保存（ブラウザの localStorage、最新15件）。
-記録内容は「シード・編成・何 tick 目に何を命じたか」だけなので数 KB に収まる。
-編成画面の「リプレイを読み込む」に JSON を貼り付けるかファイルを選ぶと再生できる。
-`replays/` にサンプルがある。
+### ECS の考え方
 
-ゲームの数値や AI を変えると、古いリプレイは同じ展開にならない（`v` フィールドで判別し警告を出す）。
+エンティティは「コンポーネントをプロパティとして持つただのオブジェクト」。システムは必要なコンポーネントを持つものだけを問い合わせて処理する。
 
-## 開発メモ
+```ts
+for (const u of sim.world.alive('weapon')) { ... }          // 武装を持つ生存エンティティ
+for (const u of sim.world.alive('squad', 'mover')) { ... }  // 自小隊で移動できるもの
+```
 
-- すべて `index.html` の1ファイル。CSS → HTML → スクリプトの順で、スクリプトは
-  データ定義 → マップ生成 → 経路探索（A*）→ シミュレーション → 命令 → 入力 → HUD → 描画 → リプレイ → AI API の順に並んでいる。
-- シミュレーションは `simStep()`（1/30 秒）だけで進む。乱数は必ず `RND()` を使う（描画側で使うと再現性が壊れる）。
-- 命令はすべて `issue()` を通して記録・実行する。新しい命令を足すときは `exec()` と `describeCmd()` にも追加する。
-- claude.ai の Artifact として公開する場合は、先頭の `<!doctype html>`〜`<style>` 行と末尾の `</html>` を除いて publish する（Artifact 側がスケルトンを付けるため）。
+| コンポーネント | 持つもの |
+|---|---|
+| `pos` `team` `name` `shape` `life` | 全エンティティ |
+| `health` | HP・装甲を持つもの |
+| `mover` | 移動できるもの（経路・速度） |
+| `sensor` | 視界・レーダー・電波 |
+| `weapon` | 武装・弾種・装填 |
+| `toolbelt` | ツールと残弾・使用予約 |
+| `squad` | プレイヤーの小隊機（番号・姿勢・命令・移動モード・隠蔽） |
+| `enemyAI` | 敵の行動状態（警戒・巡回・交戦・追跡・帰投） |
+| `structure` | 建造物（砲台・レーダー塔・司令塔・野営地） |
+| `stealth` `regen` `repairer` `systems` `truck` `ephemeral` `intel` `exposure` | それぞれの機能 |
+
+新しい性質は「コンポーネントを1つ足して、それを扱うシステムを1つ足す」で追加できる。
+システムの実行順は `src/core/systems/index.ts` に固定してある（決定性のため）。
+
+### 決定性のルール
+
+- シミュレーション内の乱数は必ず `sim.rnd()`。描画側の見た目用乱数は `game/visualRng.ts`
+- 外部からの変更は必ず `sim.issue(command)` を通す（記録される）
+- エフェクトは `sim.emit()` でキューに積むだけ。描画側が取り出して表示する
+
+## AI から操作する
+
+### Node（推奨・高速）
+
+```ts
+import { Sim, AgentPort, brainTick, buildLoadout, DEFAULT_LOADOUT, rulesText } from './src/core';
+const { slots, deploy } = buildLoadout('m1', DEFAULT_LOADOUT, [{ slot: 1, chassis: 'heavy', weapon: 'rifle', equip: 'plate', tool: 'missile' }]);
+const sim = new Sim({ mission: 'm1', difficulty: 'normal', seed: 1, slots, deploy });
+const port = new AgentPort(sim);
+while (!sim.over) { port.act([{ cmd: 'move', units: 'all', x: 12, y: 9 }]); sim.run(1); console.log(port.text()) }
+```
+
+### ブラウザ（`window.octa`）
+
+```js
+octa.rules()                                  // ルール（LLM のシステムプロンプト向け）
+octa.start({mission:'m1', difficulty:'normal', seed:1, loadout:[...], auto:false})
+octa.observe() / octa.text() / octa.map()
+octa.act([{cmd:'attack', units:'all', target:'e17'}, {cmd:'tool', units:[1], target:'e17'}])
+octa.step(1.0)                                // 時間はここでしか進まない（realtime:true で実時間）
+octa.auto(true)                               // 内蔵AIに指揮させる
+octa.replay() / octa.playReplay(json) / octa.verifyReplay(json)
+```
+
+## 操作
+
+| 操作 | 内容 |
+|---|---|
+| 左クリック / ドラッグ | 選択 / 範囲選択（`Shift` で追加） |
+| 選択中に地面・敵をクリック | 移動 / 攻撃（右クリックでも可） |
+| `WASD`・矢印・右ドラッグ / ホイール | スクロール / ズーム |
+| `1`〜`8` / `E` | 機体選択 / 全機 |
+| `Space` / `F` | 一時停止 / 倍速 |
+| `X` `Q` `M` `H` `R` | 停止 / 姿勢 / 移動モード / 隠蔽 / 弾種 |
+| `T` / `B` | ツール / 砲撃支援（`Esc` で取消） |
+| `V` / `C` / `G` | 警戒圏表示 / 選択機へ / AI指揮 |

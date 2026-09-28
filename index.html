@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>オクタ小隊戦記</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=IBM+Plex+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+</head>
+<body>
+<div id="app">
+<section id="hq">
+  <header class="hq-head">
+    <div class="brand"><span class="mark">OCTA</span><h1>オクタ小隊戦記</h1></div>
+    <p class="sub">作戦を選び、格納庫の8機を組み替えて出撃する。戦闘はリアルタイム、一時停止中も命令できる。</p>
+  </header>
+  <div class="hq-grid">
+    <div>
+      <h2 class="lbl">Operations<b>作戦一覧</b></h2>
+      <div id="mlist"></div>
+      <h2 class="lbl">Difficulty<b>難易度</b></h2>
+      <div class="diff" id="diff" role="group" aria-label="難易度"></div>
+      <div id="brief" class="brief"></div>
+      <h2 class="lbl" style="margin-top:20px">Replays<b>リプレイ</b></h2>
+      <div id="rplist"></div>
+      <details class="help" id="rpImport"><summary>リプレイを読み込む（JSON）</summary>
+        <textarea id="rpIn" rows="4" placeholder="octa.replay() の出力やコピーしたJSONを貼り付け"></textarea>
+        <div class="rpimp"><input type="file" id="rpFile" accept=".json,application/json"><button class="btn" id="rpLoad">再生</button></div>
+        <div id="rpErr"></div>
+      </details>
+    </div>
+    <div>
+      <div class="hangar-head">
+        <h2 class="lbl">Hangar<b>格納庫・出撃編成</b></h2>
+        <div id="budget"></div>
+      </div>
+      <details class="guide" id="guide" open><summary>装備ガイド ― 各パーツの役割と数値の意味</summary><div id="guideBody"></div></details>
+      <div id="slots"></div>
+      <div class="deploy-row">
+        <div id="deployMsg"></div>
+        <div class="gobtns"><button id="aiGoBtn" class="btn">AIに任せて観戦</button><button id="goBtn" class="btn primary">出撃</button></div>
+      </div>
+      <details class="help">
+        <summary>AIインターフェース（window.octa）</summary>
+        <p style="margin:8px 0 4px">ブラウザのコンソールや Playwright から、プログラムやLLMでこのゲームを操作できます。AIモードでは時間は <code>step()</code> を呼んだ分だけ進みます（ターン制のように扱える）。</p>
+        <pre style="overflow-x:auto;background:var(--panel2);padding:8px;font-family:var(--mono);font-size:12px;margin:6px 0">octa.rules()                      // ルールと仕様の説明（LLMに渡す用）
+// Node なら src/core を直接使える（tools/agent-headless.ts）
+octa.start({mission:'m1', difficulty:'easy', seed:1,
+  loadout:[{slot:1,chassis:'heavy',weapon:'rifle',equip:'plate'}, ...]})
+octa.observe()                    // 見えている情報だけのJSON
+octa.text()                       // ASCIIマップ付きの文章版（LLM向け）
+octa.act([{cmd:'move',units:[1,2],x:12,y:9},
+          {cmd:'attack',units:[3],target:'e17'},
+          {cmd:'stance',units:[6],stance:'nofire'}])
+octa.step(1.0)                    // 1秒進めて observe() を返す
+octa.replay()                     // 直前の戦闘のリプレイJSON
+octa.playReplay(json,{speed:4})   // リプレイを画面で再生</pre>
+        <p style="margin:4px 0 0">別ページに埋め込んだ場合は <code>postMessage({octa:1,id,method:'act',args:[...]})</code> でも呼べます（返信は同じ id で届く）。</p>
+      </details>
+      <details class="help">
+        <summary>操作方法</summary>
+        <ul>
+          <li>左クリック/タップで味方を選択。左ドラッグで範囲選択、<kbd>Shift</kbd>+クリックで追加選択。<kbd>1</kbd>〜<kbd>8</kbd>で機体選択、<kbd>E</kbd>（または<kbd>Ctrl</kbd>+<kbd>A</kbd>）で全機。</li>
+          <li>選択中に地面をクリックで移動、敵をクリックで攻撃目標指定。右クリックでも命令できる。</li>
+          <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>・矢印キー、右/中ドラッグ、タッチのドラッグで画面スクロール。マップ上にカーソルを置くと右上に地形・機体の情報が出る。ミニマップのクリックで移動、マウスホイールでズーム。</li>
+          <li><kbd>T</kbd>ツール使用（選択機のツール。もう一度押すと種類を切替、<kbd>Esc</kbd>で取消）　<kbd>Space</kbd>一時停止　<kbd>F</kbd>倍速　<kbd>X</kbd>停止　<kbd>Q</kbd>交戦姿勢の切替（待機射撃→自由交戦→射撃禁止）　<kbd>C</kbd>選択機へカメラ移動</li>
+          <li>森林は移動が遅いが、中にいる機体は見つかりにくく被弾が減る。丘陵の上では索敵と射程が+1。</li>
+          <li>狙撃砲は索敵範囲より射程が長い。軽量機やレーダー装備機で敵を捉えてから撃つ。</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="battle" hidden>
+  <div class="topbar">
+    <div class="tb-m"><span class="mtype" id="bType"></span><b id="bName"></b><span id="aiChip" class="aichip" hidden>AI制御</span></div>
+    <div class="tb-obj" id="bObj"></div>
+    <div class="tb-time" id="bTime"></div>
+    <div class="tb-ctl">
+      <button id="pauseBtn">▶ 再開</button>
+      <button id="spdBtn">×1</button>
+      <button id="abortBtn">撤退</button>
+    </div>
+  </div>
+  <div class="bmain">
+    <div class="stage" id="stage">
+      <div id="phaser"></div>
+      <div id="boxsel" hidden></div>
+      <div id="log"></div>
+      <div id="insp" hidden></div>
+      <div id="aiIntent" hidden></div>
+      <div id="pauseBanner">一時停止中 ― 停止したまま命令を出せます</div>
+      <div id="result" hidden></div>
+    </div>
+    <aside class="side">
+      <canvas id="mini" width="240" height="120"></canvas>
+      <div id="detail"></div>
+      <div id="cards"></div>
+    </aside>
+  </div>
+  <div class="rpbar" id="rpbar" hidden>
+    <span class="rpchip">REPLAY</span>
+    <div class="rpseek"><div id="rpMarks"></div><input type="range" id="rpSeek" min="0" max="100" step="1" value="0" aria-label="再生位置"></div>
+    <span id="rpTime" class="num">0:00 / 0:00</span>
+    <label class="rprev"><input type="checkbox" id="rpReveal"> 敵を全表示</label>
+    <span id="rpInfo"></span>
+  </div>
+  <div class="cmdbar">
+    <button data-cmd="all">全機選択 E</button>
+    <button data-cmd="stop">停止 X</button>
+    <button data-cmd="stance" id="stanceBtn">姿勢: 待機射撃 Q</button>
+    <button data-cmd="convoy" id="convoyBtn" hidden>輸送隊: 停止中</button>
+    <button data-cmd="center">選択機へ C</button>
+    <button data-cmd="det" id="detBtn" class="on">警戒圏表示 V</button>
+    <button data-cmd="tool" id="toolBtn">ツール T</button>
+    <button data-cmd="mode" id="modeBtn">移動: 通常 M</button>
+    <button data-cmd="hide" id="hideBtn">隠蔽 H</button>
+    <button data-cmd="ammo" id="ammoBtn">弾種: 通常 R</button>
+    <button data-cmd="arty" id="artyBtn">砲撃支援 B</button>
+    <button data-cmd="ai" id="aiBtn">AI指揮: OFF G</button>
+    <span class="hint">WASD スクロール / クリックで移動 / 敵クリックで攻撃 / Space 一時停止</span>
+  </div>
+</section>
+</div>
+
+
+<script type="module" src="./src/main.ts"></script>
+</body>
+</html>
