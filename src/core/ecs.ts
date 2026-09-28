@@ -22,6 +22,8 @@ export interface EGroup {
   lastHurt: number; lastFire: number; calledT: number; heardFrom: number | null;
   /** Waits hidden until you come close (or it gets hit). */
   ambush?: boolean;
+  /** Doesn't answer radio calls (training). */
+  deaf?: boolean;
 }
 
 export interface ToolPending { x: number; y: number; t: number | null }

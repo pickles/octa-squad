@@ -48,7 +48,7 @@ function callSupport(s: Sim, from: Pt, pos: Pt, caller: EGroup | null, viaRadar 
   const radar = radarUp(s);
   let n = 0;
   for (const h of s.egroups) {
-    if (h === caller) continue;
+    if (h === caller || h.deaf) continue;
     const m = s.world.alive('enemyAI').filter(u => u.enemyAI.gid === h.id);
     if (!m.length) continue;
     const hc = centroid(m);

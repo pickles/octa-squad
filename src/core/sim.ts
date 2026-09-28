@@ -15,9 +15,9 @@ import { runSystems } from './systems';
 
 export const TICK = 1 / 30;
 /** Bump whenever a change alters simulation results; replays recorded with another version will not reproduce. */
-export const SIM_VERSION = 6;
+export const SIM_VERSION = 7;
 
-export interface GroupOpts { patrol?: [number, number][]; hunt?: boolean; role?: GroupRole; leash?: number; ambush?: boolean }
+export interface GroupOpts { patrol?: [number, number][]; hunt?: boolean; role?: GroupRole; leash?: number; ambush?: boolean; deaf?: boolean }
 export interface Cloud { k: 'chaff' | 'smoke' | 'flare' | 'jam'; x: number; y: number; r: number; t: number; dur: number; team: Team }
 export interface Mine { x: number; y: number; team: Team; arm: number; revealed: boolean; disarm: number; src: number | null; done?: boolean }
 export interface Shell { x: number; y: number; at: number; cx: number; cy: number; done?: boolean }
@@ -180,7 +180,7 @@ export class Sim {
     const patrol = o.patrol ? o.patrol.map(([a, b]) => ({ x: a + .5, y: b + .5 })) : null;
     const role: GroupRole = o.role ?? (o.hunt ? 'hunt' : patrol ? 'patrol' : 'garrison');
     const g: EGroup = { id: this.egroups.length, role, post: { x: x + .5, y: y + .5 }, leash: o.leash ?? (role === 'overwatch' ? 1.5 : role === 'garrison' ? 6 : 99), patrol, pi: 0,
-      state: role === 'hunt' ? 'search' : 'idle', t: 0, contact: null, contactT: -99, seenN: 0, seenT: -99, rally: null, fallback: null, flankSide: 0, lastHurt: -99, lastFire: -99, calledT: -99, heardFrom: null, ambush: !!o.ambush };
+      state: role === 'hunt' ? 'search' : 'idle', t: 0, contact: null, contactT: -99, seenN: 0, seenT: -99, rally: null, fallback: null, flankSide: 0, lastHurt: -99, lastFire: -99, calledT: -99, heardFrom: null, ambush: !!o.ambush, deaf: !!o.deaf };
     this.egroups.push(g);
     return g;
   }

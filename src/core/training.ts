@@ -169,27 +169,28 @@ export const TRAINING: MissionDef[] = [
   },
   {
     ...COMMON, id: 't7', part: 2, type: '教練', code: '2-4', name: 'すり抜ける', max: 3, seed: 707, limit: 300, lose: '全機喪失／時間切れ',
-    terr: { forest: 4, hills: 0, water: 0, rocks: 3 }, spawn: [4, 22], keys: [[22, 7], [12, 15], [17, 11]], bounds: [2, 5, 25, 25],
-    paint: [['forest', 9, 17, 1.8], ['forest', 14, 13, 1.6], ['forest', 19, 10, 1.6]],
-    squad: [L('light', 'rifle', 'stealth'), L('light', 'rifle', 'stealth'), L('light', 'mg', 'stealth')],
-    brief: '見つからずにどう通る？　巡回隊が行き交う谷を抜けて、北東の回収点まで行く。見つかると周りの敵が集まってくる。',
-    win: '生き残った全機（2機以上）が回収点に入る', hint: 'ステルスは見つかる距離が半分、森ならさらに0.7倍、隠蔽（H）でさらに0.35倍。V で敵の警戒圏（黄色い点線）が見える。巡回が通り過ぎるのを森で待て。',
+    terr: { forest: 2, hills: 0, water: 0, rocks: 2 }, spawn: [4, 22], keys: [[22, 6], [8, 18], [13, 14], [18, 10], [4, 10], [16, 22], [10, 6], [22, 18], [16, 3], [24, 11]], bounds: [2, 3, 25, 25],
+    paint: [['forest', 8.5, 18.5, 1.6], ['forest', 13.5, 14.5, 1.6], ['forest', 18.3, 10.6, 1.5]],
+    squad: [L('light', 'rifle', 'stealth', 'smoke'), L('light', 'rifle', 'stealth', 'smoke'), L('light', 'mg', 'stealth', 'smoke')],
+    brief: '見つからずにどう通る？　巡回隊が行き交う谷を抜けて、北東の回収点まで行く。見つかったら戦わずに煙幕で視線を切って逃げ、森で隠れ直す。',
+    win: '生き残った全機が回収点に入る（1機でもよい）', hint: '3つの巡回隊が道を横切って往復している。巡回の間にある3つの森が待ち場所。ステルスは見つかる距離が半分、森ならさらに0.7倍、隠蔽（H）でさらに0.35倍。V で敵の警戒圏（黄色い点線）が見える。巡回が通り過ぎて背中を向けたら次の森へ。',
     medals: [
       { name: '影', desc: '一度も発見されない', test: s => s.everDetected.size === 0 },
       { name: 'やり過ごし', desc: '隠蔽中に敵を2回、4マス以内でやり過ごす', test: s => st(s, 'hidePass') >= 2 },
       { name: '全機到達', desc: '3機とも回収点に着く', test: s => s.lost === 0 },
     ],
     setup(s) {
-      s.addZone({ kind: 'goal', x: 22, y: 7, r: 1.8, label: '回収点' });
-      s.group(['trooper', 'gunner'], 10, 13, { patrol: [[10, 13], [15, 19], [10, 13]] });
-      s.group(['scout', 'trooper'], 17, 15, { patrol: [[17, 15], [14, 9], [17, 15]] });
-      s.group(['trooper', 'trooper'], 21, 11, { patrol: [[21, 11], [18, 7]] });
-      s.group(['heavy'], 22, 5, { role: 'garrison', leash: 3 });
+      s.addZone({ kind: 'goal', x: 22.5, y: 6, r: 1.8, label: '回収点' });
+      // three patrols walk back and forth ACROSS the route; the forests between their lanes are the waiting spots
+      s.group(['trooper', 'gunner'], 4, 10, { patrol: [[4, 10], [16, 22]], deaf: true });
+      s.group(['scout', 'trooper'], 22, 18, { patrol: [[22, 18], [10, 6]], deaf: true });
+      s.group(['trooper', 'trooper'], 16, 3, { patrol: [[16, 3], [24, 11]], deaf: true });
       say(s, 0.5, 'V で敵の警戒圏（黄色い点線）が見える。その円に入らなければ見つからない。森に入り、H で隠蔽すると円はもっと小さくなる。');
-      say(s, 25, '撃つとステルスが2.5秒切れる。射撃禁止（Q）にしておくと勝手に撃たない。');
+      say(s, 12, '見つかったら撃ち合うな。煙幕（T）を敵との間に張って視線を切り、近くの森に逃げ込んで H で隠れ直せ。巡回は最後に見た地点を探してから持ち場に戻る。');
+      say(s, 25, '撃つとステルスが2.5秒切れる。射撃禁止（Q）にしておくと勝手に撃たない。巡回は歩く速さ（普段の6割）で決まった道を往復する。通り道から2マス以上離れて隠れ、背中が見えたら進め。');
     },
     objective: s => `回収点 ${inGoal(s)}/${s.countP()}`,
-    check: s => s.countP() >= 2 && inGoal(s) === s.countP() ? { win: true, reason: '谷を抜けた' } : (s.countP() < 2 ? { win: false, reason: '2機未満になった' } : undefined),
+    check: s => s.countP() >= 1 && inGoal(s) === s.countP() ? { win: true, reason: s.lost ? `谷を抜けた（${s.lost}機損失）` : '谷を抜けた' } : undefined,
   },
   // ------------------------------------------------------------------ part 3: tools
   {
