@@ -170,6 +170,7 @@ export function damage(s: Sim, t: Entity, d: number, src: Entity | null) {
   const h = t.health; if (!h || !t.life.alive) return;
   h.hp -= d; h.hitT = 0.15;
   if (t.squad) s.count('taken:' + t.squad.cfg.chassis, d);
+  if (src?.squad && src.weapon && s.cause === 'bullet' && t.team === 'E') s.count('dmg:w:' + src.weapon.key + ':' + (s.etype(t) ?? ''), Math.min(d, Math.max(0, h.hp + d)));
   const sy = t.systems;
   if (h.hp > 0 && sy && d >= 8 && s.rnd() < 0.10 + 0.25 * (1 - h.hp / h.maxHp)) {
     const ks = (['fcs', 'legs', 'sensor'] as SubsystemKey[]).filter(k => !sy[k]);

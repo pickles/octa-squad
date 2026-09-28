@@ -25,12 +25,11 @@ export const TRAINING: MissionDef[] = [
     brief: '軽い敵と重い敵、それぞれどう倒す？　まず偵察型（装甲1）が3機、続いて重装型（装甲6）が来る。',
     win: '敵の全滅', hint: '機関銃は近距離で軽い敵を溶かすが、重装型には弾かれる。重装型にはライフルの徹甲弾（R）。',
     medals: [
-      { name: '機関銃の本領', desc: '機関銃で偵察型を2機以上倒す', test: s => st(s, 'kill:w:mg:scout') >= 2 },
+      { name: '機関銃の本領', desc: '偵察型へのダメージの半分以上を機関銃で与える', test: s => st(s, 'dmg:w:mg:scout') > 0 && st(s, 'dmg:w:mg:scout') >= (st(s, 'dmg:w:mg:scout') + st(s, 'dmg:w:rifle:scout')) * 0.5 },
       { name: '装甲を貫く', desc: '徹甲弾で重装型に60以上のダメージ', test: s => st(s, 'apHeavy') >= 60 },
       noLoss,
     ],
     setup(s) {
-      s.huntGoal = { x: 6.5, y: 20.5 };
       s.schedule(6, s2 => s2.group(['scout', 'scout', 'scout'], 19, 10, { role: 'hunt' }));
       say(s, 0.5, '開始時は一時停止中。機体カードかマップ上の味方をクリックで選択、地面をクリックで移動、敵をクリックで攻撃。Space で再開・一時停止。');
       say(s, 5, '北東から偵察型が3機来る。装甲1の軽い機体だ。機関銃（射程3.2）は近いほど強い。機関銃の2機を前に、ライフルの2機は1マス後ろに。');
@@ -61,7 +60,6 @@ export const TRAINING: MissionDef[] = [
       noLoss,
     ],
     setup(s) {
-      s.huntGoal = { x: 6.5, y: 20.5 };
       s.schedule(6, s2 => s2.group(['trooper', 'trooper', 'gunner'], 19, 10, { role: 'hunt' }));
       say(s, 0.5, 'ヘヴィ（装甲8）を先頭に置け。敵は近い機体と弱った機体を狙う。サポートは後ろ、半径2.5の味方を修理する。');
       say(s, 20, '被弾した機体はサポートの近くへ下げろ。部位損傷（火器・脚・センサー）もサポートの近くで6秒ごとに直る。');

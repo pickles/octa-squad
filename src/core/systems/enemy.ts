@@ -264,7 +264,9 @@ function unitStep(s: Sim, u: EU, g: EGroup, m: EU[], i: number, dt: number) {
       break;
     case 'search':
       if (g.role === 'hunt') {
-        const hg = s.huntGoal ? ((s.intel && s.time - s.intelT < 12 && !s.pickup) ? s.intel : s.huntGoal) : (s.intel ?? c);
+        // no fixed goal (training waves): head for the last report, else straight at the squad
+        const sq = s.livingSquad(), sc = sq.length ? { x: sq.reduce((a, q) => a + q.pos.x, 0) / sq.length, y: sq.reduce((a, q) => a + q.pos.y, 0) / sq.length } : c;
+        const hg = s.huntGoal ? ((s.intel && s.time - s.intelT < 12 && !s.pickup) ? s.intel : s.huntGoal) : ((s.intel && s.time - s.intelT < 12) ? s.intel : sc);
         goal = tgt ? (dist(u.pos, tgt.pos) > r * 0.9 ? tgt.pos : null) : hg;
         ai.state = 'hunt';
       } else { goal = c; ai.state = 'search' }
