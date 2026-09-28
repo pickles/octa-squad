@@ -154,8 +154,10 @@ function command(s: Sim, g: EGroup, m: EU[]) {
     }
     case 'attack': {
       if (outnumbered(s, g, m) && g.t > 1) { g.state = 'withdraw'; g.t = 0; g.fallback = pickFallback(s, g, gc, g.contact!); break }
+      // out-ranged: charge if we clearly outnumber what we've seen (and aren't tied to a post), otherwise fall back to cover
       const outranged = s.time - g.lastHurt < 2.5 && s.time - g.lastFire > 5 && dist(gc, g.contact!) > 5.5;
-      if ((outranged || hp < 0.4) && g.role !== 'hunt') { g.state = 'withdraw'; g.t = 0; g.fallback = pickFallback(s, g, gc, g.contact!) }
+      const canCharge = g.role !== 'garrison' && forceAt(s, g.contact!, g) >= Math.max(1, g.seenN) * 1.5;
+      if (((outranged && !canCharge) || hp < 0.4) && g.role !== 'hunt') { g.state = 'withdraw'; g.t = 0; g.fallback = pickFallback(s, g, gc, g.contact!) }
       else if (g.role === 'garrison' && dist(g.post, g.contact!) > g.leash + 3) { g.state = 'withdraw'; g.t = 0; g.fallback = pickFallback(s, g, g.post, g.contact!) }
       break;
     }
