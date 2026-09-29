@@ -1,5 +1,6 @@
 // Battle HUD (DOM): top bar, unit cards, detail and inspector panels, command bar, log, minimap,
 // replay bar and the result panel. Reads the BattleSession; never touches Phaser directly.
+import { playAlert, isMuted, setMuted, primeAudio } from './alerts';
 import { AMMO, CHASSIS, DIFFS, EQUIP, MMODES, N, STANCES, SYSN, TERR, TOOLS, WEAPONS } from '../core';
 import type { Entity, SubsystemKey } from '../core';
 import type { BattleSession } from '../game/controller';
@@ -25,6 +26,7 @@ export class Hud {
   s: BattleSession | null = null;
   private logShown: { text: string; kind: string; at: number }[] = [];
   private tipAt = 0;
+  private alertCursor = 0; private alertUntil = 0;
   private logCursor = 0;
   private hover: { x: number; y: number } | null = null;
   private hoverUnit: Entity | null = null;
@@ -51,6 +53,9 @@ export class Hud {
     });
     $('#pauseBtn').onclick = () => { if (this.s) { this.s.setPaused(!this.s.paused); this.update() } };
     $('#spdBtn').onclick = () => { if (this.s) { this.s.cycleSpeed(); this.update() } };
+    const mb = $('#muteBtn'), showMute = () => { mb.textContent = isMuted() ? '音 OFF' : '音 ON'; mb.classList.toggle('on', isMuted()) };
+    showMute(); mb.onclick = () => { setMuted(!isMuted()); showMute(); if (!isMuted()) { primeAudio(); playAlert('lock') } };
+    addEventListener('pointerdown', () => primeAudio(), { once: true });
     $('#abortBtn').onclick = () => {
       const s = this.s; if (!s) return; const b = $('#abortBtn');
       if (s.sim.over || s.replay) { this.cb.toHQ(); return }
@@ -71,7 +76,7 @@ export class Hud {
 
   /** Attach to a new battle session. */
   bind(s: BattleSession) {
-    this.s = s; this.logShown = []; this.logCursor = 0; this.tipAt = 0; $('#tip').hidden = true; this.hover = null; this.hoverUnit = null;
+    this.s = s; this.logShown = []; this.logCursor = 0; this.tipAt = 0; $('#tip').hidden = true; this.alertCursor = 0; this.alertUntil = 0; $('#alertBox').hidden = true; this.hover = null; this.hoverUnit = null;
     const m = s.sim.m;
     $('#bType').textContent = m.type; $('#bType').className = 'mtype t-' + m.type; $('#bName').textContent = m.name;
     $('#convoyBtn').hidden = !m.road;
@@ -109,6 +114,16 @@ export class Hud {
     if (this.tipAt && sim.time - this.tipAt > 14) { this.tipAt = 0; $('#tip').hidden = true }
     for (const l of sim.logs.slice(this.logCursor)) if (l.kind !== 'tip') { this.logShown.push({ text: l.text, kind: LOGCLS[l.kind], at: performance.now() }); if (this.logShown.length > 5) this.logShown.shift() }
     this.logCursor = sim.logs.length;
+    // danger alerts: banner + sound (only fresh ones — seeking a replay re-simulates old alerts)
+    for (const a of sim.alerts.slice(this.alertCursor)) {
+      if (sim.time - a.t > 1) continue;
+      const box = $('#alertBox'), hint = a.kind === 'lock' ? 'Z でレーダーOFF／チャフ／隠れる' : a.kind === 'missile' ? 'チャフで誘導を切る／機関銃の味方の近くへ' : '固まっている機体を散らせ';
+      box.className = a.kind; box.innerHTML = `${a.text}<small>${hint}</small>`; box.hidden = false;
+      this.alertUntil = performance.now() + (a.kind === 'mortar' ? 4000 : 2600);
+      playAlert(a.kind);
+    }
+    this.alertCursor = sim.alerts.length;
+    if (this.alertUntil && performance.now() > this.alertUntil) { this.alertUntil = 0; $('#alertBox').hidden = true }
     const now = performance.now(); if (this.logShown.length && now - this.logShown[0].at > 9000) this.logShown.shift();
     this.renderLog();
     // top bar

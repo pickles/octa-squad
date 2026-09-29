@@ -292,7 +292,7 @@ function unitStep(s: Sim, u: EU, g: EGroup, m: EU[], i: number, dt: number) {
     else {
       if (ai.lock?.id !== best.id) {
         ai.lock = { id: best.id, t: 0 };
-        if (best.squad) s.log(`ロックオン警報：${best.squad.pilot}機が${u.name}に狙われている`, 'warning');
+        if (best.squad) { s.log(`ロックオン警報：${best.squad.pilot}機が${u.name}に狙われている`, 'warning'); s.alert('lock', `ロックオン警報　${best.squad.pilot}機`, best.pos.x, best.pos.y) }
       }
       ai.lock.t += dt;
       const sees = s.detP.has(best.id) && dist(u.pos, best.pos) <= s.effSensor(u);
@@ -310,7 +310,7 @@ function unitStep(s: Sim, u: EU, g: EGroup, m: EU[], i: number, dt: number) {
         if (s.world.alive('enemyAI').some(e => dist(e.pos, p.pos) < 2.5)) continue;
         const at = s.time + 4;
         for (let k = 0; k < 4; k++) { const a = s.rnd() * Math.PI * 2, rr = Math.sqrt(s.rnd()) * 1.6; s.shells.push({ x: p.pos.x + Math.cos(a) * rr, y: p.pos.y + Math.sin(a) * rr, at: at + k * 0.4, cx: p.pos.x, cy: p.pos.y, light: true }) }
-        s.log('迫撃砲の発射音！密集している機体は散開せよ', 'warning');
+        s.log('迫撃砲の発射音！密集している機体は散開せよ', 'warning'); s.alert('mortar', '迫撃砲　着弾まで4秒　散開せよ', p.pos.x, p.pos.y);
         ai.cd = 16; break;
       }
     }

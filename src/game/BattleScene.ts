@@ -238,7 +238,7 @@ export class BattleScene extends Phaser.Scene {
     const seen = new Set<string>();
     for (const sh of sim.shells) {
       const key = sh.cx + ',' + sh.cy; if (seen.has(key)) continue; seen.add(key);
-      const [sx, sy] = w2p(sh.cx, sh.cy); this.ell(g, sx, sy, 1.8, COL.red, .9, 1.5, undefined, 0, 1);
+      const [sx, sy] = w2p(sh.cx, sh.cy); this.ell(g, sx, sy, sh.light ? 2.6 : 2.6, COL.red, .95, 2, COL.red, .1 + .08 * Math.sin(this.time.now / 90), 1); // danger zone = scatter + blast
       this.text(sx, sy - 30, `着弾 ${Math.max(0, sh.at - sim.time).toFixed(1)}s`, { size: 11, weight: 600, mono: true, color: '#ffb38f' });
     }
     for (const c of sim.charges) { const [sx, sy] = this.at(c); g.fillStyle(COL.gold, 1); g.fillRect(sx - 4, sy - 14, 8, 6); this.text(sx, sy - 22, c.t.toFixed(1), { size: 10, mono: true, color: '#e2b84a', weight: 600 }) }
@@ -345,6 +345,18 @@ export class BattleScene extends Phaser.Scene {
 
   private drawOver(_dt: number) {
     const g = this.over, s = this.s, sim = s.sim, now = this.time.now / 1000; g.clear();
+    // threat reticles on our units: yellow = being locked (with progress), red = missile inbound
+    const reticle = (x: number, y: number, col: number, prog?: number) => {
+      const r = 15 + Math.sin(now * 12) * 2; g.lineStyle(2, col, 0.95);
+      for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4; g.beginPath(); g.arc(x, y - 12, r, a - 0.35, a + 0.35); g.strokePath() }
+      if (prog != null) { g.lineStyle(3, col, 1); g.beginPath(); g.arc(x, y - 12, r + 5, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, prog)); g.strokePath() }
+    };
+    for (const e of sim.world.alive('enemyAI')) {
+      const L = e.enemyAI.lock; if (!L) continue; const t = sim.world.get(L.id); if (!t?.squad || !t.life.alive) continue;
+      const need = sim.detP.has(t.id) && Math.hypot(e.pos.x - t.pos.x, e.pos.y - t.pos.y) <= sim.effSensor(e) ? 1.5 : 3;
+      const [x, y] = this.at(t); reticle(x, y, 0xe2b84a, L.t / need);
+    }
+    for (const p of sim.projs) if (p.k === 'MSL' && p.team === 'E' && !p.lost) { const t = sim.world.get(p.tgt); if (t?.life.alive && (t.squad || t.truck || t.ephemeral)) { const [x, y] = this.at(t); reticle(x, y, 0xe4643c) } }
     for (const p of sim.projs) {
       const [sx, sy] = this.at(p), [qx, qy] = standPx(sim.map, p.px, p.py), col = p.team === 'P' ? 0xbfe6ff : 0xffb38f;
       if (p.k === 'MSL') { g.fillStyle(p.lost ? 0x9aa4a8 : col, 1); g.fillCircle(sx, sy - 12, 2.8) }

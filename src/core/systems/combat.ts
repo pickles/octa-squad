@@ -57,7 +57,7 @@ export function launchMissile(s: Sim, u: Entity, t: Entity) {
   if (u.stealth) u.stealth.revealT = 2.5;
   s.projs.push({ x: u.pos.x, y: u.pos.y, px: u.pos.x, py: u.pos.y, tx: t.pos.x, ty: t.pos.y, tgt: t.id, spd: 7, dmg: T.dmg!, splash: T.splash!, team: u.team, k: 'MSL', src: u.id, am: 'std', acc: 1 });
   s.emit({ k: 'flash', x: u.pos.x, y: u.pos.y, team: u.team });
-  if (u.team === 'E' && (t.squad || t.truck)) s.log(`ミサイル接近！（→ ${t.squad ? t.squad.pilot + '機' : t.name}）`, 'warning');
+  if (u.team === 'E' && (t.squad || t.truck)) { s.log(`ミサイル接近！（→ ${t.squad ? t.squad.pilot + '機' : t.name}）`, 'warning'); s.alert('missile', `ミサイル接近　${t.squad ? t.squad.pilot + '機' : t.name}`, t.pos.x, t.pos.y) }
 }
 
 export function projectileSystem(s: Sim, dt: number) {

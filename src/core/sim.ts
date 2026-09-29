@@ -33,6 +33,8 @@ export interface Zone { kind: 'lz' | 'goal' | 'hint'; x: number; y: number; r: n
 export type FxKind = 'flash' | 'hit' | 'boom' | 'miss' | 'puff' | 'heal' | 'ping' | 'smoke';
 export interface Fx { k: FxKind; x: number; y: number; r?: number; team?: Team; red?: boolean }
 export type LogKind = 'warning' | 'info' | 'note' | 'ai' | 'tip';
+/** Something the player must notice right now (UI shows a banner and plays a sound). Not part of the simulation state. */
+export interface Alert { t: number; kind: 'lock' | 'missile' | 'mortar'; text: string; x: number; y: number }
 export interface LogEntry { t: number; text: string; kind: LogKind }
 export interface Outcome { win: boolean; reason: string; /** sub-goals achieved (same order as MissionDef.medals) */ medals?: boolean[] }
 export interface TimedEvent { t: number; fn: (s: Sim) => void; done?: boolean }
@@ -85,6 +87,8 @@ export class Sim {
   cause = 'bullet';
   /** Units that were ever detected by the enemy. */
   everDetected = new Set<number>();
+  alerts: Alert[] = [];
+  alert(kind: Alert['kind'], text: string, x: number, y: number) { this.alerts.push({ t: this.time, kind, text, x, y }); if (this.alerts.length > 200) this.alerts.splice(0, 100) }
   count(k: string, n = 1) { this.stat[k] = (this.stat[k] || 0) + n }
   /** Advisor tips already shown this battle. */
   tips = new Set<string>();

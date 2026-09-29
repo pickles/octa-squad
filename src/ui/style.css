@@ -208,3 +208,8 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line2);padding
 .fixedslot .st{grid-column:1/-1}
 
 .diffrow{display:flex;align-items:center;gap:12px;margin:0 0 12px}.diffrow .lbl2{font-size:13px;color:var(--faint);letter-spacing:.08em}.diffrow .diff{margin:0;flex:0 0 auto}.diffrow .diff button{min-width:96px;white-space:nowrap;padding:6px 14px}
+
+#alertBox{position:absolute;left:50%;top:22%;transform:translateX(-50%);pointer-events:none;padding:10px 26px;border:2px solid #e4643c;background:rgba(40,10,6,.88);color:#ffd3c2;font-size:22px;font-weight:700;letter-spacing:.08em;text-align:center;box-shadow:0 0 24px rgba(228,100,60,.45);animation:alertPulse .5s ease-in-out infinite alternate}
+#alertBox.lock{border-color:#e2b84a;color:#ffe9b0;background:rgba(40,30,6,.88);box-shadow:0 0 24px rgba(226,184,74,.4)}
+#alertBox small{display:block;font-size:12px;font-weight:500;letter-spacing:0;margin-top:3px;color:#e7d9cf}
+@keyframes alertPulse{from{opacity:1}to{opacity:.72}}
