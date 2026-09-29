@@ -15,12 +15,13 @@ import { runSystems } from './systems';
 
 export const TICK = 1 / 30;
 /** Bump whenever a change alters simulation results; replays recorded with another version will not reproduce. */
-export const SIM_VERSION = 9;
+export const SIM_VERSION = 10;
 
 export interface GroupOpts { patrol?: [number, number][]; hunt?: boolean; role?: GroupRole; leash?: number; ambush?: boolean; deaf?: boolean }
 export interface Cloud { k: 'chaff' | 'smoke' | 'flare' | 'jam'; x: number; y: number; r: number; t: number; dur: number; team: Team }
 export interface Mine { x: number; y: number; team: Team; arm: number; revealed: boolean; disarm: number; src: number | null; done?: boolean }
-export interface Shell { x: number; y: number; at: number; cx: number; cy: number; done?: boolean }
+/** `light`: enemy mortar round (smaller than our artillery). */
+export interface Shell { x: number; y: number; at: number; cx: number; cy: number; done?: boolean; light?: boolean }
 export interface Charge { x: number; y: number; t: number; team: Team; src: number | null; done?: boolean }
 export interface Projectile {
   x: number; y: number; px: number; py: number; tx: number; ty: number; tgt: number; spd: number; dmg: number; splash: number;

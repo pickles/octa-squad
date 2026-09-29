@@ -266,7 +266,7 @@ Difficulty scales enemy damage and hp: ${Object.entries(DIFFS).map(([k, v]) => `
 - Ammo: std | ap (armor counts x0.3, dmg x0.9) | he (armor counts x1.3, splash 1, x1.6 vs structures, ignores forest). Switching takes 2.5s.
 - Subsystem damage (fcs: slower fire, legs: slower, sensor: x0.6). A support unit within 2.5 repairs one every 6s.
 - MG units shoot down enemy missiles passing within 2.2 (35%).
-- Artillery: limited per mission; target must be visible; 5 shells land 8s later within 1.8 and hit EVERYONE.
+- Artillery: limited per mission; target must be visible; 6 shells land 8s later within 1.3 of the point (65 dmg each within 0.7, 65% out to 1.35, forest gives no cover) and hit EVERYONE. Enemy mortar rounds are smaller (50, radius 1.1).
 
 ## Actions
 {cmd:'move', units:[ids]|'all', x, y} | {cmd:'attack', units, target:'e<ID>'} | {cmd:'stop'|'hide', units} | {cmd:'radar', units, on:true|false}

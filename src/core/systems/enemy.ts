@@ -309,7 +309,7 @@ function unitStep(s: Sim, u: EU, g: EGroup, m: EU[], i: number, dt: number) {
         if (near < 3 || dist(u.pos, p.pos) > 15) continue;
         if (s.world.alive('enemyAI').some(e => dist(e.pos, p.pos) < 2.5)) continue;
         const at = s.time + 4;
-        for (let k = 0; k < 4; k++) { const a = s.rnd() * Math.PI * 2, rr = Math.sqrt(s.rnd()) * 1.6; s.shells.push({ x: p.pos.x + Math.cos(a) * rr, y: p.pos.y + Math.sin(a) * rr, at: at + k * 0.4, cx: p.pos.x, cy: p.pos.y }) }
+        for (let k = 0; k < 4; k++) { const a = s.rnd() * Math.PI * 2, rr = Math.sqrt(s.rnd()) * 1.6; s.shells.push({ x: p.pos.x + Math.cos(a) * rr, y: p.pos.y + Math.sin(a) * rr, at: at + k * 0.4, cx: p.pos.x, cy: p.pos.y, light: true }) }
         s.log('迫撃砲の発射音！密集している機体は散開せよ', 'warning');
         ai.cd = 16; break;
       }

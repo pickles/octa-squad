@@ -29,7 +29,7 @@ export function fieldSystem(s: Sim, dt: number) {
   }
   s.mines = s.mines.filter(m => !m.done);
 
-  for (const sh of s.shells) if (s.time >= sh.at) { sh.done = true; artyHit(s, sh.x, sh.y); s.cause = 'bullet' }
+  for (const sh of s.shells) if (s.time >= sh.at) { sh.done = true; artyHit(s, sh.x, sh.y, sh.light); s.cause = 'bullet' }
   s.shells = s.shells.filter(x => !x.done);
 
   for (const c of s.charges) {

@@ -149,21 +149,22 @@ export function blast(s: Sim, x: number, y: number, team: 'P' | 'E', dmg: number
 }
 
 /** Artillery shell: hits everyone, friend or foe. */
-export function artyHit(s: Sim, x: number, y: number) {
+/** Artillery shell: hits everyone, friend or foe. Tree bursts: forest gives no protection. Mortar rounds (`light`) are smaller. */
+export function artyHit(s: Sim, x: number, y: number, light = false) {
   s.cause = 'arty';
-  s.emit({ k: 'boom', x, y, r: 1.2 });
+  const R = light ? 1.1 : 1.35, D = light ? 50 : 65;
+  s.emit({ k: 'boom', x, y, r: R });
   for (const o of s.world.alive()) {
     if (!o.health) continue;
-    const d = Math.hypot(o.pos.x - x, o.pos.y - y); if (d > 1.1) continue;
-    let v = 55 * (d < 0.5 ? 1 : 0.6) * armorMul(o.health.armor);
-    if (s.inForest(o) && !o.structure) v *= 0.75;
+    const d = Math.hypot(o.pos.x - x, o.pos.y - y); if (d > R) continue;
+    const v = D * (d < 0.7 ? 1 : 0.65) * armorMul(o.health.armor);
     damage(s, o, v, null);
   }
 }
 
 export function callArty(s: Sim, x: number, y: number) {
   s.arty--; const at = s.time + 8;
-  for (let i = 0; i < 5; i++) { const a = s.rnd() * Math.PI * 2, r = Math.sqrt(s.rnd()) * 1.8; s.shells.push({ x: x + Math.cos(a) * r, y: y + Math.sin(a) * r, at: at + i * 0.45, cx: x, cy: y }) }
+  for (let i = 0; i < 6; i++) { const a = s.rnd() * Math.PI * 2, r = Math.sqrt(s.rnd()) * 1.3; s.shells.push({ x: x + Math.cos(a) * r, y: y + Math.sin(a) * r, at: at + i * 0.45, cx: x, cy: y }) }
   s.log(`砲撃支援を要請：8秒後に着弾（残り${s.arty}回）`, 'info');
 }
 
