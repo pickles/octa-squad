@@ -19,6 +19,8 @@ export interface MapSpec {
   terr: { forest: number; hills: number; water: number; rocks: number };
   /** Hand-placed terrain discs after the random blobs: [kind, x, y, radius]. */
   paint?: [kind: 'plain' | 'forest' | 'hill' | 'rock' | 'water', x: number, y: number, r: number][];
+  /** Hand-made map (scenario editor): N rows of . F H # ~ =. Replaces the procedural terrain. */
+  tiles?: string[];
   /** Playable rectangle [x0, y0, x1, y1] (inclusive tiles); everything outside becomes rock. For small training maps. */
   bounds?: [number, number, number, number];
 }
@@ -94,6 +96,13 @@ function hpop(h: [number, number][]) {
 
 /** Procedural terrain from the mission seed; guarantees every key point is reachable from spawn. */
 export function generateMap(m: MapSpec): GameMap {
+  if (m.tiles) {
+    const CH: Record<string, number> = { '.': T.PLAIN, F: T.FOREST, H: T.HILL, '#': T.ROCK, '~': T.WATER, '=': T.ROAD };
+    const g = new Uint8Array(N * N);
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) g[y * N + x] = CH[m.tiles[y]?.[x] ?? '#'] ?? T.ROCK;
+    if (m.bounds) { const [x0, y0, x1, y1] = m.bounds; for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (x < x0 || x > x1 || y < y0 || y > y1) g[y * N + x] = T.ROCK }
+    return new GameMap(g, m.bounds);
+  }
   const R = rng(m.seed), g = new Uint8Array(N * N);
   const blob = (type: number, count: number, r0: number, r1: number) => {
     for (let k = 0; k < count; k++) {

@@ -5,6 +5,7 @@ import type { Entity } from './ecs';
 import { AMMO, CHASSIS, DIFFS, EQUIP, MMODES, STANCES, TOOLS, WEAPONS, loadoutStats } from './data';
 import type { AmmoType, Difficulty, Loadout, MoveMode, Stance, SubsystemKey, ToolKey } from './data';
 import { MISSIONS } from './missions';
+import { findMission } from './scenario';
 import type { MissionId } from './missions';
 import { N } from './map';
 import { clamp } from './rng';
@@ -212,7 +213,7 @@ export type Observation = ReturnType<AgentPort['observe']>;
 
 /** Build slot/deploy arrays from an AI loadout description, validating budget and unit cap. */
 export function buildLoadout(mission: MissionId, base: Loadout[], spec?: ({ slot: number; deploy?: boolean } & Partial<Loadout>)[], baseDeploy?: boolean[]) {
-  const m = MISSIONS.find(x => x.id === mission); if (!m) throw new Error('unknown mission ' + mission);
+  const m = findMission(mission); if (!m) throw new Error('unknown mission ' + mission);
   const slots = base.map(x => ({ ...x }));
   let deploy = baseDeploy ? [...baseDeploy] : slots.map(() => false);
   if (spec) {

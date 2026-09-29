@@ -7,7 +7,8 @@ import { World } from './ecs';
 import type { EGroup, Entity, GroupRole, Pt, Team, With } from './ecs';
 import { GameMap, N, T, generateMap } from './map';
 import { dist, rng } from './rng';
-import { MISSIONS } from './missions';
+import { findMission, registerScenario } from './scenario';
+import type { ScenarioDef } from './scenario';
 import type { MissionDef, MissionId } from './missions';
 import type { Command, CommandSource, RecordedCommand } from './commands';
 import { execCommand, describeCommand } from './commands';
@@ -41,6 +42,8 @@ export interface TimedEvent { t: number; fn: (s: Sim) => void; done?: boolean }
 
 export interface SimOptions {
   mission: MissionId;
+  /** A user-made scenario to register before starting (its mission id is 'c:' + scenario.id). */
+  scenario?: ScenarioDef;
   difficulty?: Difficulty;
   seed?: number;
   slots?: Loadout[];
@@ -50,7 +53,7 @@ export interface SimOptions {
 }
 
 export interface Replay {
-  v: 3; sv?: number; mission: MissionId; diff: Difficulty; seed: number; slots: Loadout[]; deploy: boolean[];
+  v: 3; sv?: number; mission: MissionId; scenario?: ScenarioDef; diff: Difficulty; seed: number; slots: Loadout[]; deploy: boolean[];
   ctrl: 'human' | 'ai' | 'mixed'; date: number; ticks: number;
   result: { win: boolean; reason: string; time: number; kills: number; lost: number };
   cmds: RecordedCommand[];
@@ -87,6 +90,9 @@ export class Sim {
   cause = 'bullet';
   /** Units that were ever detected by the enemy. */
   everDetected = new Set<number>();
+  /** Story text waiting to be shown; the UI pauses until the player dismisses it (not simulation state). */
+  story: string | null = null;
+  showStory(text: string) { this.story = text; this.log('📻 ' + text, 'info') }
   alerts: Alert[] = [];
   alert(kind: Alert['kind'], text: string, x: number, y: number) { this.alerts.push({ t: this.time, kind, text, x, y }); if (this.alerts.length > 200) this.alerts.splice(0, 100) }
   count(k: string, n = 1) { this.stat[k] = (this.stat[k] || 0) + n }
@@ -100,7 +106,8 @@ export class Sim {
   onSecond: ((s: Sim) => void) | null = null;
 
   constructor(o: SimOptions) {
-    const m = MISSIONS.find(x => x.id === o.mission);
+    if (o.scenario) registerScenario(o.scenario);
+    const m = findMission(o.mission);
     if (!m) throw new Error('unknown mission ' + o.mission);
     this.m = m;
     this.diff = o.difficulty || 'easy';
@@ -344,14 +351,14 @@ export class Sim {
   toReplay(): Replay {
     const srcs = new Set(this.rec.map(x => x[1].src || 'human'));
     return {
-      v: 3, sv: SIM_VERSION, mission: this.m.id, diff: this.diff, seed: this.seed, slots: this.slots, deploy: this.deploy,
+      v: 3, sv: SIM_VERSION, mission: this.m.id, ...(this.m.scenario ? { scenario: this.m.scenario } : {}), diff: this.diff, seed: this.seed, slots: this.slots, deploy: this.deploy,
       ctrl: srcs.size > 1 ? 'mixed' : srcs.size ? ([...srcs][0] as 'human' | 'ai') : 'human', date: Date.now(), ticks: this.tickN,
       result: { win: !!this.over?.win, reason: this.over?.reason || '', time: +this.time.toFixed(2), kills: this.kills, lost: this.lost },
       cmds: this.rec,
     };
   }
   static fromReplay(r: Replay) {
-    return new Sim({ mission: r.mission, difficulty: r.diff, seed: r.seed, slots: r.slots, deploy: r.deploy, replay: r.cmds });
+    return new Sim({ mission: r.mission, scenario: r.scenario, difficulty: r.diff, seed: r.seed, slots: r.slots, deploy: r.deploy, replay: r.cmds });
   }
 }
 

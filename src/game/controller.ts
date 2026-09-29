@@ -51,11 +51,15 @@ export class BattleSession {
     if (this.paused || this.sim.over || this.stepMode) return;
     this.acc += Math.min(dt, 0.1) * this.speed;
     let n = 0;
-    while (this.acc >= 1 / 30 && n < 90 && !this.sim.over) { this.sim.step(); this.acc -= 1 / 30; n++ }
+    while (this.acc >= 1 / 30 && n < 90 && !this.sim.over) {
+      this.sim.step(); this.acc -= 1 / 30; n++;
+      // story text: stop the clock until the player reads it (replays and AI runs just log it)
+      if (this.sim.story) { if (this.replay || this.autoAI) this.sim.story = null; else { this.paused = true; this.acc = 0; this.onStory?.(this.sim.story); break } }
+    }
     if (n >= 90) this.acc = 0;
     this.checkOver();
   }
-  stepSeconds(sec: number) { const n = Math.max(1, Math.round(Math.min(sec, 60) * 30)); for (let i = 0; i < n && !this.sim.over; i++) this.sim.step(); this.checkOver() }
+  stepSeconds(sec: number) { const n = Math.max(1, Math.round(Math.min(sec, 60) * 30)); for (let i = 0; i < n && !this.sim.over; i++) this.sim.step(); this.sim.story = null; this.checkOver() }
   checkOver() {
     if (this.sim.over && !this.saved) {
       this.saved = true; this.paused = true;
@@ -63,6 +67,7 @@ export class BattleSession {
       this.onOver?.(this);
     }
   }
+  onStory: ((text: string) => void) | null = null;
   setPaused(v: boolean) { if (!this.sim.over) this.paused = v }
   cycleSpeed() { const sp = this.replay ? [1, 2, 4, 8] : [1, 2]; this.speed = sp[(sp.indexOf(this.speed) + 1) % sp.length] }
 

@@ -17,7 +17,7 @@
   </header>
   <div class="hq-grid">
     <div>
-      <h2 class="lbl">Operations<b>作戦一覧</b></h2>
+      <h2 class="lbl">Operations<b>作戦一覧</b><button class="btn ed-open" id="edOpen">シナリオエディタ</button></h2>
       <div id="mlist"></div>
       <h2 class="lbl" style="margin-top:20px">Replays<b>リプレイ</b></h2>
       <div id="rplist"></div>
@@ -72,6 +72,7 @@ octa.playReplay(json,{speed:4})   // リプレイを画面で再生</pre>
   </div>
 </section>
 
+<section id="editor" hidden></section>
 <section id="battle" hidden>
   <div class="topbar">
     <div class="tb-m"><span class="mtype" id="bType"></span><b id="bName"></b><span id="aiChip" class="aichip" hidden>AI制御</span></div>
@@ -91,6 +92,7 @@ octa.playReplay(json,{speed:4})   // リプレイを画面で再生</pre>
       <div id="log"></div>
       <div id="tip" hidden></div>
       <div id="alertBox" hidden></div>
+      <div id="storyBox" hidden><div class="st-t">通信</div><div id="storyText"></div><button class="btn primary" id="storyOk">続行（Space）</button></div>
       <div id="insp" hidden></div>
       <div id="aiIntent" hidden></div>
       <div id="pauseBanner">一時停止中 ― 停止したまま命令を出せます</div>

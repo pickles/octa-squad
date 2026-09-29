@@ -5,6 +5,7 @@ import { rng } from './rng';
 
 import type { Loadout } from './data';
 import { TRAINING } from './training';
+import type { ScenarioDef } from './scenario';
 
 export type MissionId = string;
 export type MissionType = '殲滅' | '強襲' | '索敵' | '護衛' | '離脱' | '教練';
@@ -19,6 +20,8 @@ export interface MissionDef extends MapSpec {
   /** Fixed squad (training): replaces the hangar loadout. */
   squad?: Loadout[];
   medals?: Medal[];
+  /** Source of a user-made mission (scenario editor); embedded in replays. */
+  scenario?: ScenarioDef;
   /** Multiplies enemy damage on top of the difficulty (training uses < 1). */
   dmgMul?: number;
   emines?: [number, number][];

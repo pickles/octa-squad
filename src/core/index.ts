@@ -9,3 +9,5 @@ export type { Replay, SimOptions, Cloud, Mine, Shell, Charge, Projectile, Zone, 
 export { AgentPort, buildLoadout, rulesText } from './agent';
 export type { Action, ActResult, Observation } from './agent';
 export { brainTick } from './brain';
+export { blankScenario, validateScenario, missionFromScenario, registerScenario, unregisterScenario, customMissions, findMission, VICTORY_NAMES } from './scenario';
+export type { ScenarioDef, ScenarioGroup, VictoryKind, StructType, Area } from './scenario';

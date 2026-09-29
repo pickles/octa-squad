@@ -8,6 +8,8 @@ import { BattleSession } from './game/controller';
 import { BattleScene } from './game/BattleScene';
 import type { SceneHooks } from './game/BattleScene';
 import { Hangar } from './ui/hangar';
+import { Editor } from './ui/editor';
+import { loadScenarios } from './ui/store';
 import { Hud } from './ui/hud';
 import { SAVE, currentMission, deployOf, saveReplay, recordResult } from './ui/store';
 import { installOctaApi } from './api/octa';
@@ -22,6 +24,9 @@ class App {
   keys = new Set<string>();
   hud: Hud;
   hangar: Hangar;
+  editor: Editor;
+  /** The running battle was started from the editor's test play: return there afterwards. */
+  fromEditor = false;
   private hudTimer = 0;
   private sleeping = false;
 
@@ -39,11 +44,21 @@ class App {
     this.hangar = new Hangar({
       start: ({ auto }) => { const m = currentMission(); this.startBattle({ mission: m.id, slots: SAVE.slots, deploy: deployOf(m), diff: SAVE.diff, auto }) },
       playReplay: r => this.playReplay(r),
+      edit: id => this.openEditor(id),
+    });
+    this.editor = new Editor($('#editor'), {
+      close: () => { $('#editor').hidden = true; $('#hq').hidden = false; this.hangar.render() },
+      testPlay: sc => { this.fromEditor = true; SAVE.mission = 'c:' + sc.id; const m = currentMission(); this.startBattle({ mission: m.id, slots: SAVE.slots, deploy: deployOf(m), diff: SAVE.diff }) },
     });
     this.hangar.render();
     this.bindKeys();
     setInterval(() => { if (this.session && !$('#battle').hidden) this.hud.update() }, 200);
     void this.hudTimer;
+  }
+
+  openEditor(id?: string) {
+    const sc = id ? loadScenarios().find(x => x.id === id) : undefined;
+    this.editor.open(sc); $('#hq').hidden = true; $('#editor').hidden = false; scrollTo(0, 0);
   }
 
   scene(): BattleScene | null { return this.game && this.game.scene.isActive('battle') ? (this.game.scene.getScene('battle') as BattleScene) : null }
@@ -61,9 +76,10 @@ class App {
 
   private enter(session: BattleSession) {
     this.session = session;
+    session.onStory = text => this.hud.showStory(text);
     session.onOver = s => { if (!s.replay && s.lastReplay) saveReplay(s.lastReplay); if (!s.replay && s.sim.over) recordResult(s.sim.m.id, s.sim.over.win, s.sim.over.medals); this.hud.showResult() };
     session.onNotice = t => this.hud.notice(t);
-    $('#hq').hidden = true; $('#battle').hidden = false;
+    $('#hq').hidden = true; $('#editor').hidden = true; $('#battle').hidden = false;
     this.hud.bind(session);
     this.ensureGame(() => {
       if (this.sleeping) { this.sleeping = false; this.game!.scale.startListeners(); this.game!.loop.wake() }
@@ -124,7 +140,9 @@ class App {
     // the canvas' parent is about to be hidden (0x0): stop the loop and resize handling so WebGL never sees a 0-size framebuffer
     if (this.game && !this.sleeping) { this.sleeping = true; this.game.loop.sleep(); this.game.scale.stopListeners() }
     this.session = null; this.hud.s = null;
-    $('#battle').hidden = true; $('#hq').hidden = false;
+    $('#battle').hidden = true;
+    if (this.fromEditor) { this.fromEditor = false; $('#editor').hidden = false; return }
+    $('#hq').hidden = false;
     this.hangar.render();
   }
 
@@ -137,7 +155,7 @@ class App {
       if (e.ctrlKey || e.metaKey) { if (k === 'a' || k === 'A') { e.preventDefault(); if (!s.sim.over) s.selectAll() } this.hud.update(); return }
       const pk = PANK[k]; if (pk) { this.keys.add(pk); e.preventDefault(); return }
       if (s.sim.over) return;
-      if (k === ' ') { e.preventDefault(); s.setPaused(!s.paused) }
+      if (k === ' ') { e.preventDefault(); if (this.hud.storyOpen()) this.hud.closeStory(); else s.setPaused(!s.paused) }
       else if (k >= '1' && k <= '8') s.selectSlot(+k, e.shiftKey);
       else if (k === 'e' || k === 'E') s.selectAll();
       else if (k === 'x' || k === 'X') s.stop();

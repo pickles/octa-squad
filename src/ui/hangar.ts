@@ -1,5 +1,5 @@
 // Operations room / hangar screen (DOM).
-import { CHASSIS, DIFFS, EQUIP, MISSIONS, PILOTS, TOOLS, WEAPONS, loadoutStats } from '../core';
+import { CHASSIS, DIFFS, EQUIP, MISSIONS, PILOTS, TOOLS, WEAPONS, customMissions, findMission, loadoutStats } from '../core';
 import type { Difficulty, Loadout, MissionId, Replay } from '../core';
 import { PROGRESS, SAVE, currentMission, deleteReplay, deployOf, isReplay, loadReplays, persist } from './store';
 
@@ -8,6 +8,8 @@ const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySele
 export interface HangarCallbacks {
   start(opts: { auto: boolean }): void;
   playReplay(rep: Replay): void;
+  /** Open the scenario editor (optionally on a saved scenario id). */
+  edit(id?: string): void;
 }
 
 function shapeSVG(shape: string, col: string) {
@@ -53,10 +55,11 @@ export function guideHTML() {
 
 export class Hangar {
   constructor(private cb: HangarCallbacks) {
+    $('#edOpen').addEventListener('click', () => cb.edit());
     $('#guideBody').innerHTML = guideHTML();
     try { if (localStorage.getItem('octa-guide') === '0') ($('#guide') as HTMLDetailsElement).open = false } catch { /* ignore */ }
     $('#guide').addEventListener('toggle', () => { try { localStorage.setItem('octa-guide', ($('#guide') as HTMLDetailsElement).open ? '1' : '0') } catch { /* ignore */ } });
-    $('#mlist').addEventListener('click', e => { const b = (e.target as HTMLElement).closest<HTMLElement>('[data-m]'); if (!b) return; SAVE.mission = b.dataset.m as MissionId; persist(); this.render(); $('#brief').scrollIntoView({ block: 'nearest', behavior: 'smooth' }) });
+    $('#mlist').addEventListener('click', e => { const ed = (e.target as HTMLElement).closest<HTMLElement>('[data-edit]'); if (ed) { e.stopPropagation(); cb.edit(ed.dataset.edit!); return } const b = (e.target as HTMLElement).closest<HTMLElement>('[data-m]'); if (!b) return; SAVE.mission = b.dataset.m as MissionId; persist(); this.render(); $('#brief').scrollIntoView({ block: 'nearest', behavior: 'smooth' }) });
     $('#diff').addEventListener('click', e => { const b = (e.target as HTMLElement).closest<HTMLElement>('[data-d]'); if (!b) return; SAVE.diff = b.dataset.d as Difficulty; persist(); this.render() });
     $('#slots').addEventListener('change', e => {
       const t = e.target as HTMLInputElement | HTMLSelectElement, row = t.closest<HTMLElement>('.slot'); if (!row) return;
@@ -89,12 +92,13 @@ export class Hangar {
 
   render() {
     const m = currentMission();
-    const PARTS: Record<number, string> = { 1: '第1部　機体と武器', 2: '第2部　見る・隠れる', 3: '第3部　道具で崩す', 4: '第4部　作戦' };
-    $('#mlist').innerHTML = [1, 2, 3, 4].map(p => {
-      const ms = MISSIONS.filter(x => (x.part ?? 4) === p); if (!ms.length) return '';
+    const PARTS: Record<number, string> = { 1: '第1部　機体と武器', 2: '第2部　見る・隠れる', 3: '第3部　道具で崩す', 4: '第4部　作戦', 5: 'カスタム（シナリオエディタ）' };
+    const ALL = [...MISSIONS, ...customMissions()];
+    $('#mlist').innerHTML = [1, 2, 3, 4, 5].map(p => {
+      const ms = ALL.filter(x => (x.part ?? 4) === p); if (!ms.length) return '';
       return `<div class="mpart">${PARTS[p]}</div>` + ms.map(x => {
         const pr = PROGRESS[x.id], md = x.medals ? x.medals.map((_, i) => pr?.medals[i] ? '<i class="on">●</i>' : '<i>○</i>').join('') : '';
-        return `<button class="mcard${x.id === m.id ? ' on' : ''}${pr?.clear ? ' clear' : ''}" data-m="${x.id}"><span class="mtype t-${x.type}">${x.part && x.part < 4 ? x.code : x.type}</span><span class="nm">${x.name}${pr?.clear ? ' <b class="ck">✓</b>' : ''}</span><span class="cd">${md || x.code}</span></button>`;
+        return `<button class="mcard${x.id === m.id ? ' on' : ''}${pr?.clear ? ' clear' : ''}" data-m="${x.id}"><span class="mtype t-${x.type}">${x.part && x.part < 4 ? x.code : x.type}</span><span class="nm">${x.name}${pr?.clear ? ' <b class="ck">✓</b>' : ''}</span><span class="cd">${md || (x.scenario ? `<span class="ed-edit" data-edit="${x.scenario.id}">編集</span>` : x.code)}</span></button>`;
       }).join('');
     }).join('');
     $('#diff').innerHTML = Object.entries(DIFFS).map(([k, d]) => `<button data-d="${k}" class="${SAVE.diff === k ? 'on' : ''}">${d.name}</button>`).join('');
@@ -152,7 +156,7 @@ export class Hangar {
     if (!L.length) { el.innerHTML = '<p class="rpempty">まだありません。作戦を終えると自動で保存されます（最新15件）。</p>'; return }
     const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
     el.innerHTML = L.map((r, i) => {
-      const m = MISSIONS.find(x => x.id === r.mission)!, d = new Date(r.date);
+      const m = findMission(r.mission) ?? (r.scenario ? { type: r.scenario.type, name: r.scenario.name } : { type: '殲滅', name: r.mission }), d = new Date(r.date);
       return `<div class="rpitem"><span class="mtype t-${m.type}">${m.type}</span><div class="rpmeta"><b>${m.name}</b><small>${r.ctrl === 'ai' ? 'AI' : r.ctrl === 'human' ? 'プレイヤー' : 'AI＋プレイヤー'}・<span class="${r.result.win ? 'w' : 'l'}">${r.result.win ? '勝利' : '敗北'}</span>・${fmt(r.result.time)}・${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}</small></div>
         <div class="rpbtns"><button class="btn" data-play="${i}">再生</button><button class="btn" data-copy="${i}">コピー</button><button class="btn" data-del="${i}" aria-label="削除">×</button></div></div>`;
     }).join('');

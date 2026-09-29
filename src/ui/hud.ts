@@ -76,7 +76,7 @@ export class Hud {
 
   /** Attach to a new battle session. */
   bind(s: BattleSession) {
-    this.s = s; this.logShown = []; this.logCursor = 0; this.tipAt = 0; $('#tip').hidden = true; this.alertCursor = 0; this.alertUntil = 0; $('#alertBox').hidden = true; this.hover = null; this.hoverUnit = null;
+    this.s = s; this.logShown = []; this.logCursor = 0; this.tipAt = 0; $('#tip').hidden = true; this.alertCursor = 0; this.alertUntil = 0; $('#alertBox').hidden = true; $('#storyBox').hidden = true; this.hover = null; this.hoverUnit = null;
     const m = s.sim.m;
     $('#bType').textContent = m.type; $('#bType').className = 'mtype t-' + m.type; $('#bName').textContent = m.name;
     $('#convoyBtn').hidden = !m.road;
@@ -268,6 +268,15 @@ export class Hud {
   }
 
   // ---------------------------------------------------------------- result
+  /** Story text from a scenario: the battle is paused until the player continues. */
+  showStory(text: string) {
+    const b = $('#storyBox'); $('#storyText').textContent = text; b.hidden = false;
+    const go = () => { b.hidden = true; const s = this.s; if (s) { s.sim.story = null; s.setPaused(false) } this.update() };
+    $('#storyOk').onclick = go;
+  }
+  storyOpen() { return !$('#storyBox').hidden }
+  closeStory() { ($('#storyOk') as HTMLButtonElement).click() }
+
   showResult() {
     const s = this.s!, sim = s.sim, r = sim.over!, m = sim.m;
     const alive = sim.countP() + sim.extracted, total = sim.squad.length;

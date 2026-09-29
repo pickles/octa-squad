@@ -1,6 +1,6 @@
 // window.octa: programmatic control of the game in the browser (console, Playwright, LLM agents).
 // The same AgentPort / rules are available directly in Node through src/core.
-import { CHASSIS, EQUIP, MISSIONS, TOOLS, WEAPONS, buildLoadout, rulesText, verifyReplay } from '../core';
+import { CHASSIS, EQUIP, MISSIONS, TOOLS, WEAPONS, buildLoadout, findMission, rulesText, verifyReplay } from '../core';
 import type { Action, Difficulty, Loadout, MissionId, Replay } from '../core';
 import type { App } from '../main';
 import { SAVE, deployOf, isReplay, loadReplays } from '../ui/store';
@@ -14,7 +14,7 @@ export function installOctaApi(app: App) {
     rules: () => rulesText(),
     /** Start an AI-controlled battle. Time advances only via step() unless realtime:true. */
     start(o: { mission?: MissionId; difficulty?: Difficulty; seed?: number; loadout?: ({ slot: number; deploy?: boolean } & Partial<Loadout>)[]; realtime?: boolean; auto?: boolean } = {}) {
-      const mission = o.mission || 'm1', m = MISSIONS.find(x => x.id === mission);
+      const mission = o.mission || 'm1', m = findMission(mission);
       if (!m) throw new Error('unknown mission ' + mission);
       const { slots, deploy } = buildLoadout(mission, SAVE.slots, o.loadout, o.loadout ? undefined : deployOf(m));
       const s = app.startBattle({ mission, slots, deploy, seed: o.seed, diff: o.difficulty || SAVE.diff, external: true, realtime: !!o.realtime });

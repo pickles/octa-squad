@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AgentPort, DEFAULT_LOADOUT, MISSIONS, Sim, brainTick, buildLoadout, verifyReplay, N } from '../src/core';
+import { AgentPort, DEFAULT_LOADOUT, MISSIONS, Sim, blankScenario, brainTick, buildLoadout, validateScenario, verifyReplay, N } from '../src/core';
 
 function autoBattle(mission: any, difficulty: any, seed: number, maxSec = 240) {
   const { slots, deploy } = buildLoadout(mission, DEFAULT_LOADOUT, [
@@ -53,5 +53,26 @@ describe('agent interface', () => {
     expect(port.act({ cmd: 'attack', units: 'all', target: 'e999' })[0].ok).toBe(false);
     expect(port.act({ cmd: 'move', units: [1, 2], x: 10, y: 10 })[0].ok).toBe(true);
     expect(sim.rec.length).toBe(1);
+  });
+});
+
+describe('scenario editor format', () => {
+  const sc = blankScenario();
+  sc.id = 'test1';
+  sc.tiles[5] = '.....FFFF...............';
+  sc.groups.push({ types: ['trooper', 'gunner'], x: 18, y: 5, role: 'garrison', leash: 4 });
+  sc.structures.push({ type: 'turret', x: 20, y: 3 });
+  sc.events.push({ t: 2, text: 'test' });
+  sc.reinforcements.push({ t: 20, x: 22, y: 2, types: ['scout'], role: 'hunt', count: 2 });
+  it('validates', () => { expect(validateScenario(sc)).toEqual([]) });
+  it('plays and replays deterministically with the scenario embedded', () => {
+    const sim = new Sim({ mission: 'c:' + sc.id, scenario: sc, seed: 5, slots: DEFAULT_LOADOUT, deploy: DEFAULT_LOADOUT.map((_, i) => i < 4) });
+    const port = new AgentPort(sim);
+    expect(sim.countE()).toBe(3);
+    while (!sim.over && sim.time < 120) { brainTick(port); sim.run(1) }
+    expect(sim.enemies().length + sim.kills).toBeGreaterThanOrEqual(5); // reinforcements arrived
+    const rep = sim.toReplay();
+    expect(rep.scenario?.id).toBe('test1');
+    expect(verifyReplay(JSON.parse(JSON.stringify(rep))).match).toBe(true);
   });
 });
